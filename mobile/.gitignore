@@ -36,8 +36,10 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# sensitive configuration files
+android
+
 app.json
 
-app-example
+.env
 
+app-example
