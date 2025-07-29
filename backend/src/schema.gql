@@ -2,7 +2,35 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthResponse {
+  user: UserType!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input GoogleLoginInput {
+  idToken: String!
+}
+
+type Mutation {
+  googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
+}
+
 type Query {
   getAppName: String!
   sayHello: String!
+}
+
+type UserType {
+  avatarUrl: String
+  createdAt: DateTime!
+  email: String!
+  googleId: String!
+  id: String!
+  name: String
+  partnerId: String
+  updatedAt: DateTime!
 }

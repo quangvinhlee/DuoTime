@@ -36,6 +36,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-fastify": "^11.1.5",
     "@prisma/client": "^6.13.0",
+    "google-auth-library": "^10.2.0",
     "graphql": "^16.11.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
