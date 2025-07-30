@@ -6,9 +6,4 @@ export class AppResolver {
   sayHello(): string {
     return 'Hello World!';
   }
-
-  @Query(() => String)
-  getAppName(): string {
-    return 'DuoTime API';
-  }
 }

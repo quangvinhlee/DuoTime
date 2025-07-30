@@ -8,9 +8,12 @@
     "android": "DARK_MODE=media expo run:android",
     "ios": "DARK_MODE=media expo run:ios",
     "web": "DARK_MODE=media expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "codegen": "graphql-codegen",
+    "codegen:watch": "graphql-codegen --watch"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.9",
     "@expo/vector-icons": "^14.1.0",
     "@gluestack-ui/config": "^1.1.20",
     "@gluestack-ui/icon": "^0.1.27",
@@ -38,6 +41,7 @@
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.10",
     "expo-web-browser": "~14.2.0",
+    "graphql": "^16.11.0",
     "has-flag": "^5.0.1",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
@@ -56,6 +60,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@graphql-codegen/cli": "^5.0.7",
+    "@graphql-codegen/typescript": "^4.1.6",
+    "@graphql-codegen/typescript-operations": "^4.6.1",
+    "@graphql-codegen/typescript-react-apollo": "^4.3.3",
     "@types/react": "~19.0.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",

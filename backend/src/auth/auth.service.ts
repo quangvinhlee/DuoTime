@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -62,5 +63,17 @@ export class AuthService {
     } catch (error) {
       throw new Error(`Google login failed: ${error}`);
     }
+  }
+
+  async getUser(id: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
   }
 }
