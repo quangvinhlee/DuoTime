@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, ActivityIndicator, Alert } from "react-native";
 import { router } from "expo-router";
 import {
   GoogleSignin,
   GoogleSigninButton,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
+import * as SecureStore from "expo-secure-store";
+import {
+  useGoogleLoginMutation,
+  useGetProfileLazyQuery,
+} from "@/generated/graphql";
+import { useAuthStore } from "@/store/auth";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
+  const [googleLogin] = useGoogleLoginMutation();
+  const [getProfile] = useGetProfileLazyQuery();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   useEffect(() => {
-    // Configure Google Sign-In
     GoogleSignin.configure({
-      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID, // TODO: Add your Google Web Client ID
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
       offlineAccess: true,
     });
   }, []);
@@ -27,35 +29,50 @@ export default function AuthPage() {
   const signInWithGoogle = async () => {
     setLoading(true);
     try {
-      // Check if device supports Google Play
       await GoogleSignin.hasPlayServices();
-
-      // Sign in with Google
       const userInfo = await GoogleSignin.signIn();
-      console.log("👤 User Info:", userInfo);
+      const idToken =
+        (userInfo as any).idToken || (userInfo as any).data?.idToken;
 
-      // Get the ID token - using type assertion for compatibility
-      const idToken = (userInfo as any).data.idToken;
+      if (!idToken) throw new Error("Failed to get ID token from Google");
 
-      if (!idToken) {
-        throw new Error("Failed to get ID token from Google");
+      // 1. Call backend to get JWT token
+      const { data, errors } = await googleLogin({
+        variables: { googleLoginInput: { idToken } },
+      });
+
+      if (errors || !data?.googleLogin.token) {
+        throw new Error(errors?.[0]?.message || "Login failed");
       }
 
-      // Log the ID token to terminal
-      console.log("🔐 Google ID Token:", idToken);
-      console.log("👤 User Info:", userInfo);
+      const token = data.googleLogin.token;
+      console.log("🎯 JWT Token received:", token ? "YES" : "NO");
 
-      // TODO: Call GraphQL mutation when Apollo is working
-      console.log("✅ Would call backend with ID token:", idToken);
+      // 2. Save token to SecureStore first so Apollo can use it
+      console.log("💾 Saving token to SecureStore...");
+      await SecureStore.setItemAsync("jwt_token", token);
+      console.log("✅ Token saved to SecureStore");
 
-      // Show success message
+      // 3. Now fetch user profile (Apollo will include the token automatically)
+      const { data: profileData } = await getProfile();
+      console.log(
+        "👤 Profile data received:",
+        profileData?.getProfile ? "YES" : "NO"
+      );
+
+      // 4. Store user in Zustand (token already in SecureStore)
+      if (profileData?.getProfile) {
+        console.log("💾 Calling setAuth...");
+        await setAuth(token, profileData.getProfile);
+        console.log("✅ setAuth completed");
+      } else {
+        console.log("❌ No profile data, not calling setAuth");
+      }
+
       Alert.alert("Success!", `Welcome to DuoTime! You're now signed in.`);
-
-      // Navigate to home
       router.replace("/(tabs)/home");
     } catch (error: any) {
       console.error("❌ Google Sign-In Error:", error);
-
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         Alert.alert("Sign In Cancelled", "You cancelled the sign-in process.");
       } else if (error.code === statusCodes.IN_PROGRESS) {

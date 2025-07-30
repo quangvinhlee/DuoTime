@@ -6,10 +6,39 @@ import {
   TouchableOpacity,
   Image,
   Switch,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useAuthStore } from "../../store/auth";
 
 export default function SettingsPage() {
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleSignOut = async () => {
+    Alert.alert(
+      "💔 Sign Out",
+      "Are you sure you want to sign out of your love account?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await logout();
+              router.replace("/auth");
+            } catch (error) {
+              Alert.alert("Error", "Failed to sign out. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
   return (
     <View className="flex-1 bg-pink-50">
       <ScrollView className="flex-1">
@@ -282,7 +311,10 @@ export default function SettingsPage() {
 
           {/* Sign Out */}
           <View className="mb-6">
-            <TouchableOpacity className="bg-gray-500 py-4 px-6 rounded-2xl">
+            <TouchableOpacity
+              className="bg-gray-500 py-4 px-6 rounded-2xl"
+              onPress={handleSignOut}
+            >
               <Text className="text-white font-bold text-center text-lg">
                 💔 Sign Out
               </Text>
