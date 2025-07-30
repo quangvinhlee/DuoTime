@@ -8,14 +8,214 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  googleId  String   @unique
-  name      String?
-  avatarUrl String?
-  partnerId String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  partner   User?    @relation("PartnerRelation", fields: [partnerId], references: [id])
-  partnerOf User?    @relation("PartnerRelation")
+  id                String           @id @default(uuid())
+  email             String           @unique
+  googleId          String           @unique
+  name              String?
+  avatarUrl         String?
+  partnerId         String?          @unique
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  loveActivities    LoveActivity[]   @relation("ActivityCreator")
+  receivedNotes     LoveNote[]       @relation("NoteRecipient")
+  sentNotes         LoveNote[]       @relation("NoteSender")
+  loveStats         LoveStats?
+  notifications     Notification[]
+  receivedBindings  PartnerBinding[] @relation("BindingReceiver")
+  sentBindings      PartnerBinding[] @relation("BindingSender")
+  createdReminders  Reminder[]       @relation("ReminderCreator")
+  receivedReminders Reminder[]       @relation("ReminderRecipient")
+  partner           User?            @relation("PartnerRelation", fields: [partnerId], references: [id])
+  partnerOf         User?            @relation("PartnerRelation")
+  preferences       UserPreferences?
+}
+
+model PartnerBinding {
+  id             String        @id @default(uuid())
+  invitationCode String        @unique
+  status         BindingStatus @default(PENDING)
+  senderId       String
+  receiverId     String?
+  message        String?
+  expiresAt      DateTime
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  acceptedAt     DateTime?
+  receiver       User?         @relation("BindingReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender         User          @relation("BindingSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([invitationCode])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([status])
+}
+
+model Reminder {
+  id               String           @id @default(uuid())
+  title            String
+  description      String?
+  scheduledAt      DateTime
+  type             ReminderType
+  status           ReminderStatus   @default(ACTIVE)
+  isSecret         Boolean          @default(true)
+  isRecurring      Boolean          @default(false)
+  recurringPattern String?
+  alarmSound       String?
+  vibration        Boolean          @default(true)
+  priority         ReminderPriority @default(MEDIUM)
+  createdById      String
+  recipientId      String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  notifications    Notification[]
+  createdBy        User             @relation("ReminderCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  recipient        User             @relation("ReminderRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, status])
+  @@index([scheduledAt])
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  type       NotificationType
+  title      String
+  message    String
+  isRead     Boolean          @default(false)
+  sentAt     DateTime         @default(now())
+  reminderId String?
+  userId     String
+  reminder   Reminder?        @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([sentAt])
+}
+
+model LoveActivity {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  type        ActivityType
+  date        DateTime
+  duration    Int?
+  location    String?
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdBy   User         @relation("ActivityCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById, date])
+}
+
+model LoveNote {
+  id          String   @id @default(uuid())
+  title       String?
+  message     String
+  isAnonymous Boolean  @default(false)
+  isRead      Boolean  @default(false)
+  senderId    String
+  recipientId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  recipient   User     @relation("NoteRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender      User     @relation("NoteSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, isRead])
+  @@index([createdAt])
+}
+
+model UserPreferences {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  pushNotifications     Boolean  @default(true)
+  emailNotifications    Boolean  @default(true)
+  reminderNotifications Boolean  @default(true)
+  loveNoteNotifications Boolean  @default(true)
+  showOnlineStatus      Boolean  @default(true)
+  allowSecretReminders  Boolean  @default(true)
+  allowAnonymousNotes   Boolean  @default(true)
+  preferredTheme        String   @default("love")
+  preferredColors       String?
+  defaultReminderTime   String   @default("09:00")
+  timezone              String   @default("UTC")
+  defaultAlarmSound     String   @default("default")
+  defaultVibration      Boolean  @default(true)
+  snoozeDuration        Int      @default(5)
+  maxSnoozes            Int      @default(3)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LoveStats {
+  id                     String    @id @default(uuid())
+  userId                 String    @unique
+  totalRemindersCreated  Int       @default(0)
+  totalRemindersReceived Int       @default(0)
+  completedReminders     Int       @default(0)
+  activeReminders        Int       @default(0)
+  totalActivities        Int       @default(0)
+  totalLoveNotes         Int       @default(0)
+  receivedLoveNotes      Int       @default(0)
+  currentStreak          Int       @default(0)
+  longestStreak          Int       @default(0)
+  lastActivityDate       DateTime?
+  daysWithPartner        Int       @default(0)
+  anniversaryDate        DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ReminderType {
+  HEALTH
+  ROMANCE
+  FAMILY
+  DAILY
+  CHORES
+  WORK
+  PERSONAL
+  CELEBRATION
+  GIFT
+  DATE
+}
+
+enum ReminderStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+enum ReminderPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  REMINDER
+  LOVE_NOTE
+  PARTNER_ACTIVITY
+  SYSTEM
+  ACHIEVEMENT
+}
+
+enum ActivityType {
+  DATE
+  MOVIE
+  DINNER
+  WALK
+  TRAVEL
+  GIFT
+  SURPRISE
+  ANNIVERSARY
+  BIRTHDAY
+  CASUAL
+}
+
+enum BindingStatus {
+  PENDING
+  ACCEPTED
 }
