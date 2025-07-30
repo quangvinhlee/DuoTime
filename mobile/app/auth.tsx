@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,21 +7,67 @@ import {
   Alert,
 } from "react-native";
 import { router } from "expo-router";
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    // Configure Google Sign-In
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID, // TODO: Add your Google Web Client ID
+      offlineAccess: true,
+    });
+  }, []);
+
   const signInWithGoogle = async () => {
     setLoading(true);
     try {
-      // Simulate Google Sign-In process
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Check if device supports Google Play
+      await GoogleSignin.hasPlayServices();
 
-      // Simulate successful login
+      // Sign in with Google
+      const userInfo = await GoogleSignin.signIn();
+      console.log("👤 User Info:", userInfo);
+
+      // Get the ID token - using type assertion for compatibility
+      const idToken = (userInfo as any).data.idToken;
+
+      if (!idToken) {
+        throw new Error("Failed to get ID token from Google");
+      }
+
+      // Log the ID token to terminal
+      console.log("🔐 Google ID Token:", idToken);
+      console.log("👤 User Info:", userInfo);
+
+      // TODO: Call GraphQL mutation when Apollo is working
+      console.log("✅ Would call backend with ID token:", idToken);
+
+      // Show success message
       Alert.alert("Success!", `Welcome to DuoTime! You're now signed in.`);
+
+      // Navigate to home
       router.replace("/(tabs)/home");
-    } catch (error) {
-      Alert.alert("Error", "Failed to sign in. Please try again.");
+    } catch (error: any) {
+      console.error("❌ Google Sign-In Error:", error);
+
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        Alert.alert("Sign In Cancelled", "You cancelled the sign-in process.");
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        Alert.alert("Sign In In Progress", "Sign-in is already in progress.");
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert(
+          "Play Services Not Available",
+          "Google Play Services is not available on this device."
+        );
+      } else {
+        Alert.alert("Error", `Failed to sign in: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -94,34 +140,24 @@ export default function AuthPage() {
           </View>
         </View>
 
-        {/* Sign In Button */}
-        <TouchableOpacity
-          onPress={signInWithGoogle}
-          disabled={loading}
-          className="bg-gradient-to-r from-rose-500 via-pink-500 to-red-500 py-5 px-8 rounded-3xl shadow-xl border border-pink-300"
-          style={{
-            shadowColor: "#ec4899",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 8,
-          }}
-        >
-          {loading ? (
-            <View className="flex-row items-center justify-center">
-              <ActivityIndicator color="white" size="small" />
-              <Text className="text-white font-bold text-lg ml-3">
-                💕 Signing in...
-              </Text>
-            </View>
-          ) : (
-            <View className="flex-row items-center justify-center">
-              <Text className="text-white font-bold text-xl">
-                💕 Continue with Google
+        {/* Google Sign-In Button */}
+        <View className="items-center">
+          <GoogleSigninButton
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={signInWithGoogle}
+            disabled={loading}
+          />
+
+          {loading && (
+            <View className="mt-4 flex-row items-center">
+              <ActivityIndicator color="#ec4899" size="small" />
+              <Text className="text-gray-600 font-medium ml-2">
+                💕 Signing in with Google...
               </Text>
             </View>
           )}
-        </TouchableOpacity>
+        </View>
 
         {/* Footer */}
         <View className="mt-8 items-center">

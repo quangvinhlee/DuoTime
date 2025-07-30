@@ -1,5 +1,4 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
 
 // Get the GraphQL endpoint from environment or use default
 const GRAPHQL_ENDPOINT =
@@ -9,19 +8,8 @@ const httpLink = createHttpLink({
   uri: GRAPHQL_ENDPOINT,
 });
 
-const authLink = setContext((_, { headers }) => {
-  const token = null; // TODO: Get from AsyncStorage or secure storage
-
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    },
-  };
-});
-
 export const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: httpLink,
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {
