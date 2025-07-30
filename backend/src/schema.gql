@@ -3,13 +3,8 @@
 # ------------------------------------------------------
 
 type AuthResponse {
-  user: UserType!
+  token: String!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 input GoogleLoginInput {
   idToken: String!
@@ -22,15 +17,4 @@ type Mutation {
 type Query {
   getAppName: String!
   sayHello: String!
-}
-
-type UserType {
-  avatarUrl: String
-  createdAt: DateTime!
-  email: String!
-  googleId: String!
-  id: String!
-  name: String
-  partnerId: String
-  updatedAt: DateTime!
 }

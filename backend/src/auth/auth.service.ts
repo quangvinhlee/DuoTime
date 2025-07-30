@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleLoginInput } from './dtos/auth.dto';
+import { AuthResponse } from './responses/auth.response';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +21,7 @@ export class AuthService {
     );
   }
 
-  async googleLogin(googleLoginInput: GoogleLoginInput): Promise<User | null> {
+  async googleLogin(googleLoginInput: GoogleLoginInput): Promise<AuthResponse> {
     try {
       const ticket = await this.googleClient.verifyIdToken({
         idToken: googleLoginInput.idToken,
@@ -50,9 +50,17 @@ export class AuthService {
         });
       }
 
-      return user;
+      const token = this.jwtService.sign({
+        sub: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        googleId: user.googleId,
+      });
+
+      return { token };
     } catch (error) {
-      throw new Error('Invalid Google token');
+      throw new Error(`Google login failed: ${error}`);
     }
   }
 }
