@@ -6,6 +6,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
 import { User } from '@prisma/client';
+import { JwtPayload } from 'interfaces';
 
 @Injectable()
 export class AuthService {
@@ -75,5 +76,22 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  renewToken(jwtUser: JwtPayload): Promise<AuthResponse> {
+    const token = this.jwtService.sign(
+      {
+        sub: jwtUser.sub,
+        email: jwtUser.email,
+        name: jwtUser.name,
+        avatarUrl: jwtUser.avatarUrl,
+        googleId: jwtUser.googleId,
+      },
+      {
+        expiresIn: '7d', // Reset to 7 days from now
+      },
+    );
+
+    return Promise.resolve({ token } as AuthResponse);
   }
 }

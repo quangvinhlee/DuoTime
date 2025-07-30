@@ -17,6 +17,7 @@ input GoogleLoginInput {
 
 type Mutation {
   googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
+  renewToken: AuthResponse!
 }
 
 type Query {

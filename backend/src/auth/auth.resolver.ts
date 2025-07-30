@@ -29,4 +29,10 @@ export class AuthResolver {
     const user = await this.authService.getUser(jwtUser.sub);
     return user as UserType;
   }
+
+  @Mutation(() => AuthResponse)
+  @UseGuards(JwtAuthGuard)
+  async renewToken(@CurrentUser() jwtUser: JwtPayload): Promise<AuthResponse> {
+    return this.authService.renewToken(jwtUser);
+  }
 }

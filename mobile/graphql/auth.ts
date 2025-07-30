@@ -22,3 +22,11 @@ export const GET_PROFILE = gql`
     }
   }
 `;
+
+export const RENEW_TOKEN_MUTATION = gql`
+  mutation RenewToken {
+    renewToken {
+      token
+    }
+  }
+`;
