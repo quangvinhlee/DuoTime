@@ -163,6 +163,10 @@ export class PartnerBindingService {
   ): Promise<{ success: boolean; message: string }> {
     const { invitationCode, userId } = dto;
 
+    if (!invitationCode || !userId) {
+      throw new BadRequestException('Invitation code and user ID are required');
+    }
+
     const [user, binding] = await Promise.all([
       this.prisma.user.findUnique({ where: { id: userId } }),
       this.prisma.partnerBinding.findFirst({
