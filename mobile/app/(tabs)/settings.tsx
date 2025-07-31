@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuthStore } from "../../store/auth";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsPage() {
   const logout = useAuthStore((state) => state.logout);
@@ -40,7 +41,7 @@ export default function SettingsPage() {
     );
   };
   return (
-    <View className="flex-1 bg-pink-50">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView className="flex-1">
         <View className="p-4">
           {/* Header */}
@@ -345,6 +346,6 @@ export default function SettingsPage() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

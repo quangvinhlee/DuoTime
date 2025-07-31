@@ -1,16 +1,23 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomePage() {
   return (
-    <View className="flex-1 bg-pink-50">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView className="flex-1">
         <View className="p-4">
           {/* Header Section with Couple Connection */}
-          <View className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
+          <View
+            className="bg-white rounded-2xl p-6 mb-6 shadow-md border-2"
+            style={{ borderColor: "#FFB3B3" }}
+          >
             {/* Connection Status Bar */}
-            <View className="bg-blue-400 rounded-xl p-3 mb-5">
+            <View
+              className="rounded-xl p-3 mb-5"
+              style={{ backgroundColor: "#FF6B6B" }}
+            >
               <View className="flex-row items-center justify-center space-x-2">
                 <View className="w-2 h-2 bg-green-400 rounded-full" />
                 <Text className="text-white font-bold text-sm">
@@ -26,37 +33,62 @@ export default function HomePage() {
             <View className="flex-row items-center justify-between mb-6">
               {/* Your Avatar */}
               <View className="items-center">
-                <View className="w-20 h-20 bg-blue-100 rounded-full border-4 border-blue-400 items-center justify-center mb-2">
+                <View
+                  className="w-20 h-20 rounded-full border-4 items-center justify-center mb-2"
+                  style={{ backgroundColor: "#FFF5F5", borderColor: "#FF6B6B" }}
+                >
                   <Text className="text-3xl">👤</Text>
                 </View>
-                <Text className="text-sm font-bold text-gray-700">You</Text>
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: "#2D3748" }}
+                >
+                  You
+                </Text>
               </View>
 
               {/* Heart Connection */}
               <View className="items-center">
-                <View className="w-12 h-12 bg-pink-300 rounded-full items-center justify-center mb-1">
+                <View
+                  className="w-12 h-12 rounded-full items-center justify-center mb-1"
+                  style={{ backgroundColor: "#FFB3B3" }}
+                >
                   <Text className="text-2xl">💕</Text>
                 </View>
-                <Text className="text-xs font-bold text-red-500">
+                <Text
+                  className="text-xs font-bold"
+                  style={{ color: "#FF6B6B" }}
+                >
                   Connected
                 </Text>
               </View>
 
               {/* Partner Avatar */}
               <View className="items-center">
-                <View className="w-20 h-20 bg-red-100 rounded-full border-4 border-red-400 items-center justify-center mb-2">
+                <View
+                  className="w-20 h-20 rounded-full border-4 items-center justify-center mb-2"
+                  style={{ backgroundColor: "#FFF5F5", borderColor: "#FF8E8E" }}
+                >
                   <Text className="text-3xl">👤</Text>
                 </View>
-                <Text className="text-sm font-bold text-gray-700">Sarah</Text>
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: "#2D3748" }}
+                >
+                  Sarah
+                </Text>
               </View>
             </View>
 
             {/* Welcome Message */}
             <View className="items-center">
-              <Text className="text-lg font-semibold text-gray-800 text-center">
+              <Text
+                className="text-lg font-semibold text-center"
+                style={{ color: "#2D3748" }}
+              >
                 Good morning, lovebirds! 🌅
               </Text>
-              <Text className="text-gray-600 text-center mt-1">
+              <Text className="text-center mt-1" style={{ color: "#718096" }}>
                 Ready to spread some love today?
               </Text>
             </View>
@@ -313,6 +345,6 @@ export default function HomePage() {
       <TouchableOpacity className="absolute bottom-6 right-6 w-14 h-14 bg-red-500 rounded-full items-center justify-center shadow-lg">
         <Text className="text-white text-2xl font-bold">+</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -110,7 +110,7 @@ export default function AuthPage() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -123,66 +123,109 @@ export default function AuthPage() {
       >
         {/* Header */}
         <View className="items-center mb-12">
-          <View className="w-32 h-32 mb-6 bg-gray-100 rounded-2xl items-center justify-center">
+          <View className="w-32 h-32 mb-6 bg-white rounded-2xl items-center justify-center shadow-lg">
             <Image
               source={require("../assets/images/logo.png")}
               className="w-24 h-24"
               resizeMode="contain"
             />
           </View>
-          <Text className="text-3xl font-bold text-center mb-2">
-            Welcome to <Text className="text-gray-900">Duo</Text>
-            <Text style={{ color: "#ee0761" }}>Time</Text>
+          <Text
+            className="text-3xl font-bold text-center mb-2"
+            style={{ color: "#2D3748" }}
+          >
+            Welcome to <Text style={{ color: "#2D3748" }}>Duo</Text>
+            <Text style={{ color: "#FF6B6B" }}>Time</Text>
           </Text>
-          <Text className="text-lg text-gray-500 text-center">
+          <Text className="text-lg text-center" style={{ color: "#718096" }}>
             Where love meets time ✨
           </Text>
         </View>
 
         {/* Features */}
         <View className="mb-12">
-          <View className="bg-white rounded-2xl shadow-md border-2 border-pink-200 p-6">
-            <Text className="text-xl font-semibold text-gray-800 text-center mb-8">
+          <View
+            className="bg-white rounded-2xl shadow-md border-2 p-6"
+            style={{ borderColor: "#FFB3B3" }}
+          >
+            <Text
+              className="text-xl font-semibold text-center mb-8"
+              style={{ color: "#2D3748" }}
+            >
               Create magical moments together
             </Text>
+
             <View className="space-y-4">
-              <View className="flex-row items-center bg-gray-50 rounded-xl p-4 ">
-                <View className="w-10 h-10 bg-pink-500 rounded-lg items-center justify-center mr-4">
+              <View
+                className="flex-row items-center rounded-xl p-4"
+                style={{ backgroundColor: "#FFF5F5" }}
+              >
+                <View
+                  className="w-10 h-10 rounded-lg items-center justify-center mr-4"
+                  style={{ backgroundColor: "#FF6B6B" }}
+                >
                   <Ionicons name="heart" size={18} color="white" />
                 </View>
                 <View className="flex-1 ">
-                  <Text className="font-semibold text-gray-900 ">
+                  <Text
+                    className="font-semibold text-lg"
+                    style={{ color: "#2D3748" }}
+                  >
                     Love Reminders
                   </Text>
-                  <Text className="text-gray-600 text-sm">
+                  <Text className="text-sm" style={{ color: "#718096" }}>
                     Never miss a moment to show you care
                   </Text>
                 </View>
               </View>
-              <View className="h-px bg-gray-300 mx-2" />
-              <View className="flex-row items-center bg-gray-50 rounded-xl p-4">
-                <View className="w-10 h-10 bg-purple-500 rounded-lg items-center justify-center mr-4">
+              <View
+                className="h-px mx-2"
+                style={{ backgroundColor: "#FFB3B3" }}
+              />
+              <View
+                className="flex-row items-center rounded-xl p-4"
+                style={{ backgroundColor: "#FFF5F5" }}
+              >
+                <View
+                  className="w-10 h-10 rounded-lg items-center justify-center mr-4"
+                  style={{ backgroundColor: "#FF8E8E" }}
+                >
                   <Ionicons name="gift" size={18} color="white" />
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold text-gray-900">
+                  <Text
+                    className="font-semibold text-lg"
+                    style={{ color: "#2D3748" }}
+                  >
                     Surprise Moments
                   </Text>
-                  <Text className="text-gray-600 text-sm">
+                  <Text className="text-sm" style={{ color: "#718096" }}>
                     Create unexpected joy for your love
                   </Text>
                 </View>
               </View>
-              <View className="h-px bg-gray-300 mx-2" />
-              <View className="flex-row items-center bg-gray-50 rounded-xl p-4">
-                <View className="w-10 h-10 bg-blue-500 rounded-lg items-center justify-center mr-4">
+              <View
+                className="h-px mx-2"
+                style={{ backgroundColor: "#FFB3B3" }}
+              />
+              <View
+                className="flex-row items-center rounded-xl p-4"
+                style={{ backgroundColor: "#FFF5F5" }}
+              >
+                <View
+                  className="w-10 h-10 rounded-lg items-center justify-center mr-4"
+                  style={{ backgroundColor: "#FF6B6B" }}
+                >
                   <Ionicons name="chatbubbles" size={18} color="white" />
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold text-gray-900">
+                  <Text
+                    className="font-semibold text-lg"
+                    style={{ color: "#2D3748" }}
+                  >
                     Love Messages
                   </Text>
-                  <Text className="text-gray-600 text-sm">
+                  <Text className="text-sm" style={{ color: "#718096" }}>
                     Send romantic notes anytime
                   </Text>
                 </View>
@@ -196,13 +239,14 @@ export default function AuthPage() {
           <TouchableOpacity
             onPress={signInWithGoogle}
             disabled={loading}
-            className={`w-full bg-black rounded-xl shadow-lg active:scale-98 ${
+            className={`w-full rounded-xl shadow-lg active:scale-98 ${
               loading ? "opacity-70" : ""
             }`}
             style={{
-              shadowColor: "#000",
+              backgroundColor: "#FF6B6B",
+              shadowColor: "#FF6B6B",
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.1,
+              shadowOpacity: 0.3,
               shadowRadius: 8,
               elevation: 8,
             }}
@@ -227,23 +271,53 @@ export default function AuthPage() {
               </View>
             </View>
           </TouchableOpacity>
+
+          {loading && (
+            <View className="mt-4 flex-row items-center">
+              <ActivityIndicator color="#FF6B6B" size="small" />
+              <Text className="font-medium ml-2" style={{ color: "#718096" }}>
+                Signing in...
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Footer */}
         <View className="items-center mb-8">
-          <View className="w-full bg-white rounded-2xl shadow-md border-2 border-pink-200 p-6">
+          <View
+            className="w-full bg-white rounded-2xl shadow-md border-2 p-6"
+            style={{ borderColor: "#FFB3B3" }}
+          >
             <View className="items-center">
-              <Ionicons name="heart" size={24} color="#ec4899" />
-              <Text className="text-gray-700 text-center font-medium mt-3 mb-3">
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: "#FFF5F5" }}
+              >
+                <Ionicons name="heart" size={24} color="#FF6B6B" />
+              </View>
+              <Text
+                className="text-center font-medium mt-3 mb-3 italic"
+                style={{ color: "#2D3748" }}
+              >
                 &ldquo;Love is the greatest refreshment in life.&rdquo;
               </Text>
-              <Text className="text-gray-500 text-sm">Pablo Picasso</Text>
+              <Text className="text-sm" style={{ color: "#718096" }}>
+                Pablo Picasso
+              </Text>
             </View>
           </View>
-          <Text className="text-xs text-gray-400 text-center mt-4">
+          <Text
+            className="text-xs text-center mt-4"
+            style={{ color: "#A0AEC0" }}
+          >
             By continuing, you agree to our{" "}
-            <Text className="text-blue-600">Terms of Service</Text> and{" "}
-            <Text className="text-blue-600">Privacy Policy</Text>
+            <Text style={{ color: "#FF6B6B", fontWeight: "600" }}>
+              Terms of Service
+            </Text>{" "}
+            and{" "}
+            <Text style={{ color: "#FF6B6B", fontWeight: "600" }}>
+              Privacy Policy
+            </Text>
           </Text>
         </View>
       </ScrollView>

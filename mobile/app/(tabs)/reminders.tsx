@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RemindersPage() {
   const [activeReminders] = useState([
@@ -96,7 +97,7 @@ export default function RemindersPage() {
   };
 
   return (
-    <View className="flex-1 bg-gradient-to-b from-pink-50 to-red-50">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView className="flex-1 px-4 pt-12">
         {/* Header */}
         <View className="mb-6">
@@ -278,6 +279,6 @@ export default function RemindersPage() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
