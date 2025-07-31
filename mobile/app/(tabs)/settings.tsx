@@ -41,7 +41,7 @@ export default function SettingsPage() {
     );
   };
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
+    <View className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView className="flex-1">
         <View className="p-4">
           {/* Header */}
@@ -346,6 +346,6 @@ export default function SettingsPage() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

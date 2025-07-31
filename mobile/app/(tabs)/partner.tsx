@@ -15,7 +15,7 @@ export default function PartnerPage() {
 
   if (!hasPartner) {
     return (
-      <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
+      <View className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
         <ScrollView className="flex-1">
           <View className="p-4">
             {/* Header Section with Connection Status */}
@@ -419,13 +419,13 @@ export default function PartnerPage() {
             </View>
           </View>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     );
   }
 
   // Original partner page content with updated theme
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
+    <View className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView className="flex-1">
         <View className="p-4">
           {/* Header */}
@@ -897,6 +897,6 @@ export default function PartnerPage() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

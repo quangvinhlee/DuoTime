@@ -19,6 +19,20 @@ export default function TabLayout() {
         },
         tabBarActiveTintColor: "#ec4899",
         tabBarInactiveTintColor: "#6b7280",
+        tabBarItemStyle: {
+          borderRadius: 0,
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+          borderBottomLeftRadius: 0,
+          borderBottomRightRadius: 0,
+        },
+        tabBarIconStyle: {
+          borderRadius: 0,
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+          borderBottomLeftRadius: 0,
+          borderBottomRightRadius: 0,
+        },
       }}
     >
       <Tabs.Screen

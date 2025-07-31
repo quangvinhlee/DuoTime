@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomePage() {
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
+    <View className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView className="flex-1">
         <View className="p-4">
           {/* Header Section with Couple Connection */}
@@ -345,6 +345,6 @@ export default function HomePage() {
       <TouchableOpacity className="absolute bottom-6 right-6 w-14 h-14 bg-red-500 rounded-full items-center justify-center shadow-lg">
         <Text className="text-white text-2xl font-bold">+</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }

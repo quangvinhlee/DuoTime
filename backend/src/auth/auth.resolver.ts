@@ -5,9 +5,9 @@ import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
 import { JwtAuthGuard } from '../../common/guards/auth.guard';
 import { CurrentUser } from '../../common/decorators/user.decorator';
-import { UserType } from 'src/shared/graphql/types';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { JwtPayload } from 'interfaces';
+import { UserType } from '../shared/graphql/types';
+import { PrismaService } from '../prisma/prisma.service';
+import { JwtPayload } from '../../interfaces';
 
 @Resolver()
 export class AuthResolver {

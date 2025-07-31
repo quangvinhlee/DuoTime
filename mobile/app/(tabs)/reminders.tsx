@@ -97,7 +97,7 @@ export default function RemindersPage() {
   };
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
+    <View className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView className="flex-1 px-4 pt-12">
         {/* Header */}
         <View className="mb-6">
@@ -279,6 +279,6 @@ export default function RemindersPage() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
 import { User } from '@prisma/client';
-import { JwtPayload } from 'interfaces';
+import { JwtPayload } from '../../interfaces';
 
 @Injectable()
 export class AuthService {
