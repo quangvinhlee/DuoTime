@@ -28,6 +28,7 @@ type Mutation {
   createPartnerBinding(createPartnerBindingDto: CreatePartnerBindingDto!): PartnerBindingResponse!
   googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
   rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): RejectPartnerBindingResponse!
+  removePartner: RemovePartnerResponse!
   renewToken: AuthResponse!
 }
 
@@ -48,6 +49,11 @@ input RejectPartnerBindingDto {
 }
 
 type RejectPartnerBindingResponse {
+  message: String!
+  success: Boolean!
+}
+
+type RemovePartnerResponse {
   message: String!
   success: Boolean!
 }

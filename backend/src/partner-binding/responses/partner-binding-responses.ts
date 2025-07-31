@@ -23,3 +23,12 @@ export class RejectPartnerBindingResponse {
   @Field()
   message: string;
 }
+
+@ObjectType()
+export class RemovePartnerResponse {
+  @Field()
+  success: boolean;
+
+  @Field()
+  message: string;
+}

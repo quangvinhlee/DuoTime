@@ -3,6 +3,7 @@ import { PartnerBindingService } from './partner-binding.service';
 import {
   PartnerBindingResponse,
   RejectPartnerBindingResponse,
+  RemovePartnerResponse,
 } from './responses/partner-binding-responses';
 import {
   CreatePartnerBindingDto,
@@ -55,5 +56,13 @@ export class PartnerBindingResolver {
       ...rejectPartnerBindingDto,
       userId: jwtUser.sub,
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => RemovePartnerResponse)
+  async removePartner(
+    @CurrentUser() jwtUser: JwtPayload,
+  ): Promise<RemovePartnerResponse> {
+    return this.partnerBindingService.removePartner(jwtUser.sub);
   }
 }

@@ -6,7 +6,10 @@ import {
   RejectPartnerBindingDto,
 } from './dtos/partner-binding-dto';
 import { BindingStatus } from '@prisma/client';
-import { PartnerBindingResponse } from './responses/partner-binding-responses';
+import {
+  PartnerBindingResponse,
+  RemovePartnerResponse,
+} from './responses/partner-binding-responses';
 import { generateInvitationCode } from 'src/shared/utils/generateInvitationCode';
 
 @Injectable()
@@ -117,6 +120,18 @@ export class PartnerBindingService {
       throw new BadRequestException('Binding has expired');
     }
 
+    // Prevent the sender from accepting their own binding
+    if (binding.senderId === receiverId) {
+      throw new BadRequestException(
+        'You cannot accept your own binding request',
+      );
+    }
+
+    // If the binding has a specific receiverId, only that receiver can accept
+    if (binding.receiverId && binding.receiverId !== receiverId) {
+      throw new BadRequestException('This binding is not intended for you');
+    }
+
     const sender = await this.prisma.user.findUnique({
       where: { id: binding.senderId },
     });
@@ -202,6 +217,53 @@ export class PartnerBindingService {
     return {
       success: true,
       message: 'Binding rejected successfully',
+    };
+  }
+
+  async removePartner(userId: string): Promise<RemovePartnerResponse> {
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { partner: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User does not exist');
+    }
+
+    if (!user.partnerId || !user.partner) {
+      throw new BadRequestException('You do not have a partner to remove');
+    }
+
+    const partnerId = user.partnerId;
+
+    // Use transaction to ensure both users are updated atomically
+    await this.prisma.$transaction([
+      this.prisma.partnerBinding.deleteMany({
+        where: {
+          OR: [
+            { senderId: userId, receiverId: partnerId },
+            { senderId: partnerId, receiverId: userId },
+          ],
+        },
+      }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { partnerId: null },
+      }),
+      // Remove current user from partner
+      this.prisma.user.update({
+        where: { id: partnerId },
+        data: { partnerId: null },
+      }),
+    ]);
+
+    return {
+      success: true,
+      message: 'Partner removed successfully',
     };
   }
 
