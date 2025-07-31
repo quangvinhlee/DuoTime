@@ -6,3 +6,9 @@ export class CreatePartnerBindingDto {
   @Field({ nullable: true })
   receiverId?: string;
 }
+
+@InputType()
+export class AcceptPartnerBindingDto {
+  @Field()
+  invitationCode: string;
+}

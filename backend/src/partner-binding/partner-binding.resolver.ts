@@ -1,7 +1,10 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { PartnerBindingService } from './partner-binding.service';
 import { PartnerBindingResponse } from './responses/partner-binding-responses';
-import { CreatePartnerBindingDto } from './dtos/partner-binding-dto';
+import {
+  AcceptPartnerBindingDto,
+  CreatePartnerBindingDto,
+} from './dtos/partner-binding-dto';
 import { JwtAuthGuard } from 'common/guards/auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'common/decorators/user.decorator';
@@ -22,5 +25,18 @@ export class PartnerBindingResolver {
       ...createPartnerBindingDto,
       senderId: jwtUser.sub,
     } as CreatePartnerBindingDto & { senderId: string });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => PartnerBindingResponse)
+  async acceptPartnerBinding(
+    @CurrentUser() jwtUser: JwtPayload,
+    @Args('acceptPartnerBindingDto')
+    acceptPartnerBindingDto: AcceptPartnerBindingDto,
+  ): Promise<PartnerBindingResponse> {
+    return this.partnerBindingService.acceptPartnerBinding({
+      ...acceptPartnerBindingDto,
+      receiverId: jwtUser.sub,
+    } as AcceptPartnerBindingDto & { receiverId: string });
   }
 }
