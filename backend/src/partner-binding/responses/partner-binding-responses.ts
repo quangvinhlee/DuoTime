@@ -2,15 +2,24 @@ import { ObjectType, Field } from '@nestjs/graphql';
 
 @ObjectType()
 export class PartnerBindingResponse {
-  @Field(() => String)
+  @Field()
   id: string;
 
-  @Field(() => String)
+  @Field()
   invitationCode: string;
 
-  @Field(() => String)
-  status: string;
-
-  @Field(() => String)
+  @Field()
   expiresAt: string;
+
+  @Field()
+  status: string;
+}
+
+@ObjectType()
+export class RejectPartnerBindingResponse {
+  @Field()
+  success: boolean;
+
+  @Field()
+  message: string;
 }

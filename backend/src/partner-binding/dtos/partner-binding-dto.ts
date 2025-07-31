@@ -12,3 +12,9 @@ export class AcceptPartnerBindingDto {
   @Field()
   invitationCode: string;
 }
+
+@InputType()
+export class RejectPartnerBindingDto {
+  @Field()
+  invitationCode: string;
+}
