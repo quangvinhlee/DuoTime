@@ -6,6 +6,10 @@ type AuthResponse {
   token: String!
 }
 
+input CreatePartnerBindingDto {
+  receiverId: String
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -16,8 +20,16 @@ input GoogleLoginInput {
 }
 
 type Mutation {
+  createPartnerBinding(createPartnerBindingDto: CreatePartnerBindingDto!): PartnerBindingResponse!
   googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
   renewToken: AuthResponse!
+}
+
+type PartnerBindingResponse {
+  expiresAt: String!
+  id: String!
+  invitationCode: String!
+  status: String!
 }
 
 type Query {

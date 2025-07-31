@@ -36,7 +36,6 @@ model PartnerBinding {
   status         BindingStatus @default(PENDING)
   senderId       String
   receiverId     String?
-  message        String?
   expiresAt      DateTime
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt

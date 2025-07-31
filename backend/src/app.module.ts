@@ -6,6 +6,7 @@ import { join } from 'path';
 import { AppResolver } from './app.resolver';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { PartnerBindingModule } from './partner-binding/partner-binding.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     PrismaModule,
     AuthModule,
+    PartnerBindingModule,
   ],
   controllers: [],
   providers: [AppResolver],
