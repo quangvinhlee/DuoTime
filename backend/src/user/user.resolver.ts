@@ -50,36 +50,29 @@ export class UserResolver {
       updateData.name = input.name;
     }
 
-    // Handle file upload if provided
-    if (input.avatar) {
-      const file = await input.avatar;
+    // Handle base64 image upload if provided
+    if (input.avatarBase64) {
+      try {
+        // Convert base64 to buffer
+        const buffer = Buffer.from(input.avatarBase64, 'base64');
 
-      // Type assertion to access Upload properties
-      const uploadFile = file as any;
+        // Validate file size (5MB limit)
+        if (buffer.length > 5 * 1024 * 1024) {
+          throw new Error('File too large. Maximum size is 5MB');
+        }
 
-      // Get file buffer and metadata
-      const buffer = await uploadFile.toBuffer();
-      const mimetype = uploadFile.mimetype || 'image/jpeg';
+        // Create a simple file object for Cloudinary
+        const fileData = {
+          buffer,
+          mimetype: 'image/jpeg', // Default to JPEG
+        };
 
-      // Create a simple file object for Cloudinary
-      const fileData = {
-        buffer,
-        mimetype,
-      };
-
-      // Validate file type
-      if (!mimetype.startsWith('image/')) {
-        throw new Error('Only image files are allowed');
+        // Upload to Cloudinary using buffer
+        const avatarUrl = await uploadImage(fileData);
+        updateData.avatarUrl = avatarUrl;
+      } catch (error) {
+        throw new Error('Failed to upload image: ' + error.message);
       }
-
-      // Validate file size (5MB limit)
-      if (buffer.length > 5 * 1024 * 1024) {
-        throw new Error('File too large. Maximum size is 5MB');
-      }
-
-      // Upload to Cloudinary using buffer
-      const avatarUrl = await uploadImage(fileData);
-      updateData.avatarUrl = avatarUrl;
     }
 
     const user = await this.userService.updateProfile(jwtUser.sub, updateData);
@@ -98,16 +91,27 @@ export class UserResolver {
       throw new Error('No avatar to delete');
     }
 
+    console.log('Deleting avatar for user:', jwtUser.sub);
+    console.log('Avatar URL:', user.avatarUrl);
+
     // Delete from Cloudinary
     const publicId = getPublicIdFromUrl(user.avatarUrl);
+    console.log('Extracted public ID:', publicId);
+
     if (publicId) {
+      console.log('Deleting from Cloudinary with public ID:', publicId);
       await deleteImage(publicId);
+      console.log('Successfully deleted from Cloudinary');
+    } else {
+      console.log('Could not extract public ID from URL');
     }
 
     // Update user profile to remove avatar URL
+    console.log('Updating user profile to remove avatar URL');
     await this.userService.updateProfile(jwtUser.sub, {
       avatarUrl: undefined,
     });
+    console.log('Successfully updated user profile');
 
     return {
       success: true,

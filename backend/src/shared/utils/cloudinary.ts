@@ -41,11 +41,28 @@ export const deleteImage = async (publicId: string): Promise<void> => {
 // Get public ID from URL
 export const getPublicIdFromUrl = (url: string): string | null => {
   try {
+    // Example URL: https://res.cloudinary.com/ddgkcui8g/image/upload/v1754031357/duotime-avatars/go0pusvddzakegmsc2ee.jpg
+    // We need to extract: duotime-avatars/go0pusvddzakegmsc2ee
+
     const urlParts = url.split('/');
+    const uploadIndex = urlParts.findIndex((part) => part === 'upload');
+
+    if (uploadIndex === -1) {
+      return null;
+    }
+
+    // Get everything after 'upload' and before the last part (which is the filename with extension)
+    const pathParts = urlParts.slice(uploadIndex + 2, -1); // Skip 'upload' and version
     const filename = urlParts[urlParts.length - 1];
-    const publicId = filename.split('.')[0];
-    return `duotime-avatars/${publicId}`;
+    const filenameWithoutExt = filename.split('.')[0];
+
+    // Reconstruct the public ID
+    const publicId = [...pathParts, filenameWithoutExt].join('/');
+
+    console.log('Extracted public ID:', publicId);
+    return publicId;
   } catch (error) {
+    console.error('Error extracting public ID:', error);
     return null;
   }
 };

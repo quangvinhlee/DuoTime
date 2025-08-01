@@ -47,7 +47,8 @@ export class UploadAvatarInput {
   @MaxLength(100, { message: 'Name must be less than 100 characters' })
   name?: string;
 
-  @Field(() => GraphQLUpload, { nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
-  avatar?: Promise<FileUpload>;
+  @IsString()
+  avatarBase64?: string;
 }

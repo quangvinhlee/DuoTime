@@ -23,6 +23,9 @@ import { UserModule } from './user/user.module';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
       sortSchema: true,
+      buildSchemaOptions: {
+        numberScalarMode: 'integer',
+      },
     }),
 
     PrismaModule,

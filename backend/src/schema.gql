@@ -67,11 +67,8 @@ input UpdateProfileInput {
   name: String
 }
 
-"""The `Upload` scalar type represents a file upload."""
-scalar Upload
-
 input UploadAvatarInput {
-  avatar: Upload
+  avatarBase64: String
   name: String
 }
 

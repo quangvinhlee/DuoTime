@@ -22,7 +22,7 @@ export const pickImage = async (): Promise<FileUploadData | null> => {
 
     // Launch image picker
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1], // Square aspect ratio for avatars
       quality: 0.8,
@@ -98,32 +98,21 @@ export const validateImageFile = (file: FileUploadData): string | null => {
   return null;
 };
 
-export const convertToGraphQLUpload = async (
+export const convertToBase64 = async (
   file: FileUploadData
-): Promise<any> => {
-  // For React Native, we need to create a file-like object
-  // that matches the GraphQL Upload interface
+): Promise<string> => {
   const response = await fetch(file.uri);
   const blob = await response.blob();
 
-  return {
-    file: {
-      uri: file.uri,
-      type: file.type,
-      name: file.name,
-      size: file.size,
-    },
-    // Mock the Upload interface methods
-    toBuffer: async () => {
-      const arrayBuffer = await blob.arrayBuffer();
-      return Buffer.from(arrayBuffer);
-    },
-    mimetype: file.type,
-    filename: file.name,
-    encoding: "7bit",
-    createReadStream: () => {
-      // This is a mock - in practice, you might need to handle this differently
-      throw new Error("createReadStream not implemented for React Native");
-    },
-  };
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove the data:image/jpeg;base64, prefix
+      const base64 = result.split(",")[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 };

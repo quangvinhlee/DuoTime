@@ -16,7 +16,6 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   DateTime: { input: any; output: any; }
-  Upload: { input: any; output: any; }
 };
 
 export type AcceptPartnerBindingDto = {
@@ -120,7 +119,7 @@ export type UpdateProfileInput = {
 };
 
 export type UploadAvatarInput = {
-  avatar?: InputMaybe<Scalars['Upload']['input']>;
+  avatarBase64?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
 };
 

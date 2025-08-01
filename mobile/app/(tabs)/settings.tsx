@@ -9,11 +9,11 @@ import {
   Alert,
   TextInput,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuthStore } from "../../store/auth";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useGetProfileWithPartnerQuery,
   useUpdateProfileMutation,
@@ -23,14 +23,17 @@ import {
 import {
   pickImage,
   takePhoto,
-  convertToGraphQLUpload,
+  convertToBase64,
 } from "@/graphql/utils/fileUpload";
 
 export default function SettingsPage() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, setAuth } = useAuthStore();
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [avatarOptionsModalVisible, setAvatarOptionsModalVisible] =
+    useState(false);
   const [editName, setEditName] = useState(user?.name || "");
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // GraphQL hooks
   const { data: profileData, refetch } = useGetProfileWithPartnerQuery();
@@ -98,21 +101,25 @@ export default function SettingsPage() {
   };
 
   const handlePickImage = async () => {
+    if (isUploading) return; // Prevent multiple uploads
+
     try {
       console.log("Starting image pick...");
       const result = await pickImage();
       console.log("Image pick result:", result);
 
       if (result) {
-        console.log("Converting to GraphQL upload...");
-        const uploadFile = await convertToGraphQLUpload(result);
-        console.log("Upload file created:", uploadFile);
+        console.log("Converting to base64...");
+        const base64 = await convertToBase64(result);
+        console.log("Base64 created, length:", base64.length);
 
+        // Only show loading when actually uploading to server
+        setIsUploading(true);
         console.log("Uploading to server...");
         const uploadResult = await uploadAvatar({
           variables: {
             input: {
-              avatar: uploadFile,
+              avatarBase64: base64,
             },
           },
         });
@@ -129,25 +136,31 @@ export default function SettingsPage() {
         "Error",
         `Failed to upload avatar: ${error?.message || "Unknown error"}`
       );
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleTakePhoto = async () => {
+    if (isUploading) return; // Prevent multiple uploads
+
     try {
       console.log("Starting photo capture...");
       const result = await takePhoto();
       console.log("Photo capture result:", result);
 
       if (result) {
-        console.log("Converting to GraphQL upload...");
-        const uploadFile = await convertToGraphQLUpload(result);
-        console.log("Upload file created:", uploadFile);
+        console.log("Converting to base64...");
+        const base64 = await convertToBase64(result);
+        console.log("Base64 created, length:", base64.length);
 
+        // Only show loading when actually uploading to server
+        setIsUploading(true);
         console.log("Uploading to server...");
         const uploadResult = await uploadAvatar({
           variables: {
             input: {
-              avatar: uploadFile,
+              avatarBase64: base64,
             },
           },
         });
@@ -164,10 +177,14 @@ export default function SettingsPage() {
         "Error",
         `Failed to upload avatar: ${error?.message || "Unknown error"}`
       );
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleDeleteAvatar = async () => {
+    if (isUploading) return; // Prevent multiple operations
+
     Alert.alert(
       "Delete Avatar",
       "Are you sure you want to delete your avatar?",
@@ -178,14 +195,37 @@ export default function SettingsPage() {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteAvatar();
+              setIsUploading(true);
+              console.log("Deleting avatar...");
+              const result = await deleteAvatar();
+              console.log("Delete result:", result);
+
+              // Force refetch and wait for it
+              console.log("Refetching profile data...");
               await refetch();
+
+              // Also update the auth store if needed
+              if (user && result?.data?.deleteAvatar?.success) {
+                console.log("Updating auth store...");
+                // Update the user in auth store to remove avatar
+                const updatedUser = { ...user, avatarUrl: null };
+                // Get the current token from the store
+                const currentToken = useAuthStore.getState().token;
+                if (currentToken) {
+                  await setAuth(currentToken, updatedUser);
+                }
+              }
+
+              console.log("Avatar deletion completed");
               Alert.alert("Success", "Avatar deleted successfully!");
             } catch (error) {
+              console.error("Delete error:", error);
               Alert.alert(
                 "Error",
                 "Failed to delete avatar. Please try again."
               );
+            } finally {
+              setIsUploading(false);
             }
           },
         },
@@ -194,20 +234,14 @@ export default function SettingsPage() {
   };
 
   const showAvatarOptions = () => {
-    Alert.alert("Update Avatar", "Choose an option", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Take Photo", onPress: handleTakePhoto },
-      { text: "Choose from Gallery", onPress: handlePickImage },
-      ...(currentUser?.avatarUrl
-        ? [
-            {
-              text: "Delete Avatar",
-              onPress: handleDeleteAvatar,
-              style: "destructive" as const,
-            },
-          ]
-        : []),
-    ]);
+    if (isUploading) {
+      Alert.alert("Uploading", "Please wait while we process your avatar...");
+      return;
+    }
+
+    console.log("Current user avatar URL:", currentUser?.avatarUrl);
+    console.log("Has avatar:", !!currentUser?.avatarUrl);
+    setAvatarOptionsModalVisible(true);
   };
 
   return (
@@ -232,18 +266,23 @@ export default function SettingsPage() {
 
             <View className="bg-gradient-to-r from-pink-100 to-red-100 rounded-2xl p-6 border border-pink-200">
               <View className="flex-row items-center">
-                <TouchableOpacity onPress={showAvatarOptions}>
-                  <Image
-                    source={
-                      currentUser?.avatarUrl
-                        ? { uri: currentUser.avatarUrl }
-                        : require("../../assets/images/logo.png")
-                    }
-                    className="w-20 h-20 rounded-full mr-4 border-4 border-red-400"
-                    resizeMode="cover"
-                  />
-                  <View className="absolute -bottom-1 -right-1 bg-red-500 rounded-full w-6 h-6 items-center justify-center">
-                    <Ionicons name="camera" size={12} color="white" />
+                <TouchableOpacity
+                  onPress={showAvatarOptions}
+                  disabled={isUploading}
+                >
+                  <View className="relative">
+                    <Image
+                      source={
+                        currentUser?.avatarUrl
+                          ? { uri: currentUser.avatarUrl }
+                          : require("../../assets/images/logo.png")
+                      }
+                      className="w-20 h-20 rounded-full mr-4 border-4 border-red-400"
+                      resizeMode="cover"
+                    />
+                    <View className="absolute -top-2 -left-2 bg-red-500 rounded-full w-7 h-7 items-center justify-center">
+                      <Ionicons name="camera" size={14} color="white" />
+                    </View>
                   </View>
                 </TouchableOpacity>
                 <View className="flex-1">
@@ -264,6 +303,7 @@ export default function SettingsPage() {
                 <TouchableOpacity
                   className="border border-red-500 px-4 py-2 rounded-full"
                   onPress={handleEditProfile}
+                  disabled={isUploading}
                 >
                   <Text className="text-red-500 font-semibold text-sm">
                     Edit
@@ -563,6 +603,84 @@ export default function SettingsPage() {
             <TouchableOpacity
               className="bg-gray-200 py-3 px-6 rounded-lg mt-3"
               onPress={() => setEditModalVisible(false)}
+            >
+              <Text className="text-gray-800 font-bold text-center text-lg">
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Loading Modal Overlay */}
+      {isUploading && (
+        <View className="absolute inset-0 backdrop-blur-sm items-center justify-center z-50">
+          <View className="bg-white rounded-2xl p-6 items-center shadow-xl border border-gray-100 mx-4">
+            <ActivityIndicator size="large" color="#FF6B6B" />
+            <Text className="text-lg font-semibold text-gray-800 mt-4">
+              Uploading Avatar...
+            </Text>
+            <Text className="text-sm text-gray-600 mt-2 text-center">
+              Please wait while we process your image
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Avatar Options Modal */}
+      <Modal
+        visible={avatarOptionsModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setAvatarOptionsModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+          <View className="bg-white rounded-2xl p-6 w-full max-w-sm mx-4">
+            <Text className="text-xl font-bold text-gray-900 mb-4 text-center">
+              Update Avatar
+            </Text>
+
+            <TouchableOpacity
+              className="bg-red-500 py-3 px-6 rounded-lg mb-3"
+              onPress={() => {
+                setAvatarOptionsModalVisible(false);
+                handleTakePhoto();
+              }}
+            >
+              <Text className="text-white font-bold text-center text-lg">
+                📷 Take Photo
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="bg-blue-500 py-3 px-6 rounded-lg mb-3"
+              onPress={() => {
+                setAvatarOptionsModalVisible(false);
+                handlePickImage();
+              }}
+            >
+              <Text className="text-white font-bold text-center text-lg">
+                🖼️ Choose from Gallery
+              </Text>
+            </TouchableOpacity>
+
+            {currentUser?.avatarUrl && (
+              <TouchableOpacity
+                className="bg-red-600 py-3 px-6 rounded-lg mb-3"
+                onPress={() => {
+                  setAvatarOptionsModalVisible(false);
+                  handleDeleteAvatar();
+                }}
+              >
+                <Text className="text-white font-bold text-center text-lg">
+                  🗑️ Remove Avatar
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity
+              className="bg-gray-300 py-3 px-6 rounded-lg"
+              onPress={() => setAvatarOptionsModalVisible(false)}
             >
               <Text className="text-gray-800 font-bold text-center text-lg">
                 Cancel
