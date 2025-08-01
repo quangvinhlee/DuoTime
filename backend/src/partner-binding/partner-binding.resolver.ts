@@ -1,4 +1,5 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { PartnerBindingService } from './partner-binding.service';
 import { PartnerBindingResponse } from './responses/partner-binding-responses';
 import {
@@ -6,11 +7,10 @@ import {
   AcceptPartnerBindingDto,
   RejectPartnerBindingDto,
 } from './dtos/partner-binding-dto';
-import { JwtAuthGuard } from 'common/guards/auth.guard';
-import { UseGuards } from '@nestjs/common';
-import { CurrentUser } from 'common/decorators/user.decorator';
-import { JwtPayload } from 'interfaces';
-import { ResponseType } from 'src/shared/graphql/types';
+import { ResponseType } from '../shared/graphql/types';
+import { JwtAuthGuard } from '../common/guards/auth.guard';
+import { CurrentUser } from '../common/decorators/user.decorator';
+import { JwtPayload } from '../shared/interfaces';
 
 @Resolver()
 export class PartnerBindingResolver {

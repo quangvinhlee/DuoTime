@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
 import { UserType } from '../shared/graphql/types';
-import { JwtPayload } from '../../interfaces';
+import { JwtPayload } from '../shared/interfaces';
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;

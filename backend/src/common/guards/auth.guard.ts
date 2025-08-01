@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { JwtPayload } from 'interfaces';
+import { JwtPayload } from '../../shared/interfaces';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {

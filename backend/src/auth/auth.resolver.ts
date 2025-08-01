@@ -1,13 +1,12 @@
-import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
+import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
-import { JwtAuthGuard } from '../../common/guards/auth.guard';
-import { CurrentUser } from '../../common/decorators/user.decorator';
-import { UserType } from '../shared/graphql/types';
+import { JwtAuthGuard } from '../common/guards/auth.guard';
+import { CurrentUser } from '../common/decorators/user.decorator';
 import { PrismaService } from '../prisma/prisma.service';
-import { JwtPayload } from '../../interfaces';
+import { JwtPayload } from '../shared/interfaces';
 
 @Resolver()
 export class AuthResolver {

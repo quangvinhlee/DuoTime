@@ -6,7 +6,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
 import { User } from '@prisma/client';
-import { JwtPayload } from '../../interfaces';
+import { JwtPayload } from '../shared/interfaces';
 
 @Injectable()
 export class AuthService {
@@ -65,7 +65,6 @@ export class AuthService {
       throw new Error(`Google login failed: ${error}`);
     }
   }
-
 
   renewToken(jwtUser: JwtPayload): Promise<AuthResponse> {
     const token = this.jwtService.sign(

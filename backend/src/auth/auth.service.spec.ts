@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
 import { User } from '@prisma/client';
-import { JwtPayload } from '../../interfaces';
+import { JwtPayload } from '../shared/interfaces';
 
 // Mock the entire google-auth-library module
 jest.mock('google-auth-library', () => ({

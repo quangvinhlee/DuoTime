@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { PartnerBindingModule } from './partner-binding/partner-binding.module';
 import { UserResolver } from './shared/resolver-field/user.resolver';
 import { UserModule } from './user/user.module';
+import { SecurityMiddleware } from './common/middleware/security.middleware';
 
 @Module({
   imports: [
@@ -27,7 +28,6 @@ import { UserModule } from './user/user.module';
         numberScalarMode: 'integer',
       },
     }),
-
     PrismaModule,
     AuthModule,
     PartnerBindingModule,
@@ -43,4 +43,10 @@ import { UserModule } from './user/user.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(SecurityMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

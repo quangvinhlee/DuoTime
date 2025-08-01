@@ -1,10 +1,10 @@
-import { Query, Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserType, ResponseType } from '../shared/graphql/types';
-import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'common/guards/auth.guard';
-import { CurrentUser } from 'common/decorators/user.decorator';
-import { JwtPayload } from 'interfaces';
+import { JwtAuthGuard } from '../common/guards/auth.guard';
+import { CurrentUser } from '../common/decorators/user.decorator';
+import { JwtPayload } from '../shared/interfaces';
 import {
   UpdateProfileInput,
   SearchUsersInput,
