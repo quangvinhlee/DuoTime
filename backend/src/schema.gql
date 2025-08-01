@@ -31,8 +31,8 @@ type Mutation {
   rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): ResponseType!
   removePartner: ResponseType!
   renewToken: AuthResponse!
-  updateProfile(input: UpdateProfileInput!): UserType!
-  uploadAvatar(input: UploadAvatarInput!): UserType!
+  updateProfile(input: UpdateProfileInput!): ResponseType!
+  uploadAvatar(input: UploadAvatarInput!): ResponseType!
 }
 
 type PartnerBindingResponse {
@@ -63,7 +63,6 @@ input SearchUsersInput {
 }
 
 input UpdateProfileInput {
-  avatarUrl: String
   name: String
 }
 

@@ -1,13 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import {
-  IsOptional,
-  IsString,
-  IsUrl,
-  MinLength,
-  MaxLength,
-} from 'class-validator';
-import FileUpload from 'graphql-upload/Upload.mjs';
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
+import { IsOptional, IsString, MinLength, MaxLength } from 'class-validator';
 
 @InputType()
 export class UpdateProfileInput {
@@ -16,13 +8,6 @@ export class UpdateProfileInput {
   @IsString()
   @MaxLength(100, { message: 'Name must be less than 100 characters' })
   name?: string;
-
-  @Field(() => String, { nullable: true })
-  @IsOptional()
-  @IsString()
-  @MaxLength(2048, { message: 'Avatar URL must be less than 2048 characters' })
-  @IsUrl({}, { message: 'Avatar URL must be a valid URL' })
-  avatarUrl?: string;
 }
 
 @InputType()

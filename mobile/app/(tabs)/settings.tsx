@@ -82,7 +82,7 @@ export default function SettingsPage() {
 
     setIsEditing(true);
     try {
-      await updateProfile({
+      const result = await updateProfile({
         variables: {
           input: {
             name: editName.trim(),
@@ -90,9 +90,16 @@ export default function SettingsPage() {
         },
       });
 
-      await refetch();
-      setEditModalVisible(false);
-      Alert.alert("Success", "Profile updated successfully! 💕");
+      if (result.data?.updateProfile?.success) {
+        await refetch();
+        setEditModalVisible(false);
+        Alert.alert("Success", "Profile updated successfully! 💕");
+      } else {
+        Alert.alert(
+          "Error",
+          result.data?.updateProfile?.message || "Failed to update profile"
+        );
+      }
     } catch (error) {
       Alert.alert("Error", "Failed to update profile. Please try again.");
     } finally {
@@ -104,18 +111,13 @@ export default function SettingsPage() {
     if (isUploading) return; // Prevent multiple uploads
 
     try {
-      console.log("Starting image pick...");
       const result = await pickImage();
-      console.log("Image pick result:", result);
 
       if (result) {
-        console.log("Converting to base64...");
         const base64 = await convertToBase64(result);
-        console.log("Base64 created, length:", base64.length);
 
         // Only show loading when actually uploading to server
         setIsUploading(true);
-        console.log("Uploading to server...");
         const uploadResult = await uploadAvatar({
           variables: {
             input: {
@@ -123,15 +125,19 @@ export default function SettingsPage() {
             },
           },
         });
-        console.log("Upload result:", uploadResult);
 
-        await refetch();
-        Alert.alert("Success", "Avatar updated successfully! 💕");
-      } else {
-        console.log("No image selected");
+        if (uploadResult.data?.uploadAvatar?.success) {
+          await refetch();
+          Alert.alert("Success", "Avatar updated successfully! 💕");
+        } else {
+          Alert.alert(
+            "Error",
+            uploadResult.data?.uploadAvatar?.message ||
+              "Failed to upload avatar"
+          );
+        }
       }
     } catch (error: any) {
-      console.error("Upload error:", error);
       Alert.alert(
         "Error",
         `Failed to upload avatar: ${error?.message || "Unknown error"}`
@@ -145,18 +151,13 @@ export default function SettingsPage() {
     if (isUploading) return; // Prevent multiple uploads
 
     try {
-      console.log("Starting photo capture...");
       const result = await takePhoto();
-      console.log("Photo capture result:", result);
 
       if (result) {
-        console.log("Converting to base64...");
         const base64 = await convertToBase64(result);
-        console.log("Base64 created, length:", base64.length);
 
         // Only show loading when actually uploading to server
         setIsUploading(true);
-        console.log("Uploading to server...");
         const uploadResult = await uploadAvatar({
           variables: {
             input: {
@@ -164,15 +165,19 @@ export default function SettingsPage() {
             },
           },
         });
-        console.log("Upload result:", uploadResult);
 
-        await refetch();
-        Alert.alert("Success", "Avatar updated successfully! 💕");
-      } else {
-        console.log("No photo taken");
+        if (uploadResult.data?.uploadAvatar?.success) {
+          await refetch();
+          Alert.alert("Success", "Avatar updated successfully! 💕");
+        } else {
+          Alert.alert(
+            "Error",
+            uploadResult.data?.uploadAvatar?.message ||
+              "Failed to upload avatar"
+          );
+        }
       }
     } catch (error: any) {
-      console.error("Upload error:", error);
       Alert.alert(
         "Error",
         `Failed to upload avatar: ${error?.message || "Unknown error"}`
@@ -196,17 +201,13 @@ export default function SettingsPage() {
           onPress: async () => {
             try {
               setIsUploading(true);
-              console.log("Deleting avatar...");
               const result = await deleteAvatar();
-              console.log("Delete result:", result);
 
               // Force refetch and wait for it
-              console.log("Refetching profile data...");
               await refetch();
 
               // Also update the auth store if needed
               if (user && result?.data?.deleteAvatar?.success) {
-                console.log("Updating auth store...");
                 // Update the user in auth store to remove avatar
                 const updatedUser = { ...user, avatarUrl: null };
                 // Get the current token from the store
@@ -215,11 +216,8 @@ export default function SettingsPage() {
                   await setAuth(currentToken, updatedUser);
                 }
               }
-
-              console.log("Avatar deletion completed");
               Alert.alert("Success", "Avatar deleted successfully!");
             } catch (error) {
-              console.error("Delete error:", error);
               Alert.alert(
                 "Error",
                 "Failed to delete avatar. Please try again."
@@ -239,8 +237,6 @@ export default function SettingsPage() {
       return;
     }
 
-    console.log("Current user avatar URL:", currentUser?.avatarUrl);
-    console.log("Has avatar:", !!currentUser?.avatarUrl);
     setAvatarOptionsModalVisible(true);
   };
 
@@ -271,15 +267,17 @@ export default function SettingsPage() {
                   disabled={isUploading}
                 >
                   <View className="relative">
-                    <Image
-                      source={
-                        currentUser?.avatarUrl
-                          ? { uri: currentUser.avatarUrl }
-                          : require("../../assets/images/logo.png")
-                      }
-                      className="w-20 h-20 rounded-full mr-4 border-4 border-red-400"
-                      resizeMode="cover"
-                    />
+                    {currentUser?.avatarUrl ? (
+                      <Image
+                        source={{ uri: currentUser.avatarUrl }}
+                        className="w-20 h-20 rounded-full mr-4 border-4 border-red-400"
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View className="w-20 h-20 rounded-full mr-4 border-4 border-red-400 bg-gray-200 items-center justify-center">
+                        <Ionicons name="person" size={32} color="#6b7280" />
+                      </View>
+                    )}
                     <View className="absolute -top-2 -left-2 bg-red-500 rounded-full w-7 h-7 items-center justify-center">
                       <Ionicons name="camera" size={14} color="white" />
                     </View>

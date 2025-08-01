@@ -21,9 +21,8 @@ export const GET_PROFILE = gql`
 export const UPDATE_PROFILE = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
     updateProfile(input: $input) {
-      id
-      name
-      avatarUrl
+      success
+      message
     }
   }
 `;
@@ -31,8 +30,8 @@ export const UPDATE_PROFILE = gql`
 export const UPLOAD_AVATAR = gql`
   mutation UploadAvatar($input: UploadAvatarInput!) {
     uploadAvatar(input: $input) {
-      id
-      avatarUrl
+      success
+      message
     }
   }
 `;

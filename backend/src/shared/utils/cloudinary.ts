@@ -59,10 +59,8 @@ export const getPublicIdFromUrl = (url: string): string | null => {
     // Reconstruct the public ID
     const publicId = [...pathParts, filenameWithoutExt].join('/');
 
-    console.log('Extracted public ID:', publicId);
     return publicId;
   } catch (error) {
-    console.error('Error extracting public ID:', error);
     return null;
   }
 };

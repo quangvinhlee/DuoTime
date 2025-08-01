@@ -44,8 +44,8 @@ export type Mutation = {
   rejectPartnerBinding: ResponseType;
   removePartner: ResponseType;
   renewToken: AuthResponse;
-  updateProfile: UserType;
-  uploadAvatar: UserType;
+  updateProfile: ResponseType;
+  uploadAvatar: ResponseType;
 };
 
 
@@ -194,14 +194,14 @@ export type UpdateProfileMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProfileMutation = { __typename?: 'Mutation', updateProfile: { __typename?: 'UserType', id: string, name?: string | null, avatarUrl?: string | null } };
+export type UpdateProfileMutation = { __typename?: 'Mutation', updateProfile: { __typename?: 'ResponseType', success: boolean, message: string } };
 
 export type UploadAvatarMutationVariables = Exact<{
   input: UploadAvatarInput;
 }>;
 
 
-export type UploadAvatarMutation = { __typename?: 'Mutation', uploadAvatar: { __typename?: 'UserType', id: string, avatarUrl?: string | null } };
+export type UploadAvatarMutation = { __typename?: 'Mutation', uploadAvatar: { __typename?: 'ResponseType', success: boolean, message: string } };
 
 export type DeleteAvatarMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -570,9 +570,8 @@ export type GetProfileQueryResult = Apollo.QueryResult<GetProfileQuery, GetProfi
 export const UpdateProfileDocument = gql`
     mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {
-    id
-    name
-    avatarUrl
+    success
+    message
   }
 }
     `;
@@ -605,8 +604,8 @@ export type UpdateProfileMutationOptions = Apollo.BaseMutationOptions<UpdateProf
 export const UploadAvatarDocument = gql`
     mutation UploadAvatar($input: UploadAvatarInput!) {
   uploadAvatar(input: $input) {
-    id
-    avatarUrl
+    success
+    message
   }
 }
     `;
