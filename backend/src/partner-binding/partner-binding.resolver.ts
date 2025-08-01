@@ -1,10 +1,6 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { PartnerBindingService } from './partner-binding.service';
-import {
-  PartnerBindingResponse,
-  RejectPartnerBindingResponse,
-  RemovePartnerResponse,
-} from './responses/partner-binding-responses';
+import { PartnerBindingResponse } from './responses/partner-binding-responses';
 import {
   CreatePartnerBindingDto,
   AcceptPartnerBindingDto,
@@ -14,6 +10,7 @@ import { JwtAuthGuard } from 'common/guards/auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'common/decorators/user.decorator';
 import { JwtPayload } from 'interfaces';
+import { ResponseType } from 'src/shared/graphql/types';
 
 @Resolver()
 export class PartnerBindingResolver {
@@ -46,12 +43,12 @@ export class PartnerBindingResolver {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Mutation(() => RejectPartnerBindingResponse)
+  @Mutation(() => ResponseType)
   async rejectPartnerBinding(
     @CurrentUser() jwtUser: JwtPayload,
     @Args('rejectPartnerBindingDto')
     rejectPartnerBindingDto: RejectPartnerBindingDto,
-  ): Promise<RejectPartnerBindingResponse> {
+  ): Promise<ResponseType> {
     return this.partnerBindingService.rejectPartnerBinding({
       ...rejectPartnerBindingDto,
       userId: jwtUser.sub,
@@ -59,10 +56,10 @@ export class PartnerBindingResolver {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Mutation(() => RemovePartnerResponse)
+  @Mutation(() => ResponseType)
   async removePartner(
     @CurrentUser() jwtUser: JwtPayload,
-  ): Promise<RemovePartnerResponse> {
+  ): Promise<ResponseType> {
     return this.partnerBindingService.removePartner(jwtUser.sub);
   }
 }

@@ -26,10 +26,13 @@ input GoogleLoginInput {
 type Mutation {
   acceptPartnerBinding(acceptPartnerBindingDto: AcceptPartnerBindingDto!): PartnerBindingResponse!
   createPartnerBinding(createPartnerBindingDto: CreatePartnerBindingDto!): PartnerBindingResponse!
+  deleteAvatar: ResponseType!
   googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
-  rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): RejectPartnerBindingResponse!
-  removePartner: RemovePartnerResponse!
+  rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): ResponseType!
+  removePartner: ResponseType!
   renewToken: AuthResponse!
+  updateProfile(input: UpdateProfileInput!): UserType!
+  uploadAvatar(input: UploadAvatarInput!): UserType!
 }
 
 type PartnerBindingResponse {
@@ -42,20 +45,34 @@ type PartnerBindingResponse {
 type Query {
   getProfile: UserType!
   sayHello: String!
+  searchUsers(input: SearchUsersInput!): [UserType!]!
 }
 
 input RejectPartnerBindingDto {
   invitationCode: String!
 }
 
-type RejectPartnerBindingResponse {
+type ResponseType {
   message: String!
   success: Boolean!
 }
 
-type RemovePartnerResponse {
-  message: String!
-  success: Boolean!
+input SearchUsersInput {
+  excludeUserId: String
+  query: String!
+}
+
+input UpdateProfileInput {
+  avatarUrl: String
+  name: String
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input UploadAvatarInput {
+  avatar: Upload
+  name: String
 }
 
 type UserType {
@@ -65,6 +82,7 @@ type UserType {
   googleId: String!
   id: String!
   name: String
+  partner: UserType
   partnerId: String
   updatedAt: DateTime!
 }

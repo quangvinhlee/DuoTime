@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Animated,
 } from "react-native";
 import {
   SafeAreaView,
@@ -37,6 +38,22 @@ export default function AuthPage() {
   const [getProfile] = useGetProfileLazyQuery();
   const setAuth = useAuthStore((state) => state.setAuth);
   const insets = useSafeAreaInsets();
+
+  // Simple dot animation for loading text
+  const [dotCount, setDotCount] = useState(0);
+
+  // Loading dot animation effect
+  useEffect(() => {
+    if (loading) {
+      setDotCount(1); // Start with 1 dot immediately
+      const interval = setInterval(() => {
+        setDotCount((prev) => (prev + 1) % 4);
+      }, 300);
+      return () => clearInterval(interval);
+    } else {
+      setDotCount(0);
+    }
+  }, [loading]);
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -304,7 +321,7 @@ export default function AuthPage() {
                   <>
                     <ActivityIndicator color="white" size="small" />
                     <Text className="text-white font-semibold text-lg ml-2">
-                      Signing in ...
+                      Signing in {".".repeat(dotCount)}
                     </Text>
                   </>
                 ) : (
@@ -315,15 +332,6 @@ export default function AuthPage() {
               </View>
             </View>
           </TouchableOpacity>
-
-          {loading && (
-            <View className="mt-4 flex-row items-center">
-              <ActivityIndicator color="#FF6B6B" size="small" />
-              <Text className="font-medium ml-2" style={{ color: "#718096" }}>
-                Signing in...
-              </Text>
-            </View>
-          )}
         </View>
 
         {/* Footer */}

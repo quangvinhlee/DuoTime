@@ -6,11 +6,9 @@ import {
   RejectPartnerBindingDto,
 } from './dtos/partner-binding-dto';
 import { BindingStatus } from '@prisma/client';
-import {
-  PartnerBindingResponse,
-  RemovePartnerResponse,
-} from './responses/partner-binding-responses';
+import { PartnerBindingResponse } from './responses/partner-binding-responses';
 import { generateInvitationCode } from 'src/shared/utils/generateInvitationCode';
+import { ResponseType } from 'src/shared/graphql/types';
 
 @Injectable()
 export class PartnerBindingService {
@@ -220,7 +218,7 @@ export class PartnerBindingService {
     };
   }
 
-  async removePartner(userId: string): Promise<RemovePartnerResponse> {
+  async removePartner(userId: string): Promise<ResponseType> {
     if (!userId) {
       throw new BadRequestException('User ID is required');
     }

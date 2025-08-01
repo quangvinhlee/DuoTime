@@ -23,13 +23,6 @@ export class AuthResolver {
     return this.authService.googleLogin(googleLoginInput);
   }
 
-  @Query(() => UserType)
-  @UseGuards(JwtAuthGuard)
-  async getProfile(@CurrentUser() jwtUser: JwtPayload): Promise<UserType> {
-    const user = await this.authService.getUser(jwtUser.sub);
-    return user as UserType;
-  }
-
   @Mutation(() => AuthResponse)
   @UseGuards(JwtAuthGuard)
   async renewToken(@CurrentUser() jwtUser: JwtPayload): Promise<AuthResponse> {

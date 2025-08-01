@@ -8,21 +8,6 @@ export const GOOGLE_LOGIN = gql`
   }
 `;
 
-export const GET_PROFILE = gql`
-  query GetProfile {
-    getProfile {
-      id
-      email
-      googleId
-      name
-      avatarUrl
-      partnerId
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
 export const RENEW_TOKEN_MUTATION = gql`
   mutation RenewToken {
     renewToken {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,39 @@ import {
   Image,
   Switch,
   Alert,
+  TextInput,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAuthStore } from "../../store/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  useGetProfileWithPartnerQuery,
+  useUpdateProfileMutation,
+  useUploadAvatarMutation,
+  useDeleteAvatarMutation,
+} from "@/generated/graphql";
+import {
+  pickImage,
+  takePhoto,
+  convertToGraphQLUpload,
+} from "@/graphql/utils/fileUpload";
 
 export default function SettingsPage() {
-  const logout = useAuthStore((state) => state.logout);
+  const { user, logout } = useAuthStore();
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editName, setEditName] = useState(user?.name || "");
+  const [isEditing, setIsEditing] = useState(false);
+
+  // GraphQL hooks
+  const { data: profileData, refetch } = useGetProfileWithPartnerQuery();
+  const [updateProfile] = useUpdateProfileMutation();
+  const [uploadAvatar] = useUploadAvatarMutation();
+  const [deleteAvatar] = useDeleteAvatarMutation();
+
+  // Use profile data if available, otherwise fall back to auth store user
+  const currentUser = profileData?.getProfile || user;
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -40,6 +65,151 @@ export default function SettingsPage() {
       ]
     );
   };
+
+  const handleEditProfile = () => {
+    setEditName(currentUser?.name || "");
+    setEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editName.trim()) {
+      Alert.alert("Error", "Name cannot be empty");
+      return;
+    }
+
+    setIsEditing(true);
+    try {
+      await updateProfile({
+        variables: {
+          input: {
+            name: editName.trim(),
+          },
+        },
+      });
+
+      await refetch();
+      setEditModalVisible(false);
+      Alert.alert("Success", "Profile updated successfully! 💕");
+    } catch (error) {
+      Alert.alert("Error", "Failed to update profile. Please try again.");
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  const handlePickImage = async () => {
+    try {
+      console.log("Starting image pick...");
+      const result = await pickImage();
+      console.log("Image pick result:", result);
+
+      if (result) {
+        console.log("Converting to GraphQL upload...");
+        const uploadFile = await convertToGraphQLUpload(result);
+        console.log("Upload file created:", uploadFile);
+
+        console.log("Uploading to server...");
+        const uploadResult = await uploadAvatar({
+          variables: {
+            input: {
+              avatar: uploadFile,
+            },
+          },
+        });
+        console.log("Upload result:", uploadResult);
+
+        await refetch();
+        Alert.alert("Success", "Avatar updated successfully! 💕");
+      } else {
+        console.log("No image selected");
+      }
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      Alert.alert(
+        "Error",
+        `Failed to upload avatar: ${error?.message || "Unknown error"}`
+      );
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      console.log("Starting photo capture...");
+      const result = await takePhoto();
+      console.log("Photo capture result:", result);
+
+      if (result) {
+        console.log("Converting to GraphQL upload...");
+        const uploadFile = await convertToGraphQLUpload(result);
+        console.log("Upload file created:", uploadFile);
+
+        console.log("Uploading to server...");
+        const uploadResult = await uploadAvatar({
+          variables: {
+            input: {
+              avatar: uploadFile,
+            },
+          },
+        });
+        console.log("Upload result:", uploadResult);
+
+        await refetch();
+        Alert.alert("Success", "Avatar updated successfully! 💕");
+      } else {
+        console.log("No photo taken");
+      }
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      Alert.alert(
+        "Error",
+        `Failed to upload avatar: ${error?.message || "Unknown error"}`
+      );
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    Alert.alert(
+      "Delete Avatar",
+      "Are you sure you want to delete your avatar?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAvatar();
+              await refetch();
+              Alert.alert("Success", "Avatar deleted successfully!");
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                "Failed to delete avatar. Please try again."
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const showAvatarOptions = () => {
+    Alert.alert("Update Avatar", "Choose an option", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Take Photo", onPress: handleTakePhoto },
+      { text: "Choose from Gallery", onPress: handlePickImage },
+      ...(currentUser?.avatarUrl
+        ? [
+            {
+              text: "Delete Avatar",
+              onPress: handleDeleteAvatar,
+              style: "destructive" as const,
+            },
+          ]
+        : []),
+    ]);
+  };
+
   return (
     <View className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
       <ScrollView className="flex-1">
@@ -62,24 +232,39 @@ export default function SettingsPage() {
 
             <View className="bg-gradient-to-r from-pink-100 to-red-100 rounded-2xl p-6 border border-pink-200">
               <View className="flex-row items-center">
-                <Image
-                  source={{
-                    uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-                  }}
-                  className="w-20 h-20 rounded-full mr-4 border-4 border-red-400"
-                />
+                <TouchableOpacity onPress={showAvatarOptions}>
+                  <Image
+                    source={
+                      currentUser?.avatarUrl
+                        ? { uri: currentUser.avatarUrl }
+                        : require("../../assets/images/logo.png")
+                    }
+                    className="w-20 h-20 rounded-full mr-4 border-4 border-red-400"
+                    resizeMode="cover"
+                  />
+                  <View className="absolute -bottom-1 -right-1 bg-red-500 rounded-full w-6 h-6 items-center justify-center">
+                    <Ionicons name="camera" size={12} color="white" />
+                  </View>
+                </TouchableOpacity>
                 <View className="flex-1">
                   <Text className="text-xl font-bold text-gray-900">
-                    John Doe
+                    {currentUser?.name || "No Name Set"}
                   </Text>
                   <Text className="text-sm text-gray-600">
-                    john.doe@example.com
+                    {currentUser?.email || "No Email"}
                   </Text>
                   <Text className="text-sm text-red-500 font-semibold">
-                    💕 In Love with Sarah
+                    {currentUser?.partner
+                      ? `💕 In Love with ${
+                          currentUser.partner.name || "Partner"
+                        }`
+                      : "💔 Single"}
                   </Text>
                 </View>
-                <TouchableOpacity className="border border-red-500 px-4 py-2 rounded-full">
+                <TouchableOpacity
+                  className="border border-red-500 px-4 py-2 rounded-full"
+                  onPress={handleEditProfile}
+                >
                   <Text className="text-red-500 font-semibold text-sm">
                     Edit
                   </Text>
@@ -346,6 +531,46 @@ export default function SettingsPage() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+          <View className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <Text className="text-2xl font-bold text-gray-900 mb-4">
+              Edit Profile
+            </Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg p-3 mb-4"
+              value={editName}
+              onChangeText={setEditName}
+              editable={!isEditing}
+              placeholder="Enter your name"
+            />
+            <TouchableOpacity
+              className="bg-red-500 py-3 px-6 rounded-lg"
+              onPress={handleSaveProfile}
+              disabled={isEditing}
+            >
+              <Text className="text-white font-bold text-center text-lg">
+                {isEditing ? "Saving..." : "Save Changes"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-gray-200 py-3 px-6 rounded-lg mt-3"
+              onPress={() => setEditModalVisible(false)}
+            >
+              <Text className="text-gray-800 font-bold text-center text-lg">
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

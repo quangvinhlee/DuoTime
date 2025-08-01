@@ -15,20 +15,4 @@ export class PartnerBindingResponse {
   status: string;
 }
 
-@ObjectType()
-export class RejectPartnerBindingResponse {
-  @Field()
-  success: boolean;
 
-  @Field()
-  message: string;
-}
-
-@ObjectType()
-export class RemovePartnerResponse {
-  @Field()
-  success: boolean;
-
-  @Field()
-  message: string;
-}
