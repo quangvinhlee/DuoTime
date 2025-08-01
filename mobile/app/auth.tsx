@@ -23,10 +23,16 @@ import {
 } from "@/generated/graphql";
 import { useAuthStore } from "@/store/auth";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
-import Toast from "react-native-toast-message";
+import CustomAlert from "@/components/CustomAlert";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    title: "",
+    message: "",
+    type: "info" as "success" | "error" | "info" | "warning",
+  });
   const [googleLogin] = useGoogleLoginMutation();
   const [getProfile] = useGetProfileLazyQuery();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -39,74 +45,112 @@ export default function AuthPage() {
     });
   }, []);
 
+  const showAlert = (
+    title: string,
+    message: string,
+    type: "success" | "error" | "info" | "warning" = "info"
+  ) => {
+    setAlertConfig({ title, message, type });
+    setAlertVisible(true);
+  };
+
   const signInWithGoogle = async () => {
+    if (loading) return; // Prevent multiple simultaneous sign-ins
+
     setLoading(true);
     try {
+      // Step 1: Check Play Services
       await GoogleSignin.hasPlayServices();
+
+      // Step 2: Sign in with Google
       const userInfo = await GoogleSignin.signIn();
       const idToken =
         (userInfo as any).idToken || (userInfo as any).data?.idToken;
 
-      if (!idToken) throw new Error("Failed to get ID token from Google");
+      if (!idToken) {
+        throw new Error("Failed to get ID token from Google");
+      }
 
-      // 1. Call backend to get JWT token
+      // Step 3: Login with backend
       const { data, errors } = await googleLogin({
         variables: { googleLoginInput: { idToken } },
       });
 
       if (errors || !data?.googleLogin.token) {
-        throw new Error(errors?.[0]?.message || "Login failed");
+        const errorMessage = errors?.[0]?.message || "Login failed";
+        console.error("GraphQL errors:", errors);
+        throw new Error(errorMessage);
       }
 
       const token = data.googleLogin.token;
 
-      // 2. Save token to SecureStore first so Apollo can use it
+      // Step 4: Store token
       await SecureStore.setItemAsync("jwt_token", token);
 
-      // 3. Now fetch user profile (Apollo will include the token automatically)
-      const { data: profileData } = await getProfile();
+      // Step 5: Get user profile
+      try {
+        const { data: profileData, errors: profileErrors } = await getProfile();
 
-      // 4. Store user in Zustand (token already in SecureStore)
-      if (profileData?.getProfile) {
-        await setAuth(token, profileData.getProfile);
+        if (profileErrors) {
+          console.error("Profile fetch errors:", profileErrors);
+          throw new Error("Failed to fetch user profile");
+        }
+
+        if (profileData?.getProfile) {
+          await setAuth(token, profileData.getProfile);
+        } else {
+          throw new Error("No profile data received");
+        }
+      } catch (profileError) {
+        console.error("Profile fetch error:", profileError);
+        // Even if profile fetch fails, we can still proceed with the token
+        // The user can retry profile fetch later
+        showAlert(
+          "Almost there! 💕",
+          "We connected successfully, but couldn't get your profile details just yet. Don't worry, you can try again later!",
+          "warning"
+        );
+        return;
       }
 
-      // Success
-      Toast.show({
-        type: "success",
-        text1: "Welcome to DuoTime!",
-        text2: "You're now signed in.",
-      });
       router.replace("/(tabs)/home");
     } catch (error: any) {
+      console.error("Sign in error:", error);
+
+      // Handle specific Google Sign-In errors
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        Toast.show({
-          type: "info",
-          text1: "Sign In Cancelled",
-          text2: "You cancelled the sign-in process.",
-        });
+        showAlert(
+          "Oh no! 💔",
+          "You cancelled our love connection. Don't worry, we'll be here when you're ready to try again!",
+          "info"
+        );
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        Toast.show({
-          type: "info",
-          text1: "Sign In In Progress",
-          text2: "Sign-in is already in progress.",
-        });
+        showAlert(
+          "Hold on, love! 💕",
+          "We're already working on connecting you. Please wait a moment for the magic to happen!",
+          "info"
+        );
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        Toast.show({
-          type: "error",
-          text1: "Play Services Not Available",
-          text2: "Google Play Services is not available on this device.",
-        });
+        showAlert(
+          "Missing something special! 💝",
+          "Google Play Services is needed to bring us together. Please make sure it's available on your device.",
+          "error"
+        );
       } else {
-        Toast.show({
-          type: "error",
-          text1: "Sign in failed",
-          text2: error.message,
-        });
+        // Handle other errors
+        const errorMessage =
+          error.message ||
+          "Oops! Something went wrong while trying to connect our hearts. Let's try again!";
+        showAlert("Connection failed 💔", errorMessage, "error");
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAlertClose = () => {
+    setAlertVisible(false);
+    // No need for navigation logic here since we navigate directly on success
   };
 
   return (
@@ -321,6 +365,15 @@ export default function AuthPage() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onClose={handleAlertClose}
+      />
     </SafeAreaView>
   );
 }
