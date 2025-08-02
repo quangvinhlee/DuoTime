@@ -26,7 +26,6 @@ export class LoggerService extends PinoLogger {
     reason: string,
     additionalInfo?: Record<string, any>,
   ) {
-    // Clean up sensitive information from error messages
     const cleanReason = cleanErrorMessage(reason);
 
     this.warn(
@@ -40,7 +39,6 @@ export class LoggerService extends PinoLogger {
     );
   }
 
-  // Database operation logs
   logDatabaseOperation(
     operation: string,
     table: string,
@@ -82,7 +80,6 @@ export class LoggerService extends PinoLogger {
     );
   }
 
-  // GraphQL operation logs
   logGraphQLOperation(
     operationType: string,
     operationName?: string,
@@ -117,7 +114,7 @@ export class LoggerService extends PinoLogger {
         operationType,
         operationName,
         error: cleanError,
-        stack: error.stack?.split('\n').slice(0, 3).join('\n'), // Limit stack trace
+        stack: error.stack?.split('\n').slice(0, 3).join('\n'),
         userId,
       },
       `GraphQL ${operationType}${
@@ -126,7 +123,6 @@ export class LoggerService extends PinoLogger {
     );
   }
 
-  // Business logic logs
   logBusinessEvent(
     event: string,
     details: Record<string, any>,
@@ -142,7 +138,6 @@ export class LoggerService extends PinoLogger {
     );
   }
 
-  // External API logs
   logExternalApiCall(
     service: string,
     endpoint: string,

@@ -28,11 +28,20 @@ async function bootstrap() {
       'exp://localhost:8081',
       'http://192.168.4.86:8081',
       'http://192.168.4.86:19006',
+      'http://192.168.4.86:3000', // Add backend IP
       'exp://192.168.4.86:8081',
+      // Allow any origin for development (remove in production)
+      '*',
     ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
   });
 
   const PORT = process.env.PORT ?? 3000;

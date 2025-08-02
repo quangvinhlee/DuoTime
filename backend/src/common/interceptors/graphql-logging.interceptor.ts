@@ -26,12 +26,10 @@ export class GraphQLLoggingInterceptor implements NestInterceptor {
     const fieldName = info.fieldName as string;
     const userId = request.user?.sub as string | undefined;
 
-    // Skip logging for introspection queries (GraphQL Playground auto-queries)
     if (this.isIntrospectionQuery(fieldName, operationName)) {
       return next.handle();
     }
 
-    // Only log actual business operations (not every GraphQL request)
     if (!this.isBusinessOperation(operationType, operationName, fieldName)) {
       return next.handle();
     }
@@ -64,7 +62,6 @@ export class GraphQLLoggingInterceptor implements NestInterceptor {
     fieldName: string,
     operationName?: string,
   ): boolean {
-    // Skip introspection queries that GraphQL Playground makes automatically
     const introspectionFields = [
       '__schema',
       '__type',
@@ -92,19 +89,12 @@ export class GraphQLLoggingInterceptor implements NestInterceptor {
     operationName?: string,
     fieldName?: string,
   ): boolean {
-    // Log all mutations automatically (they're always business operations)
     if (operationType === 'mutation') {
       return true;
     }
 
-    // For queries, exclude common GraphQL system/utility queries
     if (operationType === 'query') {
-      const systemQueries = [
-        'node', // Relay node query
-        'viewer', // Common system query
-        '__schema', // Schema introspection
-        '__type', // Type introspection
-      ];
+      const systemQueries = ['node', 'viewer', '__schema', '__type'];
 
       const queryName = operationName || fieldName;
       if (!queryName) return false;
