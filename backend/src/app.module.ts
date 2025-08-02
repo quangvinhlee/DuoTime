@@ -20,6 +20,7 @@ import { throttleConfig } from './common/config/throttle.config';
 import { LoggerService } from './common/services/logger.service';
 import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging.interceptor';
 import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
     AuthModule,
     PartnerBindingModule,
     UserModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [
