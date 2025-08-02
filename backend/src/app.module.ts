@@ -2,8 +2,9 @@ import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { LoggerModule } from 'nestjs-pino';
 import { join } from 'path';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_PIPE, APP_INTERCEPTOR } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppResolver } from './app.resolver';
 import { PrismaModule } from './prisma/prisma.module';
@@ -12,6 +13,9 @@ import { PartnerBindingModule } from './partner-binding/partner-binding.module';
 import { UserResolver } from './shared/resolver-field/user.resolver';
 import { UserModule } from './user/user.module';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
+import { loggerConfig } from './common/config/logger.config';
+import { LoggerService } from './common/services/logger.service';
+import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging.interceptor';
 
 @Module({
   imports: [
@@ -19,6 +23,7 @@ import { SecurityMiddleware } from './common/middleware/security.middleware';
       isGlobal: true, // Make config available everywhere
       envFilePath: '.env',
     }),
+    LoggerModule.forRoot(loggerConfig),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -37,9 +42,14 @@ import { SecurityMiddleware } from './common/middleware/security.middleware';
   providers: [
     AppResolver,
     UserResolver,
+    LoggerService,
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GraphQLLoggingInterceptor,
     },
   ],
 })

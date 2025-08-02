@@ -7,6 +7,7 @@ import { GoogleLoginInput } from './dtos/auth.dto';
 import { AuthResponse } from './responses/auth.response';
 import { User } from '@prisma/client';
 import { JwtPayload } from '../shared/interfaces';
+import { LoggerService } from '../common/services/logger.service';
 
 @Injectable()
 export class AuthService {
@@ -16,15 +17,24 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly logger: LoggerService,
   ) {
     // Initialize Google OAuth client
     this.googleClient = new OAuth2Client(
       this.configService.get('GOOGLE_CLIENT_ID'),
     );
+    this.logger.setContext('AuthService');
   }
 
   async googleLogin(googleLoginInput: GoogleLoginInput): Promise<AuthResponse> {
+    const startTime = Date.now();
+
     try {
+      this.logger.debug(
+        { event: 'google_login_attempt', idToken: '[REDACTED]' },
+        'Starting Google login process',
+      );
+
       const ticket = await this.googleClient.verifyIdToken({
         idToken: googleLoginInput.idToken,
         audience: this.configService.get('GOOGLE_CLIENT_ID'),
@@ -32,7 +42,9 @@ export class AuthService {
 
       const payload = ticket.getPayload();
       if (!payload) {
-        throw new Error('Invalid token payload');
+        const error = new Error('Invalid token payload');
+        this.logger.logAuthFailure('google', 'Invalid token payload');
+        throw error;
       }
 
       const { sub: googleId, email, name, picture } = payload;
@@ -42,6 +54,15 @@ export class AuthService {
       });
 
       if (!user) {
+        this.logger.debug(
+          {
+            event: 'new_user_creation',
+            googleId,
+            email: email || '[NO_EMAIL]',
+          },
+          'Creating new user from Google authentication',
+        );
+
         user = await this.prisma.user.create({
           data: {
             googleId,
@@ -49,6 +70,18 @@ export class AuthService {
             name,
             avatarUrl: picture,
           },
+        });
+
+        this.logger.logAuthSuccess(user.id, 'google', {
+          newUser: true,
+          email: user.email,
+          duration: Date.now() - startTime,
+        });
+      } else {
+        this.logger.logAuthSuccess(user.id, 'google', {
+          newUser: false,
+          email: user.email,
+          duration: Date.now() - startTime,
         });
       }
 
@@ -60,13 +93,39 @@ export class AuthService {
         googleId: user.googleId,
       });
 
+      this.logger.info(
+        {
+          event: 'jwt_token_generated',
+          userId: user.id,
+          duration: Date.now() - startTime,
+        },
+        `JWT token generated for user ${user.id}`,
+      );
+
       return { token };
     } catch (error) {
-      throw new Error(`Google login failed: ${error}`);
+      const duration = Date.now() - startTime;
+      const errorMessage = `Google login failed: ${error}`;
+
+      this.logger.logAuthFailure('google', errorMessage, {
+        duration,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      throw new Error(errorMessage);
     }
   }
 
   renewToken(jwtUser: JwtPayload): Promise<AuthResponse> {
+    this.logger.info(
+      {
+        event: 'token_renewal',
+        userId: jwtUser.sub,
+        email: jwtUser.email,
+      },
+      `Renewing token for user ${jwtUser.sub}`,
+    );
+
     const token = this.jwtService.sign(
       {
         sub: jwtUser.sub,
@@ -78,6 +137,11 @@ export class AuthService {
       {
         expiresIn: '7d', // Reset to 7 days from now
       },
+    );
+
+    this.logger.info(
+      { event: 'token_renewed', userId: jwtUser.sub },
+      `Token successfully renewed for user ${jwtUser.sub}`,
     );
 
     return Promise.resolve({ token } as AuthResponse);
