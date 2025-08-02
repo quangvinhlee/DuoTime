@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GoogleLoginInput } from './dtos/auth.dto';
-import { AuthResponse } from './responses/auth.response';
+import { AuthResponse } from './types/auth.response';
 import { User } from '@prisma/client';
 import { JwtPayload } from '../shared/interfaces';
 

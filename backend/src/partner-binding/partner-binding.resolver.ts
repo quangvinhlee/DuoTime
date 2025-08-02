@@ -1,7 +1,6 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { PartnerBindingService } from './partner-binding.service';
-import { PartnerBindingResponse } from './responses/partner-binding-responses';
 import {
   CreatePartnerBindingDto,
   AcceptPartnerBindingDto,
@@ -15,6 +14,7 @@ import {
   SensitiveMutationThrottle,
 } from '../common/decorators/throttle.decorator';
 import { JwtPayload } from '../shared/interfaces';
+import { PartnerBindingResponse } from './types/partner-binding-types';
 
 @Resolver()
 export class PartnerBindingResolver {

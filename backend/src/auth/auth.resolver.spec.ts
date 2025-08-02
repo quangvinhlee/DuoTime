@@ -3,7 +3,7 @@ import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GoogleLoginInput } from './dtos/auth.dto';
-import { AuthResponse } from './responses/auth.response';
+import { AuthResponse } from './types/auth.response';
 import { UserType } from '../shared/graphql/types';
 import { JwtPayload } from '../shared/interfaces';
 

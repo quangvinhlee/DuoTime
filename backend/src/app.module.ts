@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
 import { APP_PIPE, APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
@@ -36,6 +37,11 @@ import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
       buildSchemaOptions: {
         numberScalarMode: 'integer',
       },
+      subscriptions: {
+        'graphql-ws': true,
+        'subscriptions-transport-ws': true,
+      },
+      installSubscriptionHandlers: true,
     }),
     PrismaModule,
     AuthModule,
@@ -47,6 +53,11 @@ import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
     AppResolver,
     UserResolver,
     LoggerService,
+    // Add PubSub provider directly here
+    {
+      provide: 'PUB_SUB',
+      useValue: new PubSub(),
+    },
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,

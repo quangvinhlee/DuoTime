@@ -6,9 +6,9 @@ import {
   RejectPartnerBindingDto,
 } from './dtos/partner-binding-dto';
 import { BindingStatus } from '@prisma/client';
-import { PartnerBindingResponse } from './responses/partner-binding-responses';
 import { generateInvitationCode } from 'src/shared/utils/generateInvitationCode';
 import { ResponseType } from 'src/shared/graphql/types';
+import { PartnerBindingResponse } from './types/partner-binding-types';
 
 @Injectable()
 export class PartnerBindingService {

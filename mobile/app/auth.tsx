@@ -21,6 +21,7 @@ import * as SecureStore from "expo-secure-store";
 import {
   useGoogleLoginMutation,
   useGetProfileLazyQuery,
+  UserType,
 } from "@/generated/graphql";
 import { useAuthStore } from "@/store/auth";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
@@ -59,6 +60,8 @@ export default function AuthPage() {
     GoogleSignin.configure({
       webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
       offlineAccess: true,
+      forceCodeForRefreshToken: true,
+      accountName: "",
     });
   }, []);
 
@@ -72,14 +75,14 @@ export default function AuthPage() {
   };
 
   const signInWithGoogle = async () => {
-    if (loading) return; // Prevent multiple simultaneous sign-ins
+    if (loading) return;
 
     setLoading(true);
     try {
-      // Step 1: Check Play Services
+      await GoogleSignin.signOut();
+
       await GoogleSignin.hasPlayServices();
 
-      // Step 2: Sign in with Google
       const userInfo = await GoogleSignin.signIn();
       const idToken =
         (userInfo as any).idToken || (userInfo as any).data?.idToken;
@@ -88,7 +91,6 @@ export default function AuthPage() {
         throw new Error("Failed to get ID token from Google");
       }
 
-      // Step 3: Login with backend
       const { data, errors } = await googleLogin({
         variables: { googleLoginInput: { idToken } },
       });
@@ -114,7 +116,7 @@ export default function AuthPage() {
         }
 
         if (profileData?.getProfile) {
-          await setAuth(token, profileData.getProfile);
+          await setAuth(token, profileData.getProfile as UserType);
         } else {
           throw new Error("No profile data received");
         }
