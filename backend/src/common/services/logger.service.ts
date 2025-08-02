@@ -1,4 +1,4 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Scope, Logger } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { cleanErrorMessage } from '../../shared/utils';
 

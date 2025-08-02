@@ -3,8 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { LoggerModule } from 'nestjs-pino';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { join } from 'path';
-import { APP_PIPE, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_PIPE, APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppResolver } from './app.resolver';
 import { PrismaModule } from './prisma/prisma.module';
@@ -14,8 +15,10 @@ import { UserResolver } from './shared/resolver-field/user.resolver';
 import { UserModule } from './user/user.module';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
 import { loggerConfig } from './common/config/logger.config';
+import { throttleConfig } from './common/config/throttle.config';
 import { LoggerService } from './common/services/logger.service';
 import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging.interceptor';
+import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
 
 @Module({
   imports: [
@@ -24,6 +27,7 @@ import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging
       envFilePath: '.env',
     }),
     LoggerModule.forRoot(loggerConfig),
+    ThrottlerModule.forRoot(throttleConfig),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -50,6 +54,10 @@ import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging
     {
       provide: APP_INTERCEPTOR,
       useClass: GraphQLLoggingInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: GraphQLThrottlerGuard,
     },
   ],
 })

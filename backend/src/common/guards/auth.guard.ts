@@ -15,9 +15,7 @@ import { LoggerService } from '../services/logger.service';
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(@Optional() private readonly logger?: LoggerService) {
     super();
-    if (this.logger) {
-      this.logger.setContext('JwtAuthGuard');
-    }
+    // Logger context is handled by LoggerService internally
   }
 
   getRequest(context: ExecutionContext) {
@@ -69,15 +67,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     // Log successful authentication
     const jwtUser = user as unknown as JwtPayload;
     if (this.logger) {
-      this.logger.debug(
-        {
-          event: 'auth_guard_success',
-          userId: jwtUser.sub,
-          operation: operationName,
-          operationType,
-        },
-        `Authentication successful for ${operationName}`,
-      );
+      this.logger.logAuthSuccess(jwtUser.sub, 'jwt', {
+        operation: operationName,
+        operationType,
+      });
     }
 
     return user;

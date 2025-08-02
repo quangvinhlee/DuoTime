@@ -10,6 +10,10 @@ import {
 import { ResponseType } from '../shared/graphql/types';
 import { JwtAuthGuard } from '../common/guards/auth.guard';
 import { CurrentUser } from '../common/decorators/user.decorator';
+import {
+  MutationThrottle,
+  SensitiveMutationThrottle,
+} from '../common/decorators/throttle.decorator';
 import { JwtPayload } from '../shared/interfaces';
 
 @Resolver()
@@ -18,6 +22,7 @@ export class PartnerBindingResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => PartnerBindingResponse)
+  @SensitiveMutationThrottle() // 5 requests per minute - partner creation is sensitive
   async createPartnerBinding(
     @CurrentUser() jwtUser: JwtPayload,
     @Args('createPartnerBindingDto')
@@ -31,6 +36,7 @@ export class PartnerBindingResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => PartnerBindingResponse)
+  @SensitiveMutationThrottle() // 5 requests per minute - accepting partnership is sensitive
   async acceptPartnerBinding(
     @CurrentUser() jwtUser: JwtPayload,
     @Args('acceptPartnerBindingDto')
@@ -44,6 +50,7 @@ export class PartnerBindingResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => ResponseType)
+  @MutationThrottle() // 10 requests per minute - rejecting is less sensitive
   async rejectPartnerBinding(
     @CurrentUser() jwtUser: JwtPayload,
     @Args('rejectPartnerBindingDto')
@@ -57,6 +64,7 @@ export class PartnerBindingResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => ResponseType)
+  @SensitiveMutationThrottle() // 5 requests per minute - removing partner is sensitive
   async removePartner(
     @CurrentUser() jwtUser: JwtPayload,
   ): Promise<ResponseType> {

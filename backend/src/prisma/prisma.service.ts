@@ -9,31 +9,19 @@ export class PrismaService
 {
   constructor(private readonly logger: LoggerService) {
     super();
-    this.logger.setContext('PrismaService');
+    // Logger context is handled by LoggerService internally
   }
 
   async onModuleInit() {
-    this.logger.info(
-      { event: 'prisma_connecting' },
-      'Connecting to database...',
-    );
+    this.logger.logBusinessEvent('prisma_connecting', {}, 'info');
     await this.$connect();
-    this.logger.info(
-      { event: 'prisma_connected' },
-      'Successfully connected to database',
-    );
+    this.logger.logBusinessEvent('prisma_connected', {}, 'info');
   }
 
   async onModuleDestroy() {
-    this.logger.info(
-      { event: 'prisma_disconnecting' },
-      'Disconnecting from database...',
-    );
+    this.logger.logBusinessEvent('prisma_disconnecting', {}, 'info');
     await this.$disconnect();
-    this.logger.info(
-      { event: 'prisma_disconnected' },
-      'Successfully disconnected from database',
-    );
+    this.logger.logBusinessEvent('prisma_disconnected', {}, 'info');
   }
 
   // Helper method to log database operations

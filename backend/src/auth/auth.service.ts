@@ -23,16 +23,17 @@ export class AuthService {
     this.googleClient = new OAuth2Client(
       this.configService.get('GOOGLE_CLIENT_ID'),
     );
-    this.logger.setContext('AuthService');
+    // Logger context is handled by LoggerService internally
   }
 
   async googleLogin(googleLoginInput: GoogleLoginInput): Promise<AuthResponse> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug(
-        { event: 'google_login_attempt', idToken: '[REDACTED]' },
-        'Starting Google login process',
+      this.logger.logBusinessEvent(
+        'google_login_attempt',
+        { idToken: '[REDACTED]' },
+        'info',
       );
 
       const ticket = await this.googleClient.verifyIdToken({
@@ -54,13 +55,13 @@ export class AuthService {
       });
 
       if (!user) {
-        this.logger.debug(
+        this.logger.logBusinessEvent(
+          'new_user_creation',
           {
-            event: 'new_user_creation',
             googleId,
             email: email || '[NO_EMAIL]',
           },
-          'Creating new user from Google authentication',
+          'info',
         );
 
         user = await this.prisma.user.create({
@@ -93,14 +94,9 @@ export class AuthService {
         googleId: user.googleId,
       });
 
-      this.logger.info(
-        {
-          event: 'jwt_token_generated',
-          userId: user.id,
-          duration: Date.now() - startTime,
-        },
-        `JWT token generated for user ${user.id}`,
-      );
+      this.logger.logAuthSuccess(user.id, 'google', {
+        duration: Date.now() - startTime,
+      });
 
       return { token };
     } catch (error) {
@@ -117,14 +113,9 @@ export class AuthService {
   }
 
   renewToken(jwtUser: JwtPayload): Promise<AuthResponse> {
-    this.logger.info(
-      {
-        event: 'token_renewal',
-        userId: jwtUser.sub,
-        email: jwtUser.email,
-      },
-      `Renewing token for user ${jwtUser.sub}`,
-    );
+    this.logger.logAuthSuccess(jwtUser.sub, 'token_renewal', {
+      email: jwtUser.email,
+    });
 
     const token = this.jwtService.sign(
       {
