@@ -14,6 +14,7 @@ async function bootstrap() {
     { bufferLogs: true },
   );
 
+  //test
   // Use Pino logger
   app.useLogger(app.get(Logger));
 
