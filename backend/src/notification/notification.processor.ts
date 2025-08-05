@@ -3,7 +3,7 @@ import { Job } from 'bull';
 import { Injectable, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationType } from '@prisma/client';
-import { RedisPubSubService } from './redis-pubsub.service';
+import { RedisService } from '../common/services/redis.service';
 import { PubSub } from 'graphql-subscriptions';
 
 export interface PartnerBindingNotificationJob {
@@ -19,7 +19,7 @@ export interface PartnerBindingNotificationJob {
 export class NotificationProcessor {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly redisPubSub: RedisPubSubService,
+    private readonly redisService: RedisService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
@@ -29,17 +29,9 @@ export class NotificationProcessor {
   ) {
     const { bindingId, senderId, receiverId, invitationCode, type } = job.data;
 
-    console.log('🔔 Processing notification job:', {
-      type,
-      bindingId,
-      senderId,
-      receiverId,
-    });
-
     try {
       switch (type) {
         case 'BINDING_CREATED':
-          console.log('🔔 Handling BINDING_CREATED notification');
           await this.handleBindingCreated(
             bindingId,
             senderId,
@@ -101,13 +93,16 @@ export class NotificationProcessor {
     });
 
     // Publish to Redis for real-time updates
-    await this.redisPubSub.publish('partner-binding-created', {
-      bindingId,
-      senderId,
-      receiverId,
-      invitationCode,
-      senderName: sender.name,
-    });
+    await this.redisService.publish(
+      'partner-binding-created',
+      JSON.stringify({
+        bindingId,
+        senderId,
+        receiverId,
+        invitationCode,
+        senderName: sender.name,
+      }),
+    );
 
     // Publish to GraphQL subscription
     console.log(
@@ -167,13 +162,16 @@ export class NotificationProcessor {
     ]);
 
     // Publish to Redis for real-time updates
-    await this.redisPubSub.publish('partner-binding-accepted', {
-      bindingId,
-      senderId,
-      receiverId,
-      senderName: sender.name,
-      receiverName: receiver.name,
-    });
+    await this.redisService.publish(
+      'partner-binding-accepted',
+      JSON.stringify({
+        bindingId,
+        senderId,
+        receiverId,
+        senderName: sender.name,
+        receiverName: receiver.name,
+      }),
+    );
 
     // Publish to GraphQL subscription for both users
     await Promise.all([
@@ -225,11 +223,14 @@ export class NotificationProcessor {
     });
 
     // Publish to Redis for real-time updates
-    await this.redisPubSub.publish('partner-binding-rejected', {
-      bindingId,
-      senderId,
-      receiverId,
-    });
+    await this.redisService.publish(
+      'partner-binding-rejected',
+      JSON.stringify({
+        bindingId,
+        senderId,
+        receiverId,
+      }),
+    );
 
     // Publish to GraphQL subscription
     await this.pubSub.publish('notificationReceived', {
