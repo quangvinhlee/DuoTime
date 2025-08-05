@@ -6,7 +6,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
-import { APP_PIPE, APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
+import { APP_PIPE, APP_GUARD } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppResolver } from './app.resolver';
 import { PrismaModule } from './prisma/prisma.module';
@@ -18,7 +18,7 @@ import { SecurityMiddleware } from './common/middleware/security.middleware';
 import { loggerConfig } from './common/config/logger.config';
 import { throttleConfig } from './common/config/throttle.config';
 import { LoggerService } from './common/services/logger.service';
-import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging.interceptor';
+// import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging.interceptor';
 import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
 import { NotificationModule } from './notification/notification.module';
 
@@ -64,10 +64,11 @@ import { NotificationModule } from './notification/notification.module';
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: GraphQLLoggingInterceptor,
-    },
+    // Temporarily disabled to stop log spam
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: GraphQLLoggingInterceptor,
+    // },
     {
       provide: APP_GUARD,
       useClass: GraphQLThrottlerGuard,
