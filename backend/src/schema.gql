@@ -27,12 +27,25 @@ type Mutation {
   acceptPartnerBinding(acceptPartnerBindingDto: AcceptPartnerBindingDto!): PartnerBindingResponse!
   createPartnerBinding(createPartnerBindingDto: CreatePartnerBindingDto!): PartnerBindingResponse!
   deleteAvatar: ResponseType!
+  deleteNotification(notificationId: String!): ResponseType!
   googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
+  markNotificationAsRead(notificationId: String!): ResponseType!
   rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): ResponseType!
   removePartner: ResponseType!
   renewToken: AuthResponse!
   updateProfile(input: UpdateProfileInput!): ResponseType!
   uploadAvatar(input: UploadAvatarInput!): ResponseType!
+}
+
+type Notification {
+  id: ID!
+  isRead: Boolean!
+  message: String!
+  reminderId: String
+  sentAt: DateTime!
+  title: String!
+  type: String!
+  userId: String!
 }
 
 type PartnerBindingResponse {
@@ -44,6 +57,7 @@ type PartnerBindingResponse {
 
 type Query {
   getProfile: UserType!
+  getUserNotifications: [Notification!]!
   sayHello: String!
   searchUsers(input: SearchUsersInput!): [UserType!]!
 }
@@ -60,6 +74,10 @@ type ResponseType {
 input SearchUsersInput {
   excludeUserId: String
   query: String!
+}
+
+type Subscription {
+  notificationReceived: Notification!
 }
 
 input UpdateProfileInput {

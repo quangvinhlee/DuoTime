@@ -40,7 +40,9 @@ export type Mutation = {
   acceptPartnerBinding: PartnerBindingResponse;
   createPartnerBinding: PartnerBindingResponse;
   deleteAvatar: ResponseType;
+  deleteNotification: ResponseType;
   googleLogin: AuthResponse;
+  markNotificationAsRead: ResponseType;
   rejectPartnerBinding: ResponseType;
   removePartner: ResponseType;
   renewToken: AuthResponse;
@@ -59,8 +61,18 @@ export type MutationCreatePartnerBindingArgs = {
 };
 
 
+export type MutationDeleteNotificationArgs = {
+  notificationId: Scalars['String']['input'];
+};
+
+
 export type MutationGoogleLoginArgs = {
   googleLoginInput: GoogleLoginInput;
+};
+
+
+export type MutationMarkNotificationAsReadArgs = {
+  notificationId: Scalars['String']['input'];
 };
 
 
@@ -78,6 +90,18 @@ export type MutationUploadAvatarArgs = {
   input: UploadAvatarInput;
 };
 
+export type Notification = {
+  __typename?: 'Notification';
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  message: Scalars['String']['output'];
+  reminderId?: Maybe<Scalars['String']['output']>;
+  sentAt: Scalars['DateTime']['output'];
+  title: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  userId: Scalars['String']['output'];
+};
+
 export type PartnerBindingResponse = {
   __typename?: 'PartnerBindingResponse';
   expiresAt: Scalars['String']['output'];
@@ -89,6 +113,7 @@ export type PartnerBindingResponse = {
 export type Query = {
   __typename?: 'Query';
   getProfile: UserType;
+  getUserNotifications: Array<Notification>;
   sayHello: Scalars['String']['output'];
   searchUsers: Array<UserType>;
 };
@@ -113,8 +138,12 @@ export type SearchUsersInput = {
   query: Scalars['String']['input'];
 };
 
+export type Subscription = {
+  __typename?: 'Subscription';
+  notificationReceived: Notification;
+};
+
 export type UpdateProfileInput = {
-  avatarUrl?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -147,6 +176,30 @@ export type RenewTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type RenewTokenMutation = { __typename?: 'Mutation', renewToken: { __typename?: 'AuthResponse', token: string } };
+
+export type GetUserNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUserNotificationsQuery = { __typename?: 'Query', getUserNotifications: Array<{ __typename?: 'Notification', id: string, type: string, title: string, message: string, isRead: boolean, sentAt: any, reminderId?: string | null, userId: string }> };
+
+export type MarkNotificationAsReadMutationVariables = Exact<{
+  notificationId: Scalars['String']['input'];
+}>;
+
+
+export type MarkNotificationAsReadMutation = { __typename?: 'Mutation', markNotificationAsRead: { __typename?: 'ResponseType', success: boolean, message: string } };
+
+export type DeleteNotificationMutationVariables = Exact<{
+  notificationId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteNotificationMutation = { __typename?: 'Mutation', deleteNotification: { __typename?: 'ResponseType', success: boolean, message: string } };
+
+export type OnNotificationReceivedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type OnNotificationReceivedSubscription = { __typename?: 'Subscription', notificationReceived: { __typename?: 'Notification', id: string, type: string, title: string, message: string, isRead: boolean, sentAt: any, reminderId?: string | null, userId: string } };
 
 export type CreatePartnerBindingMutationVariables = Exact<{
   createPartnerBindingDto: CreatePartnerBindingDto;
@@ -281,6 +334,156 @@ export function useRenewTokenMutation(baseOptions?: Apollo.MutationHookOptions<R
 export type RenewTokenMutationHookResult = ReturnType<typeof useRenewTokenMutation>;
 export type RenewTokenMutationResult = Apollo.MutationResult<RenewTokenMutation>;
 export type RenewTokenMutationOptions = Apollo.BaseMutationOptions<RenewTokenMutation, RenewTokenMutationVariables>;
+export const GetUserNotificationsDocument = gql`
+    query GetUserNotifications {
+  getUserNotifications {
+    id
+    type
+    title
+    message
+    isRead
+    sentAt
+    reminderId
+    userId
+  }
+}
+    `;
+
+/**
+ * __useGetUserNotificationsQuery__
+ *
+ * To run a query within a React component, call `useGetUserNotificationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserNotificationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserNotificationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetUserNotificationsQuery(baseOptions?: Apollo.QueryHookOptions<GetUserNotificationsQuery, GetUserNotificationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUserNotificationsQuery, GetUserNotificationsQueryVariables>(GetUserNotificationsDocument, options);
+      }
+export function useGetUserNotificationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserNotificationsQuery, GetUserNotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUserNotificationsQuery, GetUserNotificationsQueryVariables>(GetUserNotificationsDocument, options);
+        }
+export function useGetUserNotificationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetUserNotificationsQuery, GetUserNotificationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetUserNotificationsQuery, GetUserNotificationsQueryVariables>(GetUserNotificationsDocument, options);
+        }
+export type GetUserNotificationsQueryHookResult = ReturnType<typeof useGetUserNotificationsQuery>;
+export type GetUserNotificationsLazyQueryHookResult = ReturnType<typeof useGetUserNotificationsLazyQuery>;
+export type GetUserNotificationsSuspenseQueryHookResult = ReturnType<typeof useGetUserNotificationsSuspenseQuery>;
+export type GetUserNotificationsQueryResult = Apollo.QueryResult<GetUserNotificationsQuery, GetUserNotificationsQueryVariables>;
+export const MarkNotificationAsReadDocument = gql`
+    mutation MarkNotificationAsRead($notificationId: String!) {
+  markNotificationAsRead(notificationId: $notificationId) {
+    success
+    message
+  }
+}
+    `;
+export type MarkNotificationAsReadMutationFn = Apollo.MutationFunction<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>;
+
+/**
+ * __useMarkNotificationAsReadMutation__
+ *
+ * To run a mutation, you first call `useMarkNotificationAsReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkNotificationAsReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markNotificationAsReadMutation, { data, loading, error }] = useMarkNotificationAsReadMutation({
+ *   variables: {
+ *      notificationId: // value for 'notificationId'
+ *   },
+ * });
+ */
+export function useMarkNotificationAsReadMutation(baseOptions?: Apollo.MutationHookOptions<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>(MarkNotificationAsReadDocument, options);
+      }
+export type MarkNotificationAsReadMutationHookResult = ReturnType<typeof useMarkNotificationAsReadMutation>;
+export type MarkNotificationAsReadMutationResult = Apollo.MutationResult<MarkNotificationAsReadMutation>;
+export type MarkNotificationAsReadMutationOptions = Apollo.BaseMutationOptions<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>;
+export const DeleteNotificationDocument = gql`
+    mutation DeleteNotification($notificationId: String!) {
+  deleteNotification(notificationId: $notificationId) {
+    success
+    message
+  }
+}
+    `;
+export type DeleteNotificationMutationFn = Apollo.MutationFunction<DeleteNotificationMutation, DeleteNotificationMutationVariables>;
+
+/**
+ * __useDeleteNotificationMutation__
+ *
+ * To run a mutation, you first call `useDeleteNotificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteNotificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteNotificationMutation, { data, loading, error }] = useDeleteNotificationMutation({
+ *   variables: {
+ *      notificationId: // value for 'notificationId'
+ *   },
+ * });
+ */
+export function useDeleteNotificationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteNotificationMutation, DeleteNotificationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteNotificationMutation, DeleteNotificationMutationVariables>(DeleteNotificationDocument, options);
+      }
+export type DeleteNotificationMutationHookResult = ReturnType<typeof useDeleteNotificationMutation>;
+export type DeleteNotificationMutationResult = Apollo.MutationResult<DeleteNotificationMutation>;
+export type DeleteNotificationMutationOptions = Apollo.BaseMutationOptions<DeleteNotificationMutation, DeleteNotificationMutationVariables>;
+export const OnNotificationReceivedDocument = gql`
+    subscription OnNotificationReceived {
+  notificationReceived {
+    id
+    type
+    title
+    message
+    isRead
+    sentAt
+    reminderId
+    userId
+  }
+}
+    `;
+
+/**
+ * __useOnNotificationReceivedSubscription__
+ *
+ * To run a query within a React component, call `useOnNotificationReceivedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useOnNotificationReceivedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useOnNotificationReceivedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useOnNotificationReceivedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<OnNotificationReceivedSubscription, OnNotificationReceivedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<OnNotificationReceivedSubscription, OnNotificationReceivedSubscriptionVariables>(OnNotificationReceivedDocument, options);
+      }
+export type OnNotificationReceivedSubscriptionHookResult = ReturnType<typeof useOnNotificationReceivedSubscription>;
+export type OnNotificationReceivedSubscriptionResult = Apollo.SubscriptionResult<OnNotificationReceivedSubscription>;
 export const CreatePartnerBindingDocument = gql`
     mutation CreatePartnerBinding($createPartnerBindingDto: CreatePartnerBindingDto!) {
   createPartnerBinding(createPartnerBindingDto: $createPartnerBindingDto) {

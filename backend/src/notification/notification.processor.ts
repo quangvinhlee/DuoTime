@@ -1,9 +1,10 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationType } from '@prisma/client';
 import { RedisPubSubService } from './redis-pubsub.service';
+import { PubSub } from 'graphql-subscriptions';
 
 export interface PartnerBindingNotificationJob {
   bindingId: string;
@@ -19,6 +20,7 @@ export class NotificationProcessor {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redisPubSub: RedisPubSubService,
+    @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
   @Process('partner-binding')
@@ -98,6 +100,19 @@ export class NotificationProcessor {
       invitationCode,
       senderName: sender.name,
     });
+
+    // Publish to GraphQL subscription
+    await this.pubSub.publish('notificationReceived', {
+      notificationReceived: {
+        id: 'temp-id',
+        type: 'PARTNER_ACTIVITY',
+        title: 'Partner Binding Request',
+        message: `${sender.name || 'Someone'} wants to connect with you!`,
+        isRead: false,
+        sentAt: new Date(),
+        userId: receiverId,
+      },
+    });
   }
 
   private async handleBindingAccepted(
@@ -146,6 +161,32 @@ export class NotificationProcessor {
       senderName: sender.name,
       receiverName: receiver.name,
     });
+
+    // Publish to GraphQL subscription for both users
+    await Promise.all([
+      this.pubSub.publish('notificationReceived', {
+        notificationReceived: {
+          id: 'temp-id-1',
+          type: 'PARTNER_ACTIVITY',
+          title: 'Partner Connected!',
+          message: `You are now connected with ${receiver.name || 'your partner'}!`,
+          isRead: false,
+          sentAt: new Date(),
+          userId: senderId,
+        },
+      }),
+      this.pubSub.publish('notificationReceived', {
+        notificationReceived: {
+          id: 'temp-id-2',
+          type: 'PARTNER_ACTIVITY',
+          title: 'Partner Connected!',
+          message: `You are now connected with ${sender.name || 'your partner'}!`,
+          isRead: false,
+          sentAt: new Date(),
+          userId: receiverId,
+        },
+      }),
+    ]);
   }
 
   private async handleBindingRejected(
@@ -175,6 +216,19 @@ export class NotificationProcessor {
       bindingId,
       senderId,
       receiverId,
+    });
+
+    // Publish to GraphQL subscription
+    await this.pubSub.publish('notificationReceived', {
+      notificationReceived: {
+        id: 'temp-id-3',
+        type: 'PARTNER_ACTIVITY',
+        title: 'Binding Rejected',
+        message: 'Your partner binding request was rejected.',
+        isRead: false,
+        sentAt: new Date(),
+        userId: senderId,
+      },
     });
   }
 }

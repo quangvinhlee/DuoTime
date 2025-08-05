@@ -5,6 +5,7 @@ import { NotificationResolver } from './notification.resolver';
 import { NotificationProcessor } from './notification.processor';
 import { RedisPubSubService } from './redis-pubsub.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { PubSub } from 'graphql-subscriptions';
 
 @Module({
   imports: [
@@ -18,6 +19,10 @@ import { PrismaModule } from '../prisma/prisma.module';
     NotificationService,
     NotificationProcessor,
     RedisPubSubService,
+    {
+      provide: 'PUB_SUB',
+      useValue: new PubSub(),
+    },
   ],
   exports: [NotificationService],
 })
