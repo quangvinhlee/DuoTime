@@ -2,12 +2,12 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "react-native";
-import { useNotificationContext } from "../../contexts/NotificationContext";
+import { useNotificationStoreWithGraphQL } from "../../hooks/useNotificationStore";
 import { NotificationBadge } from "../../components/NotificationBadge";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const { unreadCount } = useNotificationContext();
+  const { unreadCount } = useNotificationStoreWithGraphQL();
 
   return (
     <Tabs

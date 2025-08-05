@@ -12,7 +12,7 @@ import {
   useMarkNotificationAsReadMutation,
   useDeleteNotificationMutation,
 } from "../../generated/graphql";
-import { useNotificationContext } from "../../contexts/NotificationContext";
+import { useNotificationStoreWithGraphQL } from "../../hooks/useNotificationStore";
 import { Ionicons } from "@expo/vector-icons";
 
 interface NotificationItem {
@@ -31,7 +31,7 @@ export default function NotificationsScreen() {
 
   // GraphQL hooks
   const { notifications, loading, error, refetch, updateBadge } =
-    useNotificationContext();
+    useNotificationStoreWithGraphQL();
   const [markAsRead] = useMarkNotificationAsReadMutation();
   const [deleteNotification] = useDeleteNotificationMutation();
 
@@ -164,9 +164,13 @@ export default function NotificationsScreen() {
       <FlatList
         data={notifications}
         renderItem={renderNotificationItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            key="notification-refresh"
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
         }
         ListEmptyComponent={renderEmptyState}
         contentContainerStyle={styles.listContainer}
