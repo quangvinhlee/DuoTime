@@ -16,17 +16,30 @@ const httpLink = createHttpLink({
 });
 
 // WebSocket link for subscriptions
+const httpUrl =
+  process.env.EXPO_PUBLIC_GRAPHQL_URL || "http://192.168.0.79:3000/graphql";
+const wsUrl = httpUrl.replace("http", "ws");
+console.log("🔌 WebSocket URL:", wsUrl);
+
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: (
-      process.env.EXPO_PUBLIC_GRAPHQL_WS_URL || "ws://192.168.0.79:3000/graphql"
-    ).replace("http", "ws"),
+    url: wsUrl,
     connectionParams: async () => {
       // Get token for WebSocket authentication
       const token = await SecureStore.getItemAsync("jwt_token");
       return {
         authorization: token ? `Bearer ${token}` : "",
       };
+    },
+    retryAttempts: 5,
+    retryWait: async (retries) => {
+      const delay = Math.min(1000 * 2 ** retries, 10000);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    },
+    on: {
+      connected: () => console.log("🔌 WebSocket connected"),
+      closed: () => console.log("🔌 WebSocket closed"),
+      error: (error) => console.log("🔌 WebSocket error:", error),
     },
   })
 );

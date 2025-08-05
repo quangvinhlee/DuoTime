@@ -29,9 +29,17 @@ export class NotificationProcessor {
   ) {
     const { bindingId, senderId, receiverId, invitationCode, type } = job.data;
 
+    console.log('🔔 Processing notification job:', {
+      type,
+      bindingId,
+      senderId,
+      receiverId,
+    });
+
     try {
       switch (type) {
         case 'BINDING_CREATED':
+          console.log('🔔 Handling BINDING_CREATED notification');
           await this.handleBindingCreated(
             bindingId,
             senderId,
@@ -102,6 +110,10 @@ export class NotificationProcessor {
     });
 
     // Publish to GraphQL subscription
+    console.log(
+      '🔔 Publishing to GraphQL subscription for receiverId:',
+      receiverId,
+    );
     await this.pubSub.publish('notificationReceived', {
       notificationReceived: {
         id: 'temp-id',
@@ -113,6 +125,7 @@ export class NotificationProcessor {
         userId: receiverId,
       },
     });
+    console.log('🔔 Published to GraphQL subscription successfully');
   }
 
   private async handleBindingAccepted(

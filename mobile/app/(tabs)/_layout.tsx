@@ -1,9 +1,13 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View } from "react-native";
+import { useNotificationContext } from "../../contexts/NotificationContext";
+import { NotificationBadge } from "../../components/NotificationBadge";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { unreadCount } = useNotificationContext();
 
   return (
     <Tabs
@@ -58,7 +62,10 @@ export default function TabLayout() {
         options={{
           title: "Notifications",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="notifications" size={size} color={color} />
+            <View style={{ position: "relative" }}>
+              <Ionicons name="notifications" size={size} color={color} />
+              <NotificationBadge count={unreadCount} size={18} />
+            </View>
           ),
         }}
       />

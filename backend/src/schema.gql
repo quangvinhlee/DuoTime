@@ -57,6 +57,7 @@ type PartnerBindingResponse {
 
 type Query {
   getProfile: UserType!
+  getUnreadNotificationCount: Int!
   getUserNotifications: [Notification!]!
   sayHello: String!
   searchUsers(input: SearchUsersInput!): [UserType!]!

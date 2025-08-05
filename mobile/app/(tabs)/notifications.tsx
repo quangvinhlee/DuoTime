@@ -12,7 +12,7 @@ import {
   useMarkNotificationAsReadMutation,
   useDeleteNotificationMutation,
 } from "../../generated/graphql";
-import { useRealtimeNotifications } from "../../hooks/useRealtimeNotifications";
+import { useNotificationContext } from "../../contexts/NotificationContext";
 import { Ionicons } from "@expo/vector-icons";
 
 interface NotificationItem {
@@ -30,7 +30,8 @@ export default function NotificationsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   // GraphQL hooks
-  const { notifications, loading, error, refetch } = useRealtimeNotifications();
+  const { notifications, loading, error, refetch, updateBadge } =
+    useNotificationContext();
   const [markAsRead] = useMarkNotificationAsReadMutation();
   const [deleteNotification] = useDeleteNotificationMutation();
 
@@ -47,6 +48,9 @@ export default function NotificationsScreen() {
       });
       // Refetch to update the UI
       refetch();
+      // Update badge count - decrease by 1 since we marked one as read
+      const currentUnreadCount = notifications.filter((n) => !n.isRead).length;
+      updateBadge(Math.max(0, currentUnreadCount - 1));
     } catch (error) {
       Alert.alert("Error", "Failed to mark notification as read");
     }
@@ -68,6 +72,16 @@ export default function NotificationsScreen() {
               });
               // Refetch to update the UI
               refetch();
+              // Update badge count - decrease by 1 if the deleted notification was unread
+              const deletedNotification = notifications.find(
+                (n) => n.id === notificationId
+              );
+              if (deletedNotification && !deletedNotification.isRead) {
+                const currentUnreadCount = notifications.filter(
+                  (n) => !n.isRead
+                ).length;
+                updateBadge(Math.max(0, currentUnreadCount - 1));
+              }
             } catch (error) {
               Alert.alert("Error", "Failed to delete notification");
             }

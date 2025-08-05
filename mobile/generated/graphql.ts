@@ -113,6 +113,7 @@ export type PartnerBindingResponse = {
 export type Query = {
   __typename?: 'Query';
   getProfile: UserType;
+  getUnreadNotificationCount: Scalars['Int']['output'];
   getUserNotifications: Array<Notification>;
   sayHello: Scalars['String']['output'];
   searchUsers: Array<UserType>;
@@ -181,6 +182,11 @@ export type GetUserNotificationsQueryVariables = Exact<{ [key: string]: never; }
 
 
 export type GetUserNotificationsQuery = { __typename?: 'Query', getUserNotifications: Array<{ __typename?: 'Notification', id: string, type: string, title: string, message: string, isRead: boolean, sentAt: any, reminderId?: string | null, userId: string }> };
+
+export type GetUnreadNotificationCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUnreadNotificationCountQuery = { __typename?: 'Query', getUnreadNotificationCount: number };
 
 export type MarkNotificationAsReadMutationVariables = Exact<{
   notificationId: Scalars['String']['input'];
@@ -380,6 +386,43 @@ export type GetUserNotificationsQueryHookResult = ReturnType<typeof useGetUserNo
 export type GetUserNotificationsLazyQueryHookResult = ReturnType<typeof useGetUserNotificationsLazyQuery>;
 export type GetUserNotificationsSuspenseQueryHookResult = ReturnType<typeof useGetUserNotificationsSuspenseQuery>;
 export type GetUserNotificationsQueryResult = Apollo.QueryResult<GetUserNotificationsQuery, GetUserNotificationsQueryVariables>;
+export const GetUnreadNotificationCountDocument = gql`
+    query GetUnreadNotificationCount {
+  getUnreadNotificationCount
+}
+    `;
+
+/**
+ * __useGetUnreadNotificationCountQuery__
+ *
+ * To run a query within a React component, call `useGetUnreadNotificationCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUnreadNotificationCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUnreadNotificationCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetUnreadNotificationCountQuery(baseOptions?: Apollo.QueryHookOptions<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>(GetUnreadNotificationCountDocument, options);
+      }
+export function useGetUnreadNotificationCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>(GetUnreadNotificationCountDocument, options);
+        }
+export function useGetUnreadNotificationCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>(GetUnreadNotificationCountDocument, options);
+        }
+export type GetUnreadNotificationCountQueryHookResult = ReturnType<typeof useGetUnreadNotificationCountQuery>;
+export type GetUnreadNotificationCountLazyQueryHookResult = ReturnType<typeof useGetUnreadNotificationCountLazyQuery>;
+export type GetUnreadNotificationCountSuspenseQueryHookResult = ReturnType<typeof useGetUnreadNotificationCountSuspenseQuery>;
+export type GetUnreadNotificationCountQueryResult = Apollo.QueryResult<GetUnreadNotificationCountQuery, GetUnreadNotificationCountQueryVariables>;
 export const MarkNotificationAsReadDocument = gql`
     mutation MarkNotificationAsRead($notificationId: String!) {
   markNotificationAsRead(notificationId: $notificationId) {

@@ -16,6 +16,13 @@ export const GET_USER_NOTIFICATIONS = gql`
   }
 `;
 
+// Query to get unread notification count
+export const GET_UNREAD_NOTIFICATION_COUNT = gql`
+  query GetUnreadNotificationCount {
+    getUnreadNotificationCount
+  }
+`;
+
 // Mutation to mark a notification as read
 export const MARK_NOTIFICATION_AS_READ = gql`
   mutation MarkNotificationAsRead($notificationId: String!) {

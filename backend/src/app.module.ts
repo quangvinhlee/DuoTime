@@ -33,9 +33,9 @@ import { NotificationModule } from './notification/notification.module';
     ThrottlerModule.forRoot(throttleConfig),
     BullModule.forRoot({
       redis: {
-        host: 'localhost',
-        port: 6379,
-        password: 'duotime2024',
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT as string) || 6379,
+        password: process.env.REDIS_PASSWORD || 'duotime2024',
       },
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({

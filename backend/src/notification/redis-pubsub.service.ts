@@ -8,17 +8,19 @@ export class RedisPubSubService implements OnModuleDestroy {
   private subscriber: Redis;
 
   constructor(private configService: ConfigService) {
-    // Initialize Redis connections
+    // Initialize Redis connections using individual config
     this.publisher = new Redis({
-      host: 'localhost',
-      port: 6379,
-      password: 'duotime2024',
+      host: this.configService.get<string>('REDIS_HOST') || 'localhost',
+      port: this.configService.get<number>('REDIS_PORT') || 6379,
+      password:
+        this.configService.get<string>('REDIS_PASSWORD') || 'duotime2024',
     });
 
     this.subscriber = new Redis({
-      host: 'localhost',
-      port: 6379,
-      password: 'duotime2024',
+      host: this.configService.get<string>('REDIS_HOST') || 'localhost',
+      port: this.configService.get<number>('REDIS_PORT') || 6379,
+      password:
+        this.configService.get<string>('REDIS_PASSWORD') || 'duotime2024',
     });
   }
 

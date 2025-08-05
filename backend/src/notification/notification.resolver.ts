@@ -22,6 +22,12 @@ export class NotificationResolver {
     return this.notificationService.getUserNotifications(jwtUser.sub);
   }
 
+  @Query(() => Number)
+  @UseGuards(JwtAuthGuard)
+  async getUnreadNotificationCount(@CurrentUser() jwtUser: JwtPayload) {
+    return this.notificationService.getUnreadNotificationCount(jwtUser.sub);
+  }
+
   @Mutation(() => ResponseType)
   @UseGuards(JwtAuthGuard)
   async markNotificationAsRead(
