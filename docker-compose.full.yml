@@ -53,6 +53,25 @@ services:
       - redis
     restart: unless-stopped
 
+  # Backend Application (Full Stack)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: duotime-backend
+    env_file:
+      - ./backend/.env.docker
+    ports:
+      - "3000:3000"
+    networks:
+      - duotime-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     driver: local

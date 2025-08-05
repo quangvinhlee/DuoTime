@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationService } from '../notification/notification.service';
 import {
   AcceptPartnerBindingDto,
   CreatePartnerBindingDto,
@@ -12,7 +13,10 @@ import { PartnerBindingResponse } from './types/partner-binding-types';
 
 @Injectable()
 export class PartnerBindingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async createPartnerBinding(
     createPartnerBindingDto: CreatePartnerBindingDto & { senderId: string },
@@ -81,6 +85,15 @@ export class PartnerBindingService {
         status: BindingStatus.PENDING,
       },
     });
+
+    // Trigger notification for binding creation
+    await this.notificationService.createPartnerBindingNotification(
+      newBinding.id,
+      senderId,
+      receiverId,
+      invitationCode,
+      'BINDING_CREATED',
+    );
 
     return {
       id: newBinding.id,
@@ -163,6 +176,15 @@ export class PartnerBindingService {
       }),
     ]);
 
+    // Trigger notification for binding acceptance
+    await this.notificationService.createPartnerBindingNotification(
+      updatedBinding.id,
+      binding.senderId,
+      receiverId,
+      updatedBinding.invitationCode,
+      'BINDING_ACCEPTED',
+    );
+
     return {
       id: updatedBinding.id,
       invitationCode: updatedBinding.invitationCode,
@@ -211,6 +233,15 @@ export class PartnerBindingService {
     await this.prisma.partnerBinding.delete({
       where: { id: binding.id },
     });
+
+    // Trigger notification for binding rejection
+    await this.notificationService.createPartnerBindingNotification(
+      binding.id,
+      binding.senderId,
+      binding.receiverId || undefined,
+      binding.invitationCode,
+      'BINDING_REJECTED',
+    );
 
     return {
       success: true,

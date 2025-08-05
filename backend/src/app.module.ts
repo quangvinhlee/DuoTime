@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { BullModule } from '@nestjs/bull';
 import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
 import { APP_PIPE, APP_GUARD } from '@nestjs/core';
@@ -30,6 +31,13 @@ import { NotificationModule } from './notification/notification.module';
     }),
     LoggerModule.forRoot(loggerConfig),
     ThrottlerModule.forRoot(throttleConfig),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+        password: 'duotime2024',
+      },
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
