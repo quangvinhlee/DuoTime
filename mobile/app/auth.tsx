@@ -26,6 +26,7 @@ import {
 import { useAuthStore } from "@/store/auth";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import CustomAlert from "@/components/CustomAlert";
+import { getPushToken } from "@/utils/pushToken";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
@@ -38,6 +39,7 @@ export default function AuthPage() {
   const [googleLogin] = useGoogleLoginMutation();
   const [getProfile] = useGetProfileLazyQuery();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const setPushToken = useAuthStore((state) => state.setPushToken);
   const insets = useSafeAreaInsets();
 
   // Simple dot animation for loading text
@@ -91,8 +93,16 @@ export default function AuthPage() {
         throw new Error("Failed to get ID token from Google");
       }
 
+      // Get push token
+      const pushToken = await getPushToken();
+
       const { data, errors } = await googleLogin({
-        variables: { googleLoginInput: { idToken } },
+        variables: {
+          googleLoginInput: {
+            idToken,
+            pushToken: pushToken || undefined,
+          },
+        },
       });
 
       if (errors || !data?.googleLogin.token) {
@@ -117,6 +127,10 @@ export default function AuthPage() {
 
         if (profileData?.getProfile) {
           await setAuth(token, profileData.getProfile as UserType);
+          // Store push token in auth store
+          if (pushToken) {
+            setPushToken(pushToken);
+          }
         } else {
           throw new Error("No profile data received");
         }

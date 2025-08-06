@@ -8,6 +8,7 @@ import {
   useGetProfileLazyQuery,
   useRenewTokenMutation,
 } from "../generated/graphql";
+import { getPushToken } from "../utils/pushToken";
 
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,10 +31,17 @@ export default function Index() {
       const { data, error } = await getProfile();
 
       if (data?.getProfile && !error) {
+        // Get push token for renewal
+        const pushToken = await getPushToken();
+
         // Token is valid, renew it and set auth
-        const renewResult = await renewToken();
+        const renewResult = await renewToken({
+          variables: {
+            input: pushToken ? { pushToken } : undefined,
+          },
+        });
         const newToken = renewResult.data?.renewToken?.token || token;
-        await setAuth(newToken, data.getProfile);
+        await setAuth(newToken, data.getProfile as any);
         setIsAuthenticated(true);
       } else {
         // Token invalid, clear it

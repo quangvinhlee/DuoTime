@@ -5,7 +5,7 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "DARK_MODE=media expo run:android",
+    "android": "DARK_MODE=media expo run:android --port 8082",
     "ios": "DARK_MODE=media expo run:ios",
     "web": "DARK_MODE=media expo start --web",
     "lint": "expo lint",
@@ -62,7 +62,9 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "tslib": "^2.8.1",
-    "zustand": "^5.0.6"
+    "zustand": "^5.0.6",
+    "expo-notifications": "~0.31.4",
+    "expo-device": "~7.1.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

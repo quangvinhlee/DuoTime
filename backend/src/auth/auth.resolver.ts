@@ -1,7 +1,7 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GoogleLoginInput } from './dtos/auth.dto';
+import { GoogleLoginInput, RenewTokenInput } from './dtos/auth.dto';
 import { JwtAuthGuard } from '../common/guards/auth.guard';
 import { CurrentUser } from '../common/decorators/user.decorator';
 import { AuthThrottle } from '../common/decorators/throttle.decorator';
@@ -27,7 +27,10 @@ export class AuthResolver {
   @Mutation(() => AuthResponse)
   @UseGuards(JwtAuthGuard)
   @AuthThrottle() // 5 requests per minute for auth operations
-  async renewToken(@CurrentUser() jwtUser: JwtPayload): Promise<AuthResponse> {
-    return this.authService.renewToken(jwtUser);
+  async renewToken(
+    @CurrentUser() jwtUser: JwtPayload,
+    @Args('input', { nullable: true }) input?: RenewTokenInput,
+  ): Promise<AuthResponse> {
+    return this.authService.renewToken(jwtUser, input?.pushToken);
   }
 }

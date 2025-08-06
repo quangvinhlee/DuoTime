@@ -114,7 +114,10 @@ export class UserService {
       // Update user profile with new avatar URL
       return await this.updateProfile(userId, { avatarUrl });
     } catch (error) {
-      throw new Error('Failed to upload image: ' + error.message);
+      throw new Error(
+        'Failed to upload image: ' +
+          (error instanceof Error ? error.message : String(error)),
+      );
     }
   }
 

@@ -48,7 +48,7 @@ export class NotificationProcessor {
       await job.progress(50);
       await job.log('Notification created in database');
 
-      // Publish to Redis for real-time updates
+      // Publish to Redis for push notifications (backup)
       await this.redisService.publish(
         'notification-created',
         JSON.stringify({
@@ -63,21 +63,27 @@ export class NotificationProcessor {
       );
 
       await job.progress(75);
-      await job.log('Published to Redis');
+      await job.log('Published to Redis for push notifications');
 
-      // Publish to GraphQL subscription
-      await this.pubSub.publish('notificationReceived', {
-        notificationReceived: {
-          id: notification.id,
-          type,
-          title,
-          message,
-          isRead: false,
-          sentAt: notification.sentAt,
-          userId,
-          reminderId,
-        },
-      });
+      // Try real-time WebSocket (may fail if user is offline)
+      try {
+        await this.pubSub.publish('notificationReceived', {
+          notificationReceived: {
+            id: notification.id,
+            type,
+            title,
+            message,
+            isRead: false,
+            sentAt: notification.sentAt,
+            userId,
+            reminderId,
+          },
+        });
+        await job.log('Published to GraphQL subscription (real-time)');
+      } catch (websocketError) {
+        await job.log('WebSocket failed, push notification will handle it');
+        // Push notification will still work even if WebSocket fails
+      }
 
       await job.progress(100);
       await job.log('Published to GraphQL subscription');

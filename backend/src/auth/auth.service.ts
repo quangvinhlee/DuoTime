@@ -69,6 +69,7 @@ export class AuthService {
             email: email || '',
             name,
             avatarUrl: picture,
+            pushToken: googleLoginInput.pushToken || null,
           },
         });
 
@@ -78,6 +79,17 @@ export class AuthService {
           duration: Date.now() - startTime,
         });
       } else {
+        // Update push token if provided
+        if (
+          googleLoginInput.pushToken &&
+          user.pushToken !== googleLoginInput.pushToken
+        ) {
+          user = await this.prisma.user.update({
+            where: { id: user.id },
+            data: { pushToken: googleLoginInput.pushToken },
+          });
+        }
+
         this.logger.logAuthSuccess(user.id, 'google', {
           newUser: false,
           email: user.email,
@@ -111,10 +123,21 @@ export class AuthService {
     }
   }
 
-  renewToken(jwtUser: JwtPayload): Promise<AuthResponse> {
+  async renewToken(
+    jwtUser: JwtPayload,
+    pushToken?: string,
+  ): Promise<AuthResponse> {
     this.logger.logAuthSuccess(jwtUser.sub, 'token_renewal', {
       email: jwtUser.email,
     });
+
+    // Update push token if provided
+    if (pushToken) {
+      await this.prisma.user.update({
+        where: { id: jwtUser.sub },
+        data: { pushToken },
+      });
+    }
 
     const token = this.jwtService.sign(
       {

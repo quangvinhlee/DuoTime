@@ -21,6 +21,7 @@ scalar DateTime
 
 input GoogleLoginInput {
   idToken: String!
+  pushToken: String
 }
 
 type Mutation {
@@ -33,7 +34,7 @@ type Mutation {
   markNotificationAsRead(notificationId: String!): ResponseType!
   rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): ResponseType!
   removePartner: ResponseType!
-  renewToken: AuthResponse!
+  renewToken(input: RenewTokenInput): AuthResponse!
   updateProfile(input: UpdateProfileInput!): ResponseType!
   uploadAvatar(input: UploadAvatarInput!): ResponseType!
 }
@@ -66,6 +67,10 @@ type Query {
 
 input RejectPartnerBindingDto {
   invitationCode: String!
+}
+
+input RenewTokenInput {
+  pushToken: String
 }
 
 type ResponseType {

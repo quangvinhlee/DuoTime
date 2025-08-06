@@ -33,6 +33,7 @@ export type CreatePartnerBindingDto = {
 
 export type GoogleLoginInput = {
   idToken: Scalars['String']['input'];
+  pushToken?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Mutation = {
@@ -79,6 +80,11 @@ export type MutationMarkNotificationAsReadArgs = {
 
 export type MutationRejectPartnerBindingArgs = {
   rejectPartnerBindingDto: RejectPartnerBindingDto;
+};
+
+
+export type MutationRenewTokenArgs = {
+  input?: InputMaybe<RenewTokenInput>;
 };
 
 
@@ -135,6 +141,10 @@ export type RejectPartnerBindingDto = {
   invitationCode: Scalars['String']['input'];
 };
 
+export type RenewTokenInput = {
+  pushToken?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ResponseType = {
   __typename?: 'ResponseType';
   message: Scalars['String']['output'];
@@ -180,7 +190,9 @@ export type GoogleLoginMutationVariables = Exact<{
 
 export type GoogleLoginMutation = { __typename?: 'Mutation', googleLogin: { __typename?: 'AuthResponse', token: string } };
 
-export type RenewTokenMutationVariables = Exact<{ [key: string]: never; }>;
+export type RenewTokenMutationVariables = Exact<{
+  input?: InputMaybe<RenewTokenInput>;
+}>;
 
 
 export type RenewTokenMutation = { __typename?: 'Mutation', renewToken: { __typename?: 'AuthResponse', token: string } };
@@ -324,8 +336,8 @@ export type GoogleLoginMutationHookResult = ReturnType<typeof useGoogleLoginMuta
 export type GoogleLoginMutationResult = Apollo.MutationResult<GoogleLoginMutation>;
 export type GoogleLoginMutationOptions = Apollo.BaseMutationOptions<GoogleLoginMutation, GoogleLoginMutationVariables>;
 export const RenewTokenDocument = gql`
-    mutation RenewToken {
-  renewToken {
+    mutation RenewToken($input: RenewTokenInput) {
+  renewToken(input: $input) {
     token
   }
 }
@@ -345,6 +357,7 @@ export type RenewTokenMutationFn = Apollo.MutationFunction<RenewTokenMutation, R
  * @example
  * const [renewTokenMutation, { data, loading, error }] = useRenewTokenMutation({
  *   variables: {
+ *      input: // value for 'input'
  *   },
  * });
  */

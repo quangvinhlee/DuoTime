@@ -3,6 +3,7 @@ import { BullModule } from '@nestjs/bull';
 import { NotificationService } from './notification.service';
 import { NotificationResolver } from './notification.resolver';
 import { NotificationProcessor } from './notification.processor';
+import { PushNotificationService } from './push-notification.service';
 import { RedisModule } from '../common/services/redis.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PubSub } from 'graphql-subscriptions';
@@ -19,6 +20,7 @@ import { PubSub } from 'graphql-subscriptions';
     NotificationResolver,
     NotificationService,
     NotificationProcessor,
+    PushNotificationService,
     {
       provide: 'PUB_SUB',
       useValue: new PubSub(),

@@ -9,8 +9,8 @@ export const GOOGLE_LOGIN = gql`
 `;
 
 export const RENEW_TOKEN_MUTATION = gql`
-  mutation RenewToken {
-    renewToken {
+  mutation RenewToken($input: RenewTokenInput) {
+    renewToken(input: $input) {
       token
     }
   }
