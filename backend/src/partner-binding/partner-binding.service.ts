@@ -10,6 +10,7 @@ import { BindingStatus } from '@prisma/client';
 import { generateInvitationCode } from 'src/shared/utils/generateInvitationCode';
 import { ResponseType } from 'src/shared/graphql/types';
 import { PartnerBindingResponse } from './types/partner-binding-types';
+import { NotificationType } from '@prisma/client';
 
 @Injectable()
 export class PartnerBindingService {
@@ -87,12 +88,22 @@ export class PartnerBindingService {
     });
 
     // Trigger notification for binding creation
-    await this.notificationService.createPartnerBindingNotification(
-      newBinding.id,
+    if (receiverId) {
+      await this.notificationService.createNotification(
+        NotificationType.PARTNER_ACTIVITY,
+        'Partner Binding Request',
+        `Someone wants to connect with you! Use invitation code: ${invitationCode}`,
+        receiverId,
+        { bindingId: newBinding.id, invitationCode, type: 'BINDING_CREATED' },
+      );
+    }
+
+    await this.notificationService.createNotification(
+      NotificationType.PARTNER_ACTIVITY,
+      'Binding Created',
+      `Your partner binding request has been created. Invitation code: ${invitationCode}`,
       senderId,
-      receiverId,
-      invitationCode,
-      'BINDING_CREATED',
+      { bindingId: newBinding.id, invitationCode, type: 'BINDING_CREATED' },
     );
 
     return {
@@ -177,12 +188,20 @@ export class PartnerBindingService {
     ]);
 
     // Trigger notification for binding acceptance
-    await this.notificationService.createPartnerBindingNotification(
-      updatedBinding.id,
+    await this.notificationService.createNotification(
+      NotificationType.PARTNER_ACTIVITY,
+      'Partner Connected!',
+      `You are now connected with your partner!`,
       binding.senderId,
+      { bindingId: updatedBinding.id, type: 'BINDING_ACCEPTED' },
+    );
+
+    await this.notificationService.createNotification(
+      NotificationType.PARTNER_ACTIVITY,
+      'Partner Connected!',
+      `You are now connected with your partner!`,
       receiverId,
-      updatedBinding.invitationCode,
-      'BINDING_ACCEPTED',
+      { bindingId: updatedBinding.id, type: 'BINDING_ACCEPTED' },
     );
 
     return {
@@ -235,12 +254,12 @@ export class PartnerBindingService {
     });
 
     // Trigger notification for binding rejection
-    await this.notificationService.createPartnerBindingNotification(
-      binding.id,
+    await this.notificationService.createNotification(
+      NotificationType.PARTNER_ACTIVITY,
+      'Binding Rejected',
+      'Your partner binding request was rejected.',
       binding.senderId,
-      binding.receiverId || undefined,
-      binding.invitationCode,
-      'BINDING_REJECTED',
+      { bindingId: binding.id, type: 'BINDING_REJECTED' },
     );
 
     return {

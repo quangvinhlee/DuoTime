@@ -29,6 +29,7 @@ type Mutation {
   deleteAvatar: ResponseType!
   deleteNotification(notificationId: String!): ResponseType!
   googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
+  markAllNotificationsAsRead: ResponseType!
   markNotificationAsRead(notificationId: String!): ResponseType!
   rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): ResponseType!
   removePartner: ResponseType!
@@ -58,7 +59,7 @@ type PartnerBindingResponse {
 type Query {
   getProfile: UserType!
   getUnreadNotificationCount: Int!
-  getUserNotifications: [Notification!]!
+  getUserNotifications(limit: Int! = 20, offset: Int! = 0): [Notification!]!
   sayHello: String!
   searchUsers(input: SearchUsersInput!): [UserType!]!
 }

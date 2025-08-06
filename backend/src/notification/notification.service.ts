@@ -3,7 +3,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationType } from '@prisma/client';
-import { PartnerBindingNotificationJob } from './notification.processor';
+import { NotificationJob } from './notification.processor';
 
 @Injectable()
 export class NotificationService {
@@ -12,23 +12,26 @@ export class NotificationService {
     @InjectQueue('notifications') private readonly notificationsQueue: Queue,
   ) {}
 
-  async createPartnerBindingNotification(
-    bindingId: string,
-    senderId: string,
-    receiverId: string | undefined,
-    invitationCode: string,
-    type: 'BINDING_CREATED' | 'BINDING_ACCEPTED' | 'BINDING_REJECTED',
+  // Single unified notification method for ALL types
+  async createNotification(
+    type: NotificationType,
+    title: string,
+    message: string,
+    userId: string,
+    metadata?: Record<string, any>,
+    reminderId?: string,
   ) {
-    const jobData: PartnerBindingNotificationJob = {
-      bindingId,
-      senderId,
-      receiverId,
-      invitationCode,
+    const jobData: NotificationJob = {
       type,
+      title,
+      message,
+      userId,
+      metadata,
+      reminderId,
     };
 
     // Add job to queue for processing
-    await this.notificationsQueue.add('partner-binding', jobData, {
+    await this.notificationsQueue.add('generic', jobData, {
       attempts: 3,
       backoff: {
         type: 'exponential',
@@ -37,6 +40,7 @@ export class NotificationService {
     });
   }
 
+  // Query methods
   async getUserNotifications(userId: string, limit = 20, offset = 0) {
     return this.prisma.notification.findMany({
       where: { userId },

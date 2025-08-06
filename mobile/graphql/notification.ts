@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
 
-// Query to get all user notifications
+// Query to get all user notifications with pagination
 export const GET_USER_NOTIFICATIONS = gql`
-  query GetUserNotifications {
-    getUserNotifications {
+  query GetUserNotifications($limit: Int, $offset: Int) {
+    getUserNotifications(limit: $limit, offset: $offset) {
       id
       type
       title
@@ -27,6 +27,16 @@ export const GET_UNREAD_NOTIFICATION_COUNT = gql`
 export const MARK_NOTIFICATION_AS_READ = gql`
   mutation MarkNotificationAsRead($notificationId: String!) {
     markNotificationAsRead(notificationId: $notificationId) {
+      success
+      message
+    }
+  }
+`;
+
+// Mutation to mark all notifications as read
+export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
+  mutation MarkAllNotificationsAsRead {
+    markAllNotificationsAsRead {
       success
       message
     }

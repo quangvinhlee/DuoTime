@@ -42,6 +42,7 @@ export type Mutation = {
   deleteAvatar: ResponseType;
   deleteNotification: ResponseType;
   googleLogin: AuthResponse;
+  markAllNotificationsAsRead: ResponseType;
   markNotificationAsRead: ResponseType;
   rejectPartnerBinding: ResponseType;
   removePartner: ResponseType;
@@ -120,6 +121,12 @@ export type Query = {
 };
 
 
+export type QueryGetUserNotificationsArgs = {
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+};
+
+
 export type QuerySearchUsersArgs = {
   input: SearchUsersInput;
 };
@@ -178,7 +185,10 @@ export type RenewTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type RenewTokenMutation = { __typename?: 'Mutation', renewToken: { __typename?: 'AuthResponse', token: string } };
 
-export type GetUserNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetUserNotificationsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
 
 
 export type GetUserNotificationsQuery = { __typename?: 'Query', getUserNotifications: Array<{ __typename?: 'Notification', id: string, type: string, title: string, message: string, isRead: boolean, sentAt: any, reminderId?: string | null, userId: string }> };
@@ -194,6 +204,11 @@ export type MarkNotificationAsReadMutationVariables = Exact<{
 
 
 export type MarkNotificationAsReadMutation = { __typename?: 'Mutation', markNotificationAsRead: { __typename?: 'ResponseType', success: boolean, message: string } };
+
+export type MarkAllNotificationsAsReadMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MarkAllNotificationsAsReadMutation = { __typename?: 'Mutation', markAllNotificationsAsRead: { __typename?: 'ResponseType', success: boolean, message: string } };
 
 export type DeleteNotificationMutationVariables = Exact<{
   notificationId: Scalars['String']['input'];
@@ -341,8 +356,8 @@ export type RenewTokenMutationHookResult = ReturnType<typeof useRenewTokenMutati
 export type RenewTokenMutationResult = Apollo.MutationResult<RenewTokenMutation>;
 export type RenewTokenMutationOptions = Apollo.BaseMutationOptions<RenewTokenMutation, RenewTokenMutationVariables>;
 export const GetUserNotificationsDocument = gql`
-    query GetUserNotifications {
-  getUserNotifications {
+    query GetUserNotifications($limit: Int, $offset: Int) {
+  getUserNotifications(limit: $limit, offset: $offset) {
     id
     type
     title
@@ -367,6 +382,8 @@ export const GetUserNotificationsDocument = gql`
  * @example
  * const { data, loading, error } = useGetUserNotificationsQuery({
  *   variables: {
+ *      limit: // value for 'limit'
+ *      offset: // value for 'offset'
  *   },
  * });
  */
@@ -457,6 +474,39 @@ export function useMarkNotificationAsReadMutation(baseOptions?: Apollo.MutationH
 export type MarkNotificationAsReadMutationHookResult = ReturnType<typeof useMarkNotificationAsReadMutation>;
 export type MarkNotificationAsReadMutationResult = Apollo.MutationResult<MarkNotificationAsReadMutation>;
 export type MarkNotificationAsReadMutationOptions = Apollo.BaseMutationOptions<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>;
+export const MarkAllNotificationsAsReadDocument = gql`
+    mutation MarkAllNotificationsAsRead {
+  markAllNotificationsAsRead {
+    success
+    message
+  }
+}
+    `;
+export type MarkAllNotificationsAsReadMutationFn = Apollo.MutationFunction<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>;
+
+/**
+ * __useMarkAllNotificationsAsReadMutation__
+ *
+ * To run a mutation, you first call `useMarkAllNotificationsAsReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkAllNotificationsAsReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markAllNotificationsAsReadMutation, { data, loading, error }] = useMarkAllNotificationsAsReadMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMarkAllNotificationsAsReadMutation(baseOptions?: Apollo.MutationHookOptions<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, options);
+      }
+export type MarkAllNotificationsAsReadMutationHookResult = ReturnType<typeof useMarkAllNotificationsAsReadMutation>;
+export type MarkAllNotificationsAsReadMutationResult = Apollo.MutationResult<MarkAllNotificationsAsReadMutation>;
+export type MarkAllNotificationsAsReadMutationOptions = Apollo.BaseMutationOptions<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>;
 export const DeleteNotificationDocument = gql`
     mutation DeleteNotification($notificationId: String!) {
   deleteNotification(notificationId: $notificationId) {

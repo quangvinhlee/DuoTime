@@ -9,6 +9,19 @@ import { JwtPayload } from '../shared/interfaces';
 import { PubSub } from 'graphql-subscriptions';
 import { Inject } from '@nestjs/common';
 
+interface NotificationPayload {
+  notificationReceived: {
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    isRead: boolean;
+    sentAt: Date;
+    userId: string;
+    reminderId?: string;
+  };
+}
+
 @Resolver(() => Notification)
 export class NotificationResolver {
   constructor(
@@ -18,8 +31,16 @@ export class NotificationResolver {
 
   @Query(() => [Notification])
   @UseGuards(JwtAuthGuard)
-  async getUserNotifications(@CurrentUser() jwtUser: JwtPayload) {
-    return this.notificationService.getUserNotifications(jwtUser.sub);
+  async getUserNotifications(
+    @CurrentUser() jwtUser: JwtPayload,
+    @Args('limit', { type: () => Number, defaultValue: 20 }) limit: number,
+    @Args('offset', { type: () => Number, defaultValue: 0 }) offset: number,
+  ) {
+    return this.notificationService.getUserNotifications(
+      jwtUser.sub,
+      limit,
+      offset,
+    );
   }
 
   @Query(() => Number)
@@ -49,6 +70,21 @@ export class NotificationResolver {
 
   @Mutation(() => ResponseType)
   @UseGuards(JwtAuthGuard)
+  async markAllNotificationsAsRead(@CurrentUser() jwtUser: JwtPayload) {
+    const result = await this.notificationService.markAllNotificationsAsRead(
+      jwtUser.sub,
+    );
+    return {
+      success: result.count > 0,
+      message:
+        result.count > 0
+          ? `${result.count} notifications marked as read`
+          : 'No notifications to mark as read',
+    };
+  }
+
+  @Mutation(() => ResponseType)
+  @UseGuards(JwtAuthGuard)
   async deleteNotification(
     @CurrentUser() jwtUser: JwtPayload,
     @Args('notificationId', { type: () => String }) notificationId: string,
@@ -65,18 +101,11 @@ export class NotificationResolver {
   }
 
   @Subscription(() => Notification, {
-    filter: (payload, variables, context) => {
-      // For now, let's remove the filter to test if subscription works
-      console.log('🔔 Subscription filter called:', { payload, context });
-      return true; // Allow all notifications for testing
-    },
-    resolve: (payload) => {
-      console.log('🔔 Subscription resolve called:', payload);
+    resolve: (payload: NotificationPayload) => {
       return payload.notificationReceived;
     },
   })
   notificationReceived() {
-    console.log('🔔 Subscription created for notificationReceived');
     return this.pubSub.asyncIterableIterator('notificationReceived');
   }
 }
