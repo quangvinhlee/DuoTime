@@ -19,7 +19,6 @@ const httpLink = createHttpLink({
 const httpUrl =
   process.env.EXPO_PUBLIC_GRAPHQL_URL || "http://192.168.0.79:3000/graphql";
 const wsUrl = httpUrl.replace("http", "ws");
-console.log("🔌 WebSocket URL:", wsUrl);
 
 const wsLink = new GraphQLWsLink(
   createClient({

@@ -67,7 +67,7 @@ export class NotificationProcessor {
 
       // Try real-time WebSocket (may fail if user is offline)
       try {
-        await this.pubSub.publish('notificationReceived', {
+        await this.pubSub.publish(`notification:user:${userId}`, {
           notificationReceived: {
             id: notification.id,
             type,
@@ -80,15 +80,13 @@ export class NotificationProcessor {
           },
         });
         await job.log('Published to GraphQL subscription (real-time)');
-      } catch (websocketError) {
+      } catch {
         await job.log('WebSocket failed, push notification will handle it');
         // Push notification will still work even if WebSocket fails
       }
 
       await job.progress(100);
       await job.log('Published to GraphQL subscription');
-
-      console.log(`🔔 Notification processed: ${type} for user ${userId}`);
     } catch (error) {
       await job.log('Error processing notification');
       console.error('Error processing notification:', error);

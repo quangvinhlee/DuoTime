@@ -105,9 +105,8 @@ export class NotificationResolver {
       return payload.notificationReceived;
     },
   })
+  @UseGuards(JwtAuthGuard)
   notificationReceived(@CurrentUser() jwtUser: JwtPayload) {
-    console.log('jwtUserr:', jwtUser);
-
     // Add null check for jwtUser
     if (!jwtUser || !jwtUser.id) {
       throw new UnauthorizedException(

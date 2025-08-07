@@ -43,10 +43,6 @@ export const useNotificationStoreWithGraphQL = () => {
     onError: (error) => {
       console.log("🔔 Notification Store Subscription Error:", error);
     },
-    onData: (data) => {
-      console.log("🔔 Notification Store Data Received:", data);
-    },
-    // The subscription is now user-specific via the backend channel
   });
 
   // 📥 Initial load - Sync notifications from GraphQL to Zustand
@@ -66,11 +62,6 @@ export const useNotificationStoreWithGraphQL = () => {
   // ⚡ Real-time push - Add new notifications to state immediately
   useEffect(() => {
     if (subscriptionData?.notificationReceived) {
-      console.log(
-        "🎉 New notification received in store!",
-        subscriptionData.notificationReceived
-      );
-      console.log("🔔 User-specific channel working!");
       // Add to state immediately - no refetch needed!
       addNotification(subscriptionData.notificationReceived);
     }

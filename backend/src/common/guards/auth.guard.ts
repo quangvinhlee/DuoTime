@@ -20,7 +20,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   getRequest(context: ExecutionContext) {
     const ctx = GqlExecutionContext.create(context);
-    return ctx.getContext().req as Request;
+    const request = ctx.getContext().req;
+
+    // Ensure we always return a valid request object
+    if (!request) {
+      throw new UnauthorizedException('Request context not available');
+    }
+
+    return request as Request;
   }
 
   handleRequest<TUser = JwtPayload>(

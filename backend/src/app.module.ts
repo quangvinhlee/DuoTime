@@ -47,10 +47,38 @@ import { NotificationModule } from './notification/notification.module';
         numberScalarMode: 'integer',
       },
       subscriptions: {
-        'graphql-ws': true,
-        'subscriptions-transport-ws': true,
+        'graphql-ws': {
+          onConnect: (context) => {
+            // Extract connection parameters for WebSocket connections
+            const { connectionParams } = context;
+            return {
+              req: {
+                headers: {
+                  authorization: connectionParams?.authorization || '',
+                },
+                connectionParams,
+              },
+            };
+          },
+        },
       },
       installSubscriptionHandlers: true,
+      context: ({ req, connection }) => {
+        // Handle both HTTP requests and WebSocket connections
+        if (connection) {
+          // WebSocket connection (subscriptions)
+          return {
+            req: {
+              headers: {
+                authorization: connection.context?.authorization || '',
+              },
+              connectionParams: connection.context,
+            },
+          };
+        }
+        // HTTP request (queries/mutations)
+        return { req };
+      },
     }),
     PrismaModule,
     AuthModule,

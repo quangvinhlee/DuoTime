@@ -12,7 +12,27 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new Error('JWT_SECRET is not defined in configuration');
     }
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: (req) => {
+        // Handle WebSocket connections (subscriptions)
+        if (req?.connectionParams?.authorization) {
+          const authHeader = req.connectionParams.authorization;
+          if (authHeader.startsWith('Bearer ')) {
+            return authHeader.substring(7);
+          }
+          return authHeader;
+        }
+
+        // Handle HTTP requests
+        if (req?.headers?.authorization) {
+          const authHeader = req.headers.authorization;
+          if (authHeader.startsWith('Bearer ')) {
+            return authHeader.substring(7);
+          }
+          return authHeader;
+        }
+
+        return null;
+      },
       ignoreExpiration: false,
       secretOrKey: jwtSecret,
     });
