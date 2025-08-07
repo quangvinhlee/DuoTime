@@ -116,7 +116,7 @@ export class AuthService {
       }
 
       const token = this.jwtService.sign({
-        sub: user.id,
+        id: user.id,
         email: user.email,
         name: user.name,
         avatarUrl: user.avatarUrl,

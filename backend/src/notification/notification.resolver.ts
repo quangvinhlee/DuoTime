@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UnauthorizedException, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { Notification } from './entities/notification.entity';
 import { ResponseType } from '../shared/graphql/types';
@@ -106,7 +106,15 @@ export class NotificationResolver {
     },
   })
   notificationReceived(@CurrentUser() jwtUser: JwtPayload) {
-    // Subscribe to user-specific channel
+    console.log('jwtUserr:', jwtUser);
+
+    // Add null check for jwtUser
+    if (!jwtUser || !jwtUser.id) {
+      throw new UnauthorizedException(
+        'User not authenticated for subscription',
+      );
+    }
+
     return this.pubSub.asyncIterableIterator(`notification:user:${jwtUser.id}`);
   }
 }
