@@ -30,7 +30,7 @@ export class PartnerBindingResolver {
   ): Promise<PartnerBindingResponse> {
     return this.partnerBindingService.createPartnerBinding({
       ...createPartnerBindingDto,
-      senderId: jwtUser.sub,
+      senderId: jwtUser.id,
     });
   }
 
@@ -44,7 +44,7 @@ export class PartnerBindingResolver {
   ): Promise<PartnerBindingResponse> {
     return this.partnerBindingService.acceptPartnerBinding({
       ...acceptPartnerBindingDto,
-      receiverId: jwtUser.sub,
+      receiverId: jwtUser.id,
     });
   }
 
@@ -58,7 +58,7 @@ export class PartnerBindingResolver {
   ): Promise<ResponseType> {
     return this.partnerBindingService.rejectPartnerBinding({
       ...rejectPartnerBindingDto,
-      userId: jwtUser.sub,
+      userId: jwtUser.id,
     });
   }
 
@@ -68,6 +68,6 @@ export class PartnerBindingResolver {
   async removePartner(
     @CurrentUser() jwtUser: JwtPayload,
   ): Promise<ResponseType> {
-    return this.partnerBindingService.removePartner(jwtUser.sub);
+    return this.partnerBindingService.removePartner(jwtUser.id);
   }
 }

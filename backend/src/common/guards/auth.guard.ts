@@ -67,7 +67,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     // Log successful authentication
     const jwtUser = user as unknown as JwtPayload;
     if (this.logger) {
-      this.logger.logAuthSuccess(jwtUser.sub, 'jwt', {
+      this.logger.logAuthSuccess(jwtUser.id, 'jwt', {
         operation: operationName,
         operationType,
       });

@@ -145,25 +145,25 @@ export class AuthService {
     jwtUser: JwtPayload,
     pushToken?: string,
   ): Promise<AuthResponse> {
-    this.logger.logAuthSuccess(jwtUser.sub, 'token_renewal', {
+    this.logger.logAuthSuccess(jwtUser.id, 'token_renewal', {
       email: jwtUser.email,
     });
 
     // Update push token if provided
     if (pushToken) {
       const oldUser = await this.prisma.user.findUnique({
-        where: { id: jwtUser.sub },
+        where: { id: jwtUser.id },
         select: { pushToken: true },
       });
 
       await this.prisma.user.update({
-        where: { id: jwtUser.sub },
+        where: { id: jwtUser.id },
         data: { pushToken },
       });
 
       // Log push token update during renewal
       this.logger.logBusinessEvent('push_token_renewed', {
-        userId: jwtUser.sub,
+        userId: jwtUser.id,
         oldToken: oldUser?.pushToken
           ? oldUser.pushToken.substring(0, 20) + '...'
           : null,
@@ -173,7 +173,7 @@ export class AuthService {
 
     const token = this.jwtService.sign(
       {
-        sub: jwtUser.sub,
+        id: jwtUser.id,
         email: jwtUser.email,
         name: jwtUser.name,
         avatarUrl: jwtUser.avatarUrl,
@@ -185,8 +185,8 @@ export class AuthService {
     );
 
     this.logger.info(
-      { event: 'token_renewed', userId: jwtUser.sub },
-      `Token successfully renewed for user ${jwtUser.sub}`,
+      { event: 'token_renewed', userId: jwtUser.id },
+      `Token successfully renewed for user ${jwtUser.id}`,
     );
 
     return Promise.resolve({ token } as AuthResponse);

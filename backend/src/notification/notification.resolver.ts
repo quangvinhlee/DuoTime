@@ -37,7 +37,7 @@ export class NotificationResolver {
     @Args('offset', { type: () => Number, defaultValue: 0 }) offset: number,
   ) {
     return this.notificationService.getUserNotifications(
-      jwtUser.sub,
+      jwtUser.id,
       limit,
       offset,
     );
@@ -46,7 +46,7 @@ export class NotificationResolver {
   @Query(() => Number)
   @UseGuards(JwtAuthGuard)
   async getUnreadNotificationCount(@CurrentUser() jwtUser: JwtPayload) {
-    return this.notificationService.getUnreadNotificationCount(jwtUser.sub);
+    return this.notificationService.getUnreadNotificationCount(jwtUser.id);
   }
 
   @Mutation(() => ResponseType)
@@ -57,7 +57,7 @@ export class NotificationResolver {
   ) {
     const result = await this.notificationService.markNotificationAsRead(
       notificationId,
-      jwtUser.sub,
+      jwtUser.id,
     );
     return {
       success: result.count > 0,
@@ -72,7 +72,7 @@ export class NotificationResolver {
   @UseGuards(JwtAuthGuard)
   async markAllNotificationsAsRead(@CurrentUser() jwtUser: JwtPayload) {
     const result = await this.notificationService.markAllNotificationsAsRead(
-      jwtUser.sub,
+      jwtUser.id,
     );
     return {
       success: result.count > 0,
@@ -91,7 +91,7 @@ export class NotificationResolver {
   ) {
     const result = await this.notificationService.deleteNotification(
       notificationId,
-      jwtUser.sub,
+      jwtUser.id,
     );
     return {
       success: result.count > 0,
@@ -105,7 +105,8 @@ export class NotificationResolver {
       return payload.notificationReceived;
     },
   })
-  notificationReceived() {
-    return this.pubSub.asyncIterableIterator('notificationReceived');
+  notificationReceived(@CurrentUser() jwtUser: JwtPayload) {
+    // Subscribe to user-specific channel
+    return this.pubSub.asyncIterableIterator(`notification:user:${jwtUser.id}`);
   }
 }

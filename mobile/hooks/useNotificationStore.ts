@@ -38,7 +38,7 @@ export const useNotificationStoreWithGraphQL = () => {
     fetchPolicy: "cache-and-network",
   });
 
-  // 👂 Real-time push - Subscription for new notifications
+  // 👂 Real-time push - Subscription for new notifications (user-specific)
   const { data: subscriptionData } = useOnNotificationReceivedSubscription({
     onError: (error) => {
       console.log("🔔 Notification Store Subscription Error:", error);
@@ -46,6 +46,7 @@ export const useNotificationStoreWithGraphQL = () => {
     onData: (data) => {
       console.log("🔔 Notification Store Data Received:", data);
     },
+    // The subscription is now user-specific via the backend channel
   });
 
   // 📥 Initial load - Sync notifications from GraphQL to Zustand
@@ -69,6 +70,7 @@ export const useNotificationStoreWithGraphQL = () => {
         "🎉 New notification received in store!",
         subscriptionData.notificationReceived
       );
+      console.log("🔔 User-specific channel working!");
       // Add to state immediately - no refetch needed!
       addNotification(subscriptionData.notificationReceived);
     }

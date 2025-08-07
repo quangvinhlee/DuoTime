@@ -53,7 +53,7 @@ export const DELETE_NOTIFICATION = gql`
   }
 `;
 
-// Subscription for real-time notifications
+// Subscription for real-time notifications (user-specific)
 export const NOTIFICATION_SUBSCRIPTION = gql`
   subscription OnNotificationReceived {
     notificationReceived {

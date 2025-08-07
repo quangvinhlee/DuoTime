@@ -24,7 +24,7 @@ export class UserResolver {
   @UseGuards(JwtAuthGuard)
   @QueryThrottle() // 30 requests per minute
   async getProfile(@CurrentUser() jwtUser: JwtPayload): Promise<UserType> {
-    const user = await this.userService.getUser(jwtUser.sub);
+    const user = await this.userService.getUser(jwtUser.id);
     return user as UserType;
   }
 
@@ -35,7 +35,7 @@ export class UserResolver {
     @CurrentUser() jwtUser: JwtPayload,
     @Args('input') input: UpdateProfileInput,
   ): Promise<ResponseType> {
-    await this.userService.updateProfile(jwtUser.sub, input);
+    await this.userService.updateProfile(jwtUser.id, input);
     return {
       success: true,
       message: 'Profile updated successfully',
@@ -51,7 +51,7 @@ export class UserResolver {
   ): Promise<ResponseType> {
     // Handle base64 image upload if provided
     if (input.avatarBase64) {
-      await this.userService.uploadAvatar(jwtUser.sub, input.avatarBase64);
+      await this.userService.uploadAvatar(jwtUser.id, input.avatarBase64);
       return {
         success: true,
         message: 'Avatar uploaded successfully',
@@ -60,7 +60,7 @@ export class UserResolver {
 
     // If only name is being updated
     if (input.name) {
-      await this.userService.updateProfile(jwtUser.sub, { name: input.name });
+      await this.userService.updateProfile(jwtUser.id, { name: input.name });
       return {
         success: true,
         message: 'Profile updated successfully',
@@ -80,7 +80,7 @@ export class UserResolver {
   async deleteAvatar(
     @CurrentUser() jwtUser: JwtPayload,
   ): Promise<ResponseType> {
-    await this.userService.deleteAvatar(jwtUser.sub);
+    await this.userService.deleteAvatar(jwtUser.id);
 
     return {
       success: true,
@@ -97,7 +97,7 @@ export class UserResolver {
   ): Promise<UserType[]> {
     const users = await this.userService.searchUsers(
       input.query,
-      input.excludeUserId || jwtUser.sub,
+      input.excludeUserId || jwtUser.id,
     );
     return users as UserType[];
   }

@@ -54,6 +54,20 @@ export class NotificationService {
         timestamp: new Date().toISOString(),
       }),
     );
+
+    // Publish to user-specific channel for real-time notifications
+    await this.redisService.publish(
+      `notification:user:${userId}`,
+      JSON.stringify({
+        type,
+        title,
+        message,
+        userId,
+        metadata,
+        reminderId,
+        timestamp: new Date().toISOString(),
+      }),
+    );
   }
 
   // Query methods
