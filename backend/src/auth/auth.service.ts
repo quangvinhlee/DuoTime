@@ -73,6 +73,15 @@ export class AuthService {
           },
         });
 
+        // Log push token creation for new user
+        if (googleLoginInput.pushToken) {
+          this.logger.logBusinessEvent('push_token_created', {
+            userId: user.id,
+            pushToken: googleLoginInput.pushToken.substring(0, 20) + '...',
+            isNewUser: true,
+          });
+        }
+
         this.logger.logAuthSuccess(user.id, 'google', {
           newUser: true,
           email: user.email,
@@ -84,9 +93,18 @@ export class AuthService {
           googleLoginInput.pushToken &&
           user.pushToken !== googleLoginInput.pushToken
         ) {
+          const oldToken = user.pushToken;
           user = await this.prisma.user.update({
             where: { id: user.id },
             data: { pushToken: googleLoginInput.pushToken },
+          });
+
+          // Log push token update
+          this.logger.logBusinessEvent('push_token_updated', {
+            userId: user.id,
+            oldToken: oldToken ? oldToken.substring(0, 20) + '...' : null,
+            newToken: googleLoginInput.pushToken.substring(0, 20) + '...',
+            isNewUser: false,
           });
         }
 
@@ -133,9 +151,23 @@ export class AuthService {
 
     // Update push token if provided
     if (pushToken) {
+      const oldUser = await this.prisma.user.findUnique({
+        where: { id: jwtUser.sub },
+        select: { pushToken: true },
+      });
+
       await this.prisma.user.update({
         where: { id: jwtUser.sub },
         data: { pushToken },
+      });
+
+      // Log push token update during renewal
+      this.logger.logBusinessEvent('push_token_renewed', {
+        userId: jwtUser.sub,
+        oldToken: oldUser?.pushToken
+          ? oldUser.pushToken.substring(0, 20) + '...'
+          : null,
+        newToken: pushToken.substring(0, 20) + '...',
       });
     }
 

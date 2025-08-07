@@ -219,4 +219,26 @@ export class LoggerService extends PinoLogger {
       `Security event (${severity}): ${event}`,
     );
   }
+
+  // Push notification logging
+  logPushNotification(
+    action:
+      | 'token_created'
+      | 'token_updated'
+      | 'token_renewed'
+      | 'notification_sent'
+      | 'notification_failed',
+    userId: string,
+    details: Record<string, any>,
+  ) {
+    this.info(
+      {
+        event: 'push_notification',
+        action,
+        userId,
+        ...details,
+      },
+      `Push notification ${action} for user ${userId}`,
+    );
+  }
 }

@@ -43,6 +43,13 @@ export class PushNotificationService {
         return;
       }
 
+      console.log(
+        `📱 Processing push notification for user ${notification.userId}`,
+      );
+      console.log(
+        `📱 Token: ${user.pushToken ? user.pushToken.substring(0, 30) + '...' : 'null'}`,
+      );
+
       // Send push notification
       await this.sendToExpoPushService({
         to: user.pushToken,
