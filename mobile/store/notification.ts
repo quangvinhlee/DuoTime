@@ -40,6 +40,15 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   // Business logic
   addNotification: (notification) => {
     const { notifications, unreadCount } = get();
+
+    // Check if notification already exists to prevent duplicates
+    const existingNotification = notifications.find(
+      (n) => n.id === notification.id
+    );
+    if (existingNotification) {
+      return;
+    }
+
     set({
       notifications: [notification, ...notifications],
       unreadCount: unreadCount + 1,
