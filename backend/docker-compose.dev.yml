@@ -61,4 +61,4 @@ volumes:
 
 networks:
   duotime-network:
-    driver: bridge 
+    driver: bridge

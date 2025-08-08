@@ -1,98 +1,157 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🕐 DuoTime Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS backend for the DuoTime application - a couples' reminder and activity tracking app.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Quick Start
 
-## Description
+### Prerequisites
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Node.js 18+
+- Docker & Docker Compose
+- PostgreSQL
+- Redis
 
-## Project setup
+### Development Setup
 
-```bash
-$ npm install
-```
+1. **Install dependencies:**
 
-## Compile and run the project
+   ```bash
+   npm install
+   ```
 
-```bash
-# development
-$ npm run start
+2. **Start infrastructure services:**
 
-# watch mode
-$ npm run start:dev
+   ```bash
+   docker-compose -f docker-compose.dev.yml up -d
+   ```
 
-# production mode
-$ npm run start:prod
-```
+3. **Set up environment variables:**
 
-## Run tests
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
 
-```bash
-# unit tests
-$ npm run test
+4. **Run database migrations:**
 
-# e2e tests
-$ npm run test:e2e
+   ```bash
+   npm run db:migrate
+   ```
 
-# test coverage
-$ npm run test:cov
-```
+5. **Start the development server:**
+   ```bash
+   npm run start:dev
+   ```
 
-## Deployment
+### Docker Setup
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+For full Docker deployment, see [DOCKER.md](./DOCKER.md).
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Full stack with Docker
+docker-compose up -d
+
+# Development infrastructure only
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 📚 Available Scripts
 
-## Resources
+```bash
+# Development
+npm run start:dev          # Start in watch mode
+npm run start:debug        # Start in debug mode
 
-Check out a few resources that may come in handy when working with NestJS:
+# Production
+npm run start:prod         # Start production server
+npm run build              # Build the application
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Database
+npm run db:generate        # Generate Prisma client
+npm run db:migrate         # Run database migrations
+npm run db:push            # Push schema to database
+npm run db:studio          # Open Prisma Studio
 
-## Support
+# Testing
+npm run test               # Run unit tests
+npm run test:e2e           # Run e2e tests
+npm run test:cov           # Run tests with coverage
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 🔧 Features
 
-## Stay in touch
+- **🔐 Authentication** - Google OAuth integration
+- **🔒 Encryption** - Automatic field-level encryption
+- **📊 GraphQL API** - Apollo Server with subscriptions
+- **💾 Database** - PostgreSQL with Prisma ORM
+- **⚡ Caching** - Redis for session and job queues
+- **📱 Push Notifications** - Real-time notifications
+- **🔄 Job Queues** - Bull queue for background tasks
+- **📝 Logging** - Structured logging with Pino
+- **🛡️ Security** - Rate limiting, CORS, Helmet
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🌐 API Endpoints
 
-## License
+- **GraphQL Playground:** http://localhost:3000/graphql
+- **Health Check:** http://localhost:3000/health
+- **Redis Commander:** http://localhost:8081
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📁 Project Structure
+
+```
+src/
+├── auth/                 # Authentication & authorization
+├── common/               # Shared utilities & services
+│   ├── config/          # Configuration files
+│   ├── guards/          # Authentication guards
+│   ├── middleware/      # HTTP middleware
+│   ├── services/        # Shared services
+│   └── utils/           # Utility functions
+├── notification/         # Notification system
+├── partner-binding/      # Partner connection logic
+├── prisma/              # Database configuration
+├── shared/              # Shared interfaces & types
+└── user/                # User management
+```
+
+## 🔐 Environment Variables
+
+Required environment variables (see `.env.example`):
+
+```env
+# Database
+DATABASE_URL="postgresql://..."
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=duotime2024
+
+# JWT
+JWT_SECRET=your-secret-key
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-client-id
+
+# Encryption
+ENCRYPTION_KEY=your-32-character-key
+```
+
+## 📖 Documentation
+
+- [Docker Setup](./DOCKER.md)
+- [Encryption System](./ENCRYPTION.md)
+- [Testing Guide](./TESTING.md)
+- [Logging Guide](./LOGGING.md)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.

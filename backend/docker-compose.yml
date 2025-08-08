@@ -53,14 +53,14 @@ services:
       - redis
     restart: unless-stopped
 
-  # Backend Application (Full Stack)
+  # Backend Application
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: duotime-backend
     env_file:
-      - ./backend/.env.docker
+      - .env.docker
     ports:
       - "3000:3000"
     networks:
@@ -80,4 +80,4 @@ volumes:
 
 networks:
   duotime-network:
-    driver: bridge 
+    driver: bridge
