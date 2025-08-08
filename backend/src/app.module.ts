@@ -9,18 +9,16 @@ import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
 import { APP_PIPE, APP_GUARD } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { AppResolver } from './app.resolver';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { PartnerBindingModule } from './partner-binding/partner-binding.module';
-import { UserResolver } from './shared/resolver-field/user.resolver';
 import { UserModule } from './user/user.module';
+import { NotificationModule } from './notification/notification.module';
+import { ReminderModule } from './reminder/reminder.module';
+import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
 import { loggerConfig } from './common/config/logger.config';
 import { throttleConfig } from './common/config/throttle.config';
-// import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging.interceptor';
-import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
-import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -84,12 +82,10 @@ import { NotificationModule } from './notification/notification.module';
     PartnerBindingModule,
     UserModule,
     NotificationModule,
+    ReminderModule,
   ],
   controllers: [],
   providers: [
-    AppResolver,
-    UserResolver,
-    // Add PubSub provider directly here
     {
       provide: 'PUB_SUB',
       useValue: new PubSub(),

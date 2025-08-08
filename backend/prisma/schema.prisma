@@ -51,28 +51,26 @@ model PartnerBinding {
 }
 
 model Reminder {
-  id               String           @id @default(uuid())
+  id               String             @id @default(uuid())
   title            String
   description      String?
   scheduledAt      DateTime
   type             ReminderType
-  status           ReminderStatus   @default(ACTIVE)
-  isSecret         Boolean          @default(true)
-  isRecurring      Boolean          @default(false)
+  status           ReminderStatus     @default(ACTIVE)
+  isRecurring      Boolean            @default(false)
   recurringPattern String?
-  alarmSound       String?
-  vibration        Boolean          @default(true)
-  priority         ReminderPriority @default(MEDIUM)
+  targetType       ReminderTargetType @default(FOR_ME) // FOR_ME, FOR_PARTNER, FOR_BOTH
   createdById      String
-  recipientId      String
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  recipientId      String? // Only used when targetType is FOR_PARTNER
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
   notifications    Notification[]
-  createdBy        User             @relation("ReminderCreator", fields: [createdById], references: [id], onDelete: Cascade)
-  recipient        User             @relation("ReminderRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  createdBy        User               @relation("ReminderCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  recipient        User?              @relation("ReminderRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
 
   @@index([recipientId, status])
   @@index([scheduledAt])
+  @@index([createdById, targetType])
 }
 
 model Notification {
@@ -183,15 +181,12 @@ enum ReminderType {
 enum ReminderStatus {
   ACTIVE
   COMPLETED
-  CANCELLED
-  EXPIRED
 }
 
-enum ReminderPriority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
+enum ReminderTargetType {
+  FOR_ME
+  FOR_PARTNER
+  FOR_BOTH
 }
 
 enum NotificationType {

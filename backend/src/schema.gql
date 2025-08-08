@@ -14,10 +14,28 @@ input CreatePartnerBindingDto {
   receiverId: String
 }
 
+input CreateReminderInput {
+  description: String
+  isRecurring: Boolean! = false
+  recipientId: String
+  recurringPattern: String
+  scheduledAt: DateTime!
+  targetType: ReminderTargetType! = FOR_ME
+  title: String!
+  type: ReminderType!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input GetRemindersInput {
+  limit: Int! = 20
+  offset: Int! = 0
+  targetType: ReminderTargetType
+  type: ReminderType
+}
 
 input GoogleLoginInput {
   idToken: String!
@@ -27,15 +45,19 @@ input GoogleLoginInput {
 type Mutation {
   acceptPartnerBinding(acceptPartnerBindingDto: AcceptPartnerBindingDto!): PartnerBindingResponse!
   createPartnerBinding(createPartnerBindingDto: CreatePartnerBindingDto!): PartnerBindingResponse!
+  createReminder(input: CreateReminderInput!): ReminderGraphQLType!
   deleteAvatar: ResponseType!
   deleteNotification(notificationId: String!): ResponseType!
+  deleteReminder(reminderId: String!): ResponseType!
   googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
   markAllNotificationsAsRead: ResponseType!
   markNotificationAsRead(notificationId: String!): ResponseType!
+  markReminderAsCompleted(reminderId: String!): ReminderGraphQLType!
   rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): ResponseType!
   removePartner: ResponseType!
   renewToken(input: RenewTokenInput): AuthResponse!
   updateProfile(input: UpdateProfileInput!): ResponseType!
+  updateReminder(input: UpdateReminderInput!, reminderId: String!): ReminderGraphQLType!
   uploadAvatar(input: UploadAvatarInput!): ResponseType!
 }
 
@@ -59,14 +81,60 @@ type PartnerBindingResponse {
 
 type Query {
   getProfile: UserType!
+  getReminder(reminderId: String!): ReminderGraphQLType!
+  getReminders(input: GetRemindersInput!): [ReminderGraphQLType!]!
   getUnreadNotificationCount: Int!
   getUserNotifications(limit: Int! = 20, offset: Int! = 0): [Notification!]!
-  sayHello: String!
   searchUsers(input: SearchUsersInput!): [UserType!]!
 }
 
 input RejectPartnerBindingDto {
   invitationCode: String!
+}
+
+type ReminderGraphQLType {
+  createdAt: DateTime!
+  createdBy: UserType
+  createdById: String!
+  description: String
+  id: ID!
+  isRecurring: Boolean!
+  recipient: UserType
+  recipientId: String
+  recurringPattern: String
+  scheduledAt: DateTime!
+  status: ReminderStatus!
+  targetType: ReminderTargetType!
+  title: String!
+  type: ReminderType!
+  updatedAt: DateTime!
+}
+
+"""The status of a reminder"""
+enum ReminderStatus {
+  ACTIVE
+  COMPLETED
+}
+
+"""Who the reminder is for"""
+enum ReminderTargetType {
+  FOR_BOTH
+  FOR_ME
+  FOR_PARTNER
+}
+
+"""The type of reminder"""
+enum ReminderType {
+  CELEBRATION
+  CHORES
+  DAILY
+  DATE
+  FAMILY
+  GIFT
+  HEALTH
+  PERSONAL
+  ROMANCE
+  WORK
 }
 
 input RenewTokenInput {
@@ -89,6 +157,17 @@ type Subscription {
 
 input UpdateProfileInput {
   name: String
+}
+
+input UpdateReminderInput {
+  description: String
+  isRecurring: Boolean
+  recipientId: String
+  recurringPattern: String
+  scheduledAt: DateTime
+  targetType: ReminderTargetType
+  title: String
+  type: ReminderType
 }
 
 input UploadAvatarInput {
