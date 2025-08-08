@@ -38,22 +38,31 @@ export class PartnerBindingService {
     }
     await this.validateNoExistingPartners(senderId, receiverId);
 
-    const existingBinding = await this.prisma.partnerBinding.findFirst({
+    const existingBindings = await this.prisma.partnerBinding.findMany({
       where: {
         senderId,
       },
     });
 
-    if (existingBinding) {
-      if (existingBinding.status === BindingStatus.ACCEPTED) {
-        throw new BadRequestException('User already has a partner');
-      }
+    if (
+      existingBindings.some(
+        (binding) => binding.status === BindingStatus.ACCEPTED,
+      )
+    ) {
+      throw new BadRequestException('User already has a partner');
+    }
 
-      if (existingBinding.status === BindingStatus.PENDING) {
-        await this.prisma.partnerBinding.delete({
-          where: { id: existingBinding.id },
-        });
-      }
+    const bindingsToDelete = existingBindings.filter(
+      (binding) =>
+        binding.status === BindingStatus.PENDING &&
+        ((!receiverId && !binding.receiverId) ||
+          (receiverId && binding.receiverId === receiverId)),
+    );
+
+    if (bindingsToDelete.length > 0) {
+      await this.prisma.partnerBinding.deleteMany({
+        where: { id: { in: bindingsToDelete.map((b) => b.id) } },
+      });
     }
 
     let invitationCode = '';
@@ -87,7 +96,6 @@ export class PartnerBindingService {
       },
     });
 
-    // Trigger notification for binding creation
     if (receiverId) {
       await this.notificationService.createNotification(
         NotificationType.PARTNER_ACTIVITY,
@@ -142,14 +150,12 @@ export class PartnerBindingService {
       throw new BadRequestException('Binding has expired');
     }
 
-    // Prevent the sender from accepting their own binding
     if (binding.senderId === receiverId) {
       throw new BadRequestException(
         'You cannot accept your own binding request',
       );
     }
 
-    // If the binding has a specific receiverId, only that receiver can accept
     if (binding.receiverId && binding.receiverId !== receiverId) {
       throw new BadRequestException('This binding is not intended for you');
     }
@@ -174,7 +180,7 @@ export class PartnerBindingService {
         data: {
           status: BindingStatus.ACCEPTED,
           acceptedAt,
-          receiverId, // Set the receiverId when accepting
+          receiverId,
         },
       }),
       this.prisma.user.update({
@@ -184,6 +190,21 @@ export class PartnerBindingService {
       this.prisma.user.update({
         where: { id: binding.senderId },
         data: { partnerId: receiverId },
+      }),
+      // Delete all other pending partner bindings for both users when accepting
+      this.prisma.partnerBinding.deleteMany({
+        where: {
+          OR: [
+            { senderId: binding.senderId },
+            { senderId: receiverId },
+            { receiverId: binding.senderId },
+            { receiverId: receiverId },
+          ],
+          AND: [
+            { id: { not: binding.id } },
+            { status: { not: BindingStatus.ACCEPTED } },
+          ],
+        },
       }),
     ]);
 
