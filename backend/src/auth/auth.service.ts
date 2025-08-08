@@ -57,8 +57,8 @@ export class AuthService {
         this.logger.logBusinessEvent(
           'new_user_creation',
           {
-            googleId,
-            email: email || '[NO_EMAIL]',
+            googleId: googleId.substring(0, 8) + '...',
+            email: email ? email.substring(0, 3) + '***@***' : '[NO_EMAIL]',
           },
           'info',
         );
@@ -71,6 +71,13 @@ export class AuthService {
             avatarUrl: picture,
             pushToken: googleLoginInput.pushToken || null,
           },
+        });
+
+        // Log that sensitive data was encrypted
+        this.logger.logBusinessEvent('user_data_encrypted', {
+          userId: user.id,
+          fieldsEncrypted: ['googleId', 'email', 'pushToken'],
+          isNewUser: true,
         });
 
         // Log push token creation for new user
@@ -97,6 +104,13 @@ export class AuthService {
           user = await this.prisma.user.update({
             where: { id: user.id },
             data: { pushToken: googleLoginInput.pushToken },
+          });
+
+          // Log that sensitive data was encrypted
+          this.logger.logBusinessEvent('user_data_encrypted', {
+            userId: user.id,
+            fieldsEncrypted: ['pushToken'],
+            isNewUser: false,
           });
 
           // Log push token update
@@ -159,6 +173,13 @@ export class AuthService {
       await this.prisma.user.update({
         where: { id: jwtUser.id },
         data: { pushToken },
+      });
+
+      // Log that sensitive data was encrypted
+      this.logger.logBusinessEvent('user_data_encrypted', {
+        userId: jwtUser.id,
+        fieldsEncrypted: ['pushToken'],
+        context: 'token_renewal',
       });
 
       // Log push token update during renewal

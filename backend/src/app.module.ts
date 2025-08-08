@@ -18,7 +18,6 @@ import { UserModule } from './user/user.module';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
 import { loggerConfig } from './common/config/logger.config';
 import { throttleConfig } from './common/config/throttle.config';
-import { LoggerService } from './common/services/logger.service';
 // import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging.interceptor';
 import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
 import { NotificationModule } from './notification/notification.module';
@@ -90,7 +89,6 @@ import { NotificationModule } from './notification/notification.module';
   providers: [
     AppResolver,
     UserResolver,
-    LoggerService,
     // Add PubSub provider directly here
     {
       provide: 'PUB_SUB',
