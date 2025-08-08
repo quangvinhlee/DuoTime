@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Params } from 'nestjs-pino';
 import { randomUUID } from 'crypto';
-import { cleanErrorMessage } from '../../shared/utils';
+import { cleanErrorMessage } from '../utils/error-cleaner';
 
 export const loggerConfig: Params = {
   pinoHttp: {

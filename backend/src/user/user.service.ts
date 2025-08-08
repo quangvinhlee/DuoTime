@@ -5,7 +5,7 @@ import {
   uploadImage,
   deleteImage,
   getPublicIdFromUrl,
-} from '../shared/utils/cloudinary';
+} from '../common/utils/cloudinary';
 
 @Injectable()
 export class UserService {

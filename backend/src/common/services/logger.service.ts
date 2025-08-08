@@ -1,6 +1,6 @@
 import { Injectable, Scope, Logger } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { cleanErrorMessage } from '../../shared/utils';
+import { cleanErrorMessage } from '../utils/error-cleaner';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class LoggerService extends PinoLogger {

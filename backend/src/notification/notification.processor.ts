@@ -6,7 +6,6 @@ import { NotificationType } from '@prisma/client';
 import { RedisService } from '../common/services/redis.service';
 import { PubSub } from 'graphql-subscriptions';
 
-// Single generic notification job interface
 export interface NotificationJob {
   type: NotificationType;
   title: string;

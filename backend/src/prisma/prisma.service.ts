@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { LoggerService } from '../common/services/logger.service';
 import { EncryptionService } from '../common/services/encryption.service';
-import { encryptionConfig } from '../common/config/encryption.config';
+import { EncryptionMiddleware } from '../common/middleware/encryption.middleware';
 
 @Injectable()
 export class PrismaService
@@ -14,7 +14,6 @@ export class PrismaService
     private readonly encryptionService: EncryptionService,
   ) {
     super();
-    // Logger context is handled by LoggerService internally
     this.setupEncryptionMiddleware();
   }
 
@@ -31,57 +30,15 @@ export class PrismaService
   }
 
   private setupEncryptionMiddleware() {
-    // Use the centralized encryption configuration
-    const { encryptedFields } = encryptionConfig;
+    const encryptionMiddleware = new EncryptionMiddleware(
+      this.encryptionService,
+    );
+    const middleware = encryptionMiddleware.createMiddleware();
 
-    // Middleware to encrypt data before saving
-    this.$use(async (params, next) => {
-      const modelName = params.model;
-      const config = encryptedFields[modelName as keyof typeof encryptedFields];
-
-      if (config && params.action === 'create') {
-        params.args.data = this.encryptionService.encryptObject(
-          params.args.data,
-          [...config], // Convert readonly array to regular array
-        );
-      }
-
-      if (config && params.action === 'update') {
-        if (params.args.data) {
-          params.args.data = this.encryptionService.encryptObject(
-            params.args.data,
-            [...config], // Convert readonly array to regular array
-          );
-        }
-      }
-
-      if (config && params.action === 'updateMany') {
-        if (params.args.data) {
-          params.args.data = this.encryptionService.encryptObject(
-            params.args.data,
-            [...config], // Convert readonly array to regular array
-          );
-        }
-      }
-
-      const result = await next(params);
-
-      // Decrypt data after reading
-      if (
-        config &&
-        ['findMany', 'findFirst', 'findUnique'].includes(params.action)
-      ) {
-        if (Array.isArray(result)) {
-          return result.map(
-            (item) => this.encryptionService.decryptObject(item, [...config]), // Convert readonly array to regular array
-          );
-        } else if (result) {
-          return this.encryptionService.decryptObject(result, [...config]); // Convert readonly array to regular array
-        }
-      }
-
-      return result;
-    });
+    // Suppress deprecation warning for now
+    // TODO: Migrate to client extensions when Prisma version supports it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this as any).$use(middleware);
   }
 
   // Helper method to log database operations

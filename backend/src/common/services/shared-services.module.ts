@@ -4,11 +4,24 @@ import { EncryptionService } from './encryption.service';
 import { LoggerService } from './logger.service';
 import { RedisService } from './redis.service';
 import { EncryptionUtils } from '../utils/encryption.utils';
+import { EncryptionMiddleware } from '../middleware/encryption.middleware';
 
 @Global()
 @Module({
   imports: [ConfigModule],
-  providers: [EncryptionService, LoggerService, RedisService, EncryptionUtils],
-  exports: [EncryptionService, LoggerService, RedisService, EncryptionUtils],
+  providers: [
+    EncryptionService,
+    LoggerService,
+    RedisService,
+    EncryptionUtils,
+    EncryptionMiddleware,
+  ],
+  exports: [
+    EncryptionService,
+    LoggerService,
+    RedisService,
+    EncryptionUtils,
+    EncryptionMiddleware,
+  ],
 })
 export class SharedServicesModule {}

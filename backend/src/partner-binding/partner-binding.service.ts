@@ -7,7 +7,7 @@ import {
   RejectPartnerBindingDto,
 } from './dtos/partner-binding-dto';
 import { BindingStatus } from '@prisma/client';
-import { generateInvitationCode } from 'src/shared/utils/generateInvitationCode';
+import { generateInvitationCode } from '../common/utils/generateInvitationCode';
 import { ResponseType } from 'src/shared/graphql/types';
 import { PartnerBindingResponse } from './types/partner-binding-types';
 import { NotificationType } from '@prisma/client';
