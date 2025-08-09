@@ -39,6 +39,7 @@ export class ReminderService {
     const reminder = await this.prisma.reminder.create({
       data: {
         ...reminderData,
+        targetType, // Add the targetType to the database
         createdById: userId,
         recipientId:
           targetType === ReminderTargetType.FOR_ME ? null : recipientId,
