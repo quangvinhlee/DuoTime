@@ -112,6 +112,7 @@ export default function AuthPage() {
       }
 
       const token = data.googleLogin.token;
+      console.log("token", token);
 
       // Step 4: Store token
       await SecureStore.setItemAsync("jwt_token", token);

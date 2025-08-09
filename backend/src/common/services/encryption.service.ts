@@ -58,7 +58,7 @@ export class EncryptionService {
     for (const field of fieldsToEncrypt) {
       const value = encryptedObj[field];
       if (value && typeof value === 'string') {
-        (encryptedObj as any)[field] = this.encrypt(value);
+        encryptedObj[field] = this.encrypt(value) as T[keyof T];
       }
     }
 
@@ -80,7 +80,7 @@ export class EncryptionService {
     for (const field of fieldsToDecrypt) {
       const value = decryptedObj[field];
       if (value && typeof value === 'string') {
-        (decryptedObj as any)[field] = this.decrypt(value);
+        decryptedObj[field] = this.decrypt(value) as T[keyof T];
       }
     }
 

@@ -50,7 +50,9 @@ export class PushNotificationService {
         `📱 Token: ${user.pushToken ? user.pushToken.substring(0, 30) + '...' : 'null'}`,
       );
 
-      // Send push notification
+      // Configure push notification based on type
+      const isReminderNotification = notification.type === 'REMINDER';
+
       await this.sendToExpoPushService({
         to: user.pushToken,
         title: notification.title,
@@ -61,8 +63,15 @@ export class PushNotificationService {
           metadata: notification.metadata,
           reminderId: notification.reminderId,
         },
-        sound: 'default',
+        // Make reminder notifications high-priority like alarms
+        sound: isReminderNotification ? 'default' : 'default',
         badge: 1,
+        priority: isReminderNotification ? 'high' : 'normal',
+        // Make reminder notifications show as alerts that require action
+        ...(isReminderNotification && {
+          channelId: 'reminders',
+          categoryId: 'reminder',
+        }),
       });
 
       console.log(`📱 Push notification sent to user ${notification.userId}`);
@@ -85,6 +94,9 @@ export class PushNotificationService {
     data?: any;
     sound?: string;
     badge?: number;
+    priority?: string;
+    channelId?: string;
+    categoryId?: string;
   }) {
     try {
       // Send to Expo Push API

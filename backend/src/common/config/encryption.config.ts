@@ -1,7 +1,7 @@
 export const encryptionConfig = {
   // Fields that will be automatically encrypted/decrypted by Prisma middleware
   encryptedFields: {
-    User: ['googleId', 'email', 'pushToken'],
+    User: ['email', 'pushToken'],
     LoveNote: ['message'],
     Reminder: ['description'],
     UserPreferences: ['preferredColors'],

@@ -263,6 +263,7 @@ export class ReminderService {
     const delay = scheduledAt.getTime() - Date.now();
 
     if (delay > 0) {
+      // Schedule for future - this is the proper alarm behavior
       await this.remindersQueue.add(
         'send-reminder',
         { reminderId: reminder.id },
@@ -278,12 +279,15 @@ export class ReminderService {
         delay,
       });
     } else {
-      // If the time has already passed, send immediately
-      await this.remindersQueue.add(
-        'send-reminder',
-        { reminderId: reminder.id },
-        { jobId: reminder.id },
-      );
+      // If the time has already passed, log but don't send immediately
+      // This prevents immediate notifications for past times
+      this.logger.logBusinessEvent('reminder_past_time_ignored', {
+        reminderId: reminder.id,
+        scheduledAt: reminder.scheduledAt,
+        delay,
+        message:
+          'Reminder scheduled for past time - no notification will be sent',
+      });
     }
 
     // If it's a recurring reminder, also schedule the next occurrence
