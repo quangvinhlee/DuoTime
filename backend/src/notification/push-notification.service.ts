@@ -71,6 +71,8 @@ export class PushNotificationService {
         ...(isReminderNotification && {
           channelId: 'reminders',
           categoryId: 'reminder',
+          // Use system notification sound
+          sound: 'default',
         }),
       });
 

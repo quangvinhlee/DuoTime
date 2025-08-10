@@ -62,11 +62,12 @@ model Reminder {
   targetType       ReminderTargetType @default(FOR_ME) // FOR_ME, FOR_PARTNER, FOR_BOTH
   createdById      String
   recipientId      String? // Only used when targetType is FOR_PARTNER
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  notifications    Notification[]
-  createdBy        User               @relation("ReminderCreator", fields: [createdById], references: [id], onDelete: Cascade)
-  recipient        User?              @relation("ReminderRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  notifications Notification[]
+  createdBy     User           @relation("ReminderCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  recipient     User?          @relation("ReminderRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
 
   @@index([recipientId, status])
   @@index([scheduledAt])

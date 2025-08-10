@@ -41,6 +41,16 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   addNotification: (notification) => {
     const { notifications, unreadCount } = get();
 
+    // For reminder notifications, don't persist them in the store
+    // They should only exist for the current session
+    if (notification.type === "REMINDER") {
+      // Just update the newNotification for immediate display
+      set({
+        newNotification: notification,
+      });
+      return;
+    }
+
     // Check if notification already exists to prevent duplicates
     const existingNotification = notifications.find(
       (n) => n.id === notification.id
