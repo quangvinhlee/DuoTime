@@ -63,15 +63,12 @@ export class PushNotificationService {
           metadata: notification.metadata,
           reminderId: notification.reminderId,
         },
-        // Make reminder notifications high-priority like alarms
         sound: isReminderNotification ? 'default' : 'default',
         badge: 1,
         priority: isReminderNotification ? 'high' : 'normal',
-        // Make reminder notifications show as alerts that require action
         ...(isReminderNotification && {
           channelId: 'reminders',
           categoryId: 'reminder',
-          // Use system notification sound
           sound: 'default',
         }),
       });

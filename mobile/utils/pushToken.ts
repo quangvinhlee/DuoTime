@@ -1,5 +1,15 @@
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
+import Constants from "expo-constants";
+
+/**
+ * Validate if a string is a valid UUID
+ */
+const isValidUUID = (uuid: string): boolean => {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
 
 /**
  * Get push token from Expo Notifications
@@ -28,11 +38,28 @@ export const getPushToken = async (): Promise<string | null> => {
     }
 
     // Get the push token with proper configuration
+    // Prioritize the app.json configuration over environment variable to avoid conflicts
+    const envProjectId = process.env.EXPO_PUBLIC_PROJECT_ID;
+    const configProjectId = Constants.expoConfig?.extra?.eas?.projectId;
+
+    // Use config project ID if it's a valid UUID, otherwise fall back to env
+    let projectId = configProjectId;
+    if (!projectId || !isValidUUID(projectId)) {
+      projectId = envProjectId;
+    }
+
+    // Validate that we have a proper UUID
+    if (!projectId || !isValidUUID(projectId)) {
+      console.error("Invalid project ID format. Expected a valid UUID.");
+      console.error("Environment project ID:", envProjectId);
+      console.error("Config project ID:", configProjectId);
+      return null;
+    }
+
     const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: process.env.EXPO_PUBLIC_PROJECT_ID, // Your EAS project ID
+      projectId: projectId,
     });
 
-    console.log("Push token obtained:", tokenData.data);
     return tokenData.data;
   } catch (error) {
     console.error("Error getting push token:", error);
@@ -43,18 +70,21 @@ export const getPushToken = async (): Promise<string | null> => {
       error.message &&
       error.message.includes("FirebaseApp is not initialized")
     ) {
-      console.log("Firebase not initialized - this is expected in development");
-      console.log("Push tokens will work properly in production builds");
+      // Return a development token for testing
+      return "ExponentPushToken[DEV_MOCK_TOKEN_FOR_TESTING]";
+    }
 
+    // Check if it's a project ID validation error
+    if (
+      error instanceof Error &&
+      error.message &&
+      error.message.includes("Invalid uuid")
+    ) {
       // Return a development token for testing
       return "ExponentPushToken[DEV_MOCK_TOKEN_FOR_TESTING]";
     }
 
     // For other errors, return null
-    console.log(
-      "Push token error:",
-      error instanceof Error ? error.message : String(error)
-    );
     return null;
   }
 };
