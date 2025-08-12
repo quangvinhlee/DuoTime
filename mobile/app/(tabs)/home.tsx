@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { sendTestNotification } from "../../utils/pushToken";
 
 export default function HomePage() {
   return (
@@ -316,6 +317,24 @@ export default function HomePage() {
                     </Text>
                     <Text className="text-xs text-gray-600 text-center">
                       Couple preferences
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              {/* Test Notification Button - Remove in production */}
+              <View className="flex-row space-x-4">
+                <TouchableOpacity
+                  className="flex-1 bg-yellow-100 rounded-2xl p-5 shadow-sm border-2 border-yellow-300"
+                  onPress={sendTestNotification}
+                >
+                  <View className="items-center">
+                    <Text className="text-3xl mb-2">🔔</Text>
+                    <Text className="font-bold text-gray-800 text-center">
+                      Test Notification
+                    </Text>
+                    <Text className="text-xs text-gray-600 text-center">
+                      Send test push notification
                     </Text>
                   </View>
                 </TouchableOpacity>
