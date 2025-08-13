@@ -28,7 +28,6 @@ export class PartnerBindingResolver {
     @Args('createPartnerBindingDto')
     createPartnerBindingDto: CreatePartnerBindingDto,
   ): Promise<PartnerBindingResponse> {
-    console.log('CurrentUser:', jwtUser);
     return this.partnerBindingService.createPartnerBinding({
       ...createPartnerBindingDto,
       senderId: jwtUser.id,

@@ -14,7 +14,6 @@ export class NotificationService {
     @InjectQueue('notifications') private readonly notificationsQueue: Queue,
   ) {}
 
-  // Single unified notification method for ALL types
   async createNotification(
     type: NotificationType,
     title: string,
@@ -32,45 +31,12 @@ export class NotificationService {
       reminderId,
     };
 
-    // Add job to queue for processing
     await this.notificationsQueue.add('generic', jobData, {
       attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 2000,
-      },
+      backoff: { type: 'exponential', delay: 2000 },
     });
-
-    // Publish event for other services to listen
-    await this.redisService.publish(
-      'notification-queued',
-      JSON.stringify({
-        type,
-        title,
-        message,
-        userId,
-        metadata,
-        reminderId,
-        timestamp: new Date().toISOString(),
-      }),
-    );
-
-    // Publish to user-specific channel for real-time notifications
-    await this.redisService.publish(
-      `notification:user:${userId}`,
-      JSON.stringify({
-        type,
-        title,
-        message,
-        userId,
-        metadata,
-        reminderId,
-        timestamp: new Date().toISOString(),
-      }),
-    );
   }
 
-  // Query methods
   async getUserNotifications(userId: string, limit = 20, offset = 0) {
     return this.prisma.notification.findMany({
       where: { userId },
@@ -81,80 +47,28 @@ export class NotificationService {
   }
 
   async markNotificationAsRead(notificationId: string, userId: string) {
-    const result = await this.prisma.notification.updateMany({
-      where: {
-        id: notificationId,
-        userId,
-      },
-      data: {
-        isRead: true,
-      },
+    return this.prisma.notification.updateMany({
+      where: { id: notificationId, userId },
+      data: { isRead: true },
     });
-
-    // Publish event for analytics
-    await this.redisService.publish(
-      'notification-read',
-      JSON.stringify({
-        notificationId,
-        userId,
-        timestamp: new Date().toISOString(),
-      }),
-    );
-
-    return result;
   }
 
   async markAllNotificationsAsRead(userId: string) {
-    const result = await this.prisma.notification.updateMany({
-      where: {
-        userId,
-        isRead: false,
-      },
-      data: {
-        isRead: true,
-      },
+    return this.prisma.notification.updateMany({
+      where: { userId, isRead: false },
+      data: { isRead: true },
     });
-
-    // Publish event for analytics
-    await this.redisService.publish(
-      'notifications-all-read',
-      JSON.stringify({
-        userId,
-        count: result.count,
-        timestamp: new Date().toISOString(),
-      }),
-    );
-
-    return result;
   }
 
   async getUnreadNotificationCount(userId: string) {
     return this.prisma.notification.count({
-      where: {
-        userId,
-        isRead: false,
-      },
+      where: { userId, isRead: false },
     });
   }
 
   async deleteNotification(notificationId: string, userId: string) {
-    const result = await this.prisma.notification.deleteMany({
-      where: {
-        id: notificationId,
-        userId,
-      },
+    return this.prisma.notification.deleteMany({
+      where: { id: notificationId, userId },
     });
-
-    // Publish event for analytics
-    await this.redisService.publish(
-      'notification-deleted',
-      JSON.stringify({
-        notificationId,
-        userId,
-        timestamp: new Date().toISOString(),
-      }),
-    );
-
-    return result;
   }
 }

@@ -14,26 +14,11 @@ async function bootstrap() {
     { bufferLogs: true },
   );
 
-  //test
-  // Use Pino logger
   app.useLogger(app.get(Logger));
-
   app.useGlobalPipes(new ValidationPipe());
 
-  // Enable CORS
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:8081',
-      'http://localhost:19006',
-      'exp://localhost:8081',
-      'http://192.168.4.86:8081',
-      'http://192.168.4.86:19006',
-      'http://192.168.4.86:3000', // Add backend IP
-      'exp://192.168.4.86:8081',
-      // Allow any origin for development (remove in production)
-      '*',
-    ],
+    origin: true, // Allow all origins in development
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: [
@@ -46,16 +31,14 @@ async function bootstrap() {
   });
 
   const PORT = process.env.PORT ?? 3000;
-
-  await app.listen(PORT, '0.0.0.0'); // Listen on all interfaces
+  await app.listen(PORT, '0.0.0.0');
 
   const logger = app.get(Logger);
-  logger.log(`🚀 Server is running on port ${PORT}`);
-  logger.log(`🎯 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.log(`🚀 Server running on port ${PORT}`);
   logger.log(`📊 GraphQL Playground: http://localhost:${PORT}/graphql`);
 }
 
 bootstrap().catch((error) => {
-  console.error('❌ Error starting server:', error);
+  console.error('❌ Server startup error:', error);
   process.exit(1);
 });

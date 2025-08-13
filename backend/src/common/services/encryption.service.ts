@@ -10,27 +10,16 @@ export class EncryptionService {
     this.secretKey = getEncryptionKey();
   }
 
-  /**
-   * Encrypts a string value
-   * @param value - The string to encrypt
-   * @returns Encrypted string
-   */
   encrypt(value: string): string {
     if (!value) return value;
 
     try {
       return CryptoJS.AES.encrypt(value, this.secretKey).toString();
     } catch (error) {
-      console.error('Encryption failed:', error);
       throw new Error('Failed to encrypt data');
     }
   }
 
-  /**
-   * Decrypts an encrypted string value
-   * @param encryptedValue - The encrypted string to decrypt
-   * @returns Decrypted string
-   */
   decrypt(encryptedValue: string): string {
     if (!encryptedValue) return encryptedValue;
 
@@ -38,17 +27,10 @@ export class EncryptionService {
       const bytes = CryptoJS.AES.decrypt(encryptedValue, this.secretKey);
       return bytes.toString(CryptoJS.enc.Utf8);
     } catch (error) {
-      console.error('Decryption failed:', error);
       throw new Error('Failed to decrypt data');
     }
   }
 
-  /**
-   * Encrypts an object by encrypting specific fields
-   * @param obj - The object to encrypt
-   * @param fieldsToEncrypt - Array of field names to encrypt
-   * @returns Object with specified fields encrypted
-   */
   encryptObject<T extends Record<string, any>>(
     obj: T,
     fieldsToEncrypt: (keyof T)[],
@@ -65,12 +47,6 @@ export class EncryptionService {
     return encryptedObj;
   }
 
-  /**
-   * Decrypts an object by decrypting specific fields
-   * @param obj - The object to decrypt
-   * @param fieldsToDecrypt - Array of field names to decrypt
-   * @returns Object with specified fields decrypted
-   */
   decryptObject<T extends Record<string, any>>(
     obj: T,
     fieldsToDecrypt: (keyof T)[],
@@ -87,16 +63,10 @@ export class EncryptionService {
     return decryptedObj;
   }
 
-  /**
-   * Checks if a string is encrypted
-   * @param value - The string to check
-   * @returns True if the string appears to be encrypted
-   */
   isEncrypted(value: string): boolean {
     if (!value) return false;
 
     try {
-      // Try to decrypt - if it fails, it's probably not encrypted
       this.decrypt(value);
       return true;
     } catch {

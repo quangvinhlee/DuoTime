@@ -23,7 +23,7 @@ import { throttleConfig } from './common/config/throttle.config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Make config available everywhere
+      isGlobal: true,
       envFilePath: '.env',
     }),
     LoggerModule.forRoot(loggerConfig),
@@ -46,7 +46,6 @@ import { throttleConfig } from './common/config/throttle.config';
       subscriptions: {
         'graphql-ws': {
           onConnect: (context) => {
-            // Extract connection parameters for WebSocket connections
             const { connectionParams } = context;
             return {
               req: {
@@ -61,9 +60,7 @@ import { throttleConfig } from './common/config/throttle.config';
       },
       installSubscriptionHandlers: true,
       context: ({ req, connection }) => {
-        // Handle both HTTP requests and WebSocket connections
         if (connection) {
-          // WebSocket connection (subscriptions)
           return {
             req: {
               headers: {
@@ -73,7 +70,6 @@ import { throttleConfig } from './common/config/throttle.config';
             },
           };
         }
-        // HTTP request (queries/mutations)
         return { req };
       },
     }),
@@ -94,11 +90,6 @@ import { throttleConfig } from './common/config/throttle.config';
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-    // Temporarily disabled to stop log spam
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: GraphQLLoggingInterceptor,
-    // },
     {
       provide: APP_GUARD,
       useClass: GraphQLThrottlerGuard,
