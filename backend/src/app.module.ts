@@ -5,9 +5,8 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { BullModule } from '@nestjs/bull';
-import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
-import { APP_PIPE, APP_GUARD } from '@nestjs/core';
+import { APP_PIPE, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
@@ -15,10 +14,12 @@ import { PartnerBindingModule } from './partner-binding/partner-binding.module';
 import { UserModule } from './user/user.module';
 import { NotificationModule } from './notification/notification.module';
 import { ReminderModule } from './reminder/reminder.module';
+import { LoveNoteModule } from './love-note/love-note.module';
 import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
 import { loggerConfig } from './common/config/logger.config';
 import { throttleConfig } from './common/config/throttle.config';
+import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging.interceptor';
 
 @Module({
   imports: [
@@ -79,13 +80,10 @@ import { throttleConfig } from './common/config/throttle.config';
     UserModule,
     NotificationModule,
     ReminderModule,
+    LoveNoteModule,
   ],
   controllers: [],
   providers: [
-    {
-      provide: 'PUB_SUB',
-      useValue: new PubSub(),
-    },
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,
@@ -93,6 +91,10 @@ import { throttleConfig } from './common/config/throttle.config';
     {
       provide: APP_GUARD,
       useClass: GraphQLThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GraphQLLoggingInterceptor,
     },
   ],
 })

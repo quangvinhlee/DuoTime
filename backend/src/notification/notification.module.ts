@@ -21,10 +21,7 @@ import { SharedServicesModule } from '../common/services/shared-services.module'
     NotificationService,
     NotificationProcessor,
     PushNotificationService,
-    {
-      provide: 'PUB_SUB',
-      useValue: new PubSub(),
-    },
+    // Use PUB_SUB from root module; avoid duplicating providers here
   ],
   exports: [NotificationService],
 })

@@ -4,10 +4,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "react-native";
 import { useNotificationStoreWithGraphQL } from "../../hooks/useNotificationStore";
 import { NotificationBadge } from "../../components/NotificationBadge";
+import { useGetUnreadLoveNoteCountQuery } from "../../generated/graphql";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const { unreadCount } = useNotificationStoreWithGraphQL();
+  const { data: loveNoteCountData } = useGetUnreadLoveNoteCountQuery();
 
   return (
     <Tabs
@@ -65,6 +67,23 @@ export default function TabLayout() {
             <View style={{ position: "relative" }}>
               <Ionicons name="notifications" size={size} color={color} />
               <NotificationBadge count={unreadCount} size={18} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="love-notes"
+        options={{
+          title: "Love Notes",
+          tabBarIcon: ({ color, size }) => (
+            <View style={{ position: "relative" }}>
+              <Ionicons name="mail" size={size} color={color} />
+              {loveNoteCountData?.getUnreadLoveNoteCount > 0 && (
+                <NotificationBadge
+                  count={loveNoteCountData.getUnreadLoveNoteCount}
+                  size={18}
+                />
+              )}
             </View>
           ),
         }}

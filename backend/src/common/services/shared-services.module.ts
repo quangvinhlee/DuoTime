@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { PubSub } from 'graphql-subscriptions';
 import { ConfigModule } from '@nestjs/config';
 import { EncryptionService } from './encryption.service';
 import { LoggerService } from './logger.service';
@@ -15,6 +16,10 @@ import { EncryptionMiddleware } from '../middleware/encryption.middleware';
     RedisService,
     EncryptionUtils,
     EncryptionMiddleware,
+    {
+      provide: 'PUB_SUB',
+      useValue: new PubSub(),
+    },
   ],
   exports: [
     EncryptionService,
@@ -22,6 +27,7 @@ import { EncryptionMiddleware } from '../middleware/encryption.middleware';
     RedisService,
     EncryptionUtils,
     EncryptionMiddleware,
+    'PUB_SUB',
   ],
 })
 export class SharedServicesModule {}

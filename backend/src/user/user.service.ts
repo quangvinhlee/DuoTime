@@ -48,10 +48,7 @@ export class UserService {
 
   async searchUsers(query: string, excludeUserId?: string): Promise<User[]> {
     const where: Prisma.UserWhereInput = {
-      OR: [
-        { name: { contains: query, mode: 'insensitive' } },
-        { email: { contains: query, mode: 'insensitive' } },
-      ],
+      OR: [{ name: { contains: query, mode: 'insensitive' } }],
     };
 
     if (excludeUserId) {

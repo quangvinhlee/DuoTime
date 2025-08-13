@@ -110,7 +110,6 @@ model LoveNote {
   id          String   @id @default(uuid())
   title       String?
   message     String
-  isAnonymous Boolean  @default(false)
   isRead      Boolean  @default(false)
   senderId    String
   recipientId String
@@ -132,7 +131,6 @@ model UserPreferences {
   loveNoteNotifications Boolean  @default(true)
   showOnlineStatus      Boolean  @default(true)
   allowSecretReminders  Boolean  @default(true)
-  allowAnonymousNotes   Boolean  @default(true)
   preferredTheme        String   @default("love")
   preferredColors       String?
   defaultReminderTime   String   @default("09:00")

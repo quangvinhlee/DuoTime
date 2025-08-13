@@ -4,11 +4,10 @@ import { cleanErrorMessage } from '../utils/error-cleaner';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class LoggerService extends PinoLogger {
-  // Authentication related logs
   logAuthSuccess(
     userId: string,
     method: string,
-    additionalInfo?: Record<string, any>,
+    additionalInfo?: Record<string, unknown>,
   ) {
     this.info(
       {
@@ -24,7 +23,7 @@ export class LoggerService extends PinoLogger {
   logAuthFailure(
     method: string,
     reason: string,
-    additionalInfo?: Record<string, any>,
+    additionalInfo?: Record<string, unknown>,
   ) {
     const cleanReason = cleanErrorMessage(reason);
 
@@ -39,44 +38,61 @@ export class LoggerService extends PinoLogger {
     );
   }
 
-  logDatabaseOperation(
-    operation: string,
-    table: string,
-    duration?: number,
-    additionalInfo?: Record<string, any>,
+  logSecurityEvent(
+    event: string,
+    severity: 'low' | 'medium' | 'high' | 'critical',
+    details: Record<string, unknown>,
   ) {
-    this.debug(
+    this.warn(
       {
-        event: 'db_operation',
-        operation,
-        table,
-        duration,
-        ...additionalInfo,
+        event: 'security_event',
+        securityEvent: event,
+        severity,
+        ...details,
       },
-      `Database ${operation} on ${table}${
-        duration ? ` completed in ${duration}ms` : ''
-      }`,
+      `Security event: ${event} (${severity} severity)`,
     );
   }
 
-  logDatabaseError(
-    operation: string,
-    table: string,
-    error: Error,
-    additionalInfo?: Record<string, any>,
-  ) {
+  logDatabaseOperation(operation: string, table: string, duration: number) {
+    this.info(
+      {
+        event: 'database_operation',
+        operation,
+        table,
+        duration,
+      },
+      `Database ${operation} on ${table} completed in ${duration}ms`,
+    );
+  }
+
+  logDatabaseError(operation: string, table: string, error: Error) {
     const cleanError = cleanErrorMessage(error.message);
 
     this.error(
       {
-        event: 'db_error',
+        event: 'database_error',
         operation,
         table,
         error: cleanError,
-        stack: error.stack?.split('\n').slice(0, 3).join('\n'), // Limit stack trace
-        ...additionalInfo,
+        stack: error.stack?.split('\n').slice(0, 3).join('\n'),
       },
       `Database ${operation} on ${table} failed: ${cleanError}`,
+    );
+  }
+
+  logBusinessEvent(
+    event: string,
+    details: Record<string, unknown>,
+    level: 'info' | 'warn' | 'error' = 'info',
+  ) {
+    this[level](
+      {
+        event: 'business_event',
+        eventType: event,
+        ...details,
+      },
+      `Business event: ${event}`,
     );
   }
 
@@ -120,125 +136,6 @@ export class LoggerService extends PinoLogger {
       `GraphQL ${operationType}${
         operationName ? ` (${operationName})` : ''
       } failed: ${cleanError}`,
-    );
-  }
-
-  logBusinessEvent(
-    event: string,
-    details: Record<string, any>,
-    level: 'info' | 'warn' | 'error' = 'info',
-  ) {
-    this[level](
-      {
-        event: 'business_event',
-        eventType: event,
-        ...details,
-      },
-      `Business event: ${event}`,
-    );
-  }
-
-  logExternalApiCall(
-    service: string,
-    endpoint: string,
-    method: string,
-    duration?: number,
-    statusCode?: number,
-  ) {
-    this.info(
-      {
-        event: 'external_api_call',
-        service,
-        endpoint,
-        method,
-        duration,
-        statusCode,
-      },
-      `External API call to ${service} ${method} ${endpoint} ${
-        statusCode ? `(${statusCode})` : ''
-      } ${duration ? `in ${duration}ms` : ''}`,
-    );
-  }
-
-  logExternalApiError(
-    service: string,
-    endpoint: string,
-    method: string,
-    error: Error,
-    statusCode?: number,
-  ) {
-    const cleanError = cleanErrorMessage(error.message);
-
-    this.error(
-      {
-        event: 'external_api_error',
-        service,
-        endpoint,
-        method,
-        error: cleanError,
-        statusCode,
-      },
-      `External API call to ${service} ${method} ${endpoint} failed: ${cleanError}`,
-    );
-  }
-
-  // Performance monitoring
-  logPerformanceMetric(
-    metric: string,
-    value: number,
-    unit: string,
-    additionalInfo?: Record<string, any>,
-  ) {
-    this.info(
-      {
-        event: 'performance_metric',
-        metric,
-        value,
-        unit,
-        ...additionalInfo,
-      },
-      `Performance metric: ${metric} = ${value}${unit}`,
-    );
-  }
-
-  // Security events
-  logSecurityEvent(
-    event: string,
-    severity: 'low' | 'medium' | 'high' | 'critical',
-    details: Record<string, any>,
-  ) {
-    const level =
-      severity === 'critical' || severity === 'high' ? 'error' : 'warn';
-    this[level](
-      {
-        event: 'security_event',
-        securityEvent: event,
-        severity,
-        ...details,
-      },
-      `Security event (${severity}): ${event}`,
-    );
-  }
-
-  // Push notification logging
-  logPushNotification(
-    action:
-      | 'token_created'
-      | 'token_updated'
-      | 'token_renewed'
-      | 'notification_sent'
-      | 'notification_failed',
-    userId: string,
-    details: Record<string, any>,
-  ) {
-    this.info(
-      {
-        event: 'push_notification',
-        action,
-        userId,
-        ...details,
-      },
-      `Push notification ${action} for user ${userId}`,
     );
   }
 }

@@ -33,7 +33,6 @@ export class NotificationProcessor {
 
       await job.progress(25);
 
-      // Create notification in database
       const notification = await this.prisma.notification.create({
         data: {
           type,
@@ -47,7 +46,6 @@ export class NotificationProcessor {
       await job.progress(50);
       await job.log('Notification created in database');
 
-      // Publish to Redis for push notifications (backup)
       await this.redisService.publish(
         'notification-created',
         JSON.stringify({
@@ -64,7 +62,6 @@ export class NotificationProcessor {
       await job.progress(75);
       await job.log('Published to Redis for push notifications');
 
-      // Try real-time WebSocket (may fail if user is offline)
       try {
         await this.pubSub.publish(`notification:user:${userId}`, {
           notificationReceived: {
@@ -81,7 +78,6 @@ export class NotificationProcessor {
         await job.log('Published to GraphQL subscription (real-time)');
       } catch {
         await job.log('WebSocket failed, push notification will handle it');
-        // Push notification will still work even if WebSocket fails
       }
 
       await job.progress(100);

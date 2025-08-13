@@ -1,22 +1,27 @@
 import { create } from "zustand";
 import { Notification } from "@/generated/graphql";
 
+// Extended notification type to include love note specific data
+interface ExtendedNotification extends Notification {
+  loveNoteId?: string | null;
+}
+
 interface NotificationState {
-  notifications: Notification[];
+  notifications: ExtendedNotification[];
   unreadCount: number;
   loading: boolean;
   error: any;
-  newNotification: Notification | null;
+  newNotification: ExtendedNotification | null;
 
   // Actions
-  setNotifications: (notifications: Notification[]) => void;
+  setNotifications: (notifications: ExtendedNotification[]) => void;
   setUnreadCount: (count: number) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: any) => void;
-  setNewNotification: (notification: Notification | null) => void;
+  setNewNotification: (notification: ExtendedNotification | null) => void;
 
   // Business logic
-  addNotification: (notification: Notification) => void;
+  addNotification: (notification: ExtendedNotification) => void;
   markAsRead: (notificationId: string) => void;
   deleteNotification: (notificationId: string) => void;
   clearBadge: () => void;

@@ -107,7 +107,6 @@ export class NotificationResolver {
   })
   @UseGuards(JwtAuthGuard)
   notificationReceived(@CurrentUser() jwtUser: JwtPayload) {
-    // Add null check for jwtUser
     if (!jwtUser || !jwtUser.id) {
       throw new UnauthorizedException(
         'User not authenticated for subscription',

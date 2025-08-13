@@ -10,6 +10,12 @@ type AuthResponse {
   token: String!
 }
 
+input CreateLoveNoteInput {
+  message: String!
+  recipientId: String!
+  title: String!
+}
+
 input CreatePartnerBindingDto {
   receiverId: String
 }
@@ -30,6 +36,12 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input GetLoveNotesInput {
+  isRead: Boolean
+  limit: Int! = 20
+  offset: Int! = 0
+}
+
 input GetRemindersInput {
   limit: Int! = 20
   offset: Int! = 0
@@ -42,20 +54,43 @@ input GoogleLoginInput {
   pushToken: String
 }
 
+type LoveNoteType {
+  createdAt: DateTime!
+  id: ID!
+  isRead: Boolean!
+  message: String!
+  recipient: LoveNoteUserType
+  recipientId: String!
+  sender: LoveNoteUserType
+  senderId: String!
+  title: String
+  updatedAt: DateTime!
+}
+
+type LoveNoteUserType {
+  avatarUrl: String
+  id: ID!
+  name: String
+}
+
 type Mutation {
   acceptPartnerBinding(acceptPartnerBindingDto: AcceptPartnerBindingDto!): PartnerBindingResponse!
+  createLoveNote(input: CreateLoveNoteInput!): LoveNoteType!
   createPartnerBinding(createPartnerBindingDto: CreatePartnerBindingDto!): PartnerBindingResponse!
   createReminder(input: CreateReminderInput!): ReminderGraphQLType!
   deleteAvatar: ResponseType!
+  deleteLoveNote(loveNoteId: String!): ResponseType!
   deleteNotification(notificationId: String!): ResponseType!
   deleteReminder(reminderId: String!): ResponseType!
   googleLogin(googleLoginInput: GoogleLoginInput!): AuthResponse!
   markAllNotificationsAsRead: ResponseType!
+  markLoveNoteAsRead(loveNoteId: String!): LoveNoteType!
   markNotificationAsRead(notificationId: String!): ResponseType!
   markReminderAsCompleted(reminderId: String!): ReminderGraphQLType!
   rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): ResponseType!
   removePartner: ResponseType!
   renewToken(input: RenewTokenInput): AuthResponse!
+  updateLoveNote(input: UpdateLoveNoteInput!, loveNoteId: String!): LoveNoteType!
   updateProfile(input: UpdateProfileInput!): ResponseType!
   updateReminder(input: UpdateReminderInput!, reminderId: String!): ReminderGraphQLType!
   uploadAvatar(input: UploadAvatarInput!): ResponseType!
@@ -68,8 +103,17 @@ type Notification {
   reminderId: String
   sentAt: DateTime!
   title: String!
-  type: String!
+  type: NotificationType!
   userId: String!
+}
+
+"""The type of notification"""
+enum NotificationType {
+  ACHIEVEMENT
+  LOVE_NOTE
+  PARTNER_ACTIVITY
+  REMINDER
+  SYSTEM
 }
 
 type PartnerBindingResponse {
@@ -80,9 +124,12 @@ type PartnerBindingResponse {
 }
 
 type Query {
+  getLoveNote(loveNoteId: String!): LoveNoteType!
+  getLoveNotes(input: GetLoveNotesInput!): [LoveNoteType!]!
   getProfile: UserType!
   getReminder(reminderId: String!): ReminderGraphQLType!
   getReminders(input: GetRemindersInput!): [ReminderGraphQLType!]!
+  getUnreadLoveNoteCount: Int!
   getUnreadNotificationCount: Int!
   getUserNotifications(limit: Int! = 20, offset: Int! = 0): [Notification!]!
   searchUsers(input: SearchUsersInput!): [UserType!]!
@@ -153,6 +200,12 @@ input SearchUsersInput {
 
 type Subscription {
   notificationReceived: Notification!
+}
+
+input UpdateLoveNoteInput {
+  isRead: Boolean
+  message: String
+  title: String
 }
 
 input UpdateProfileInput {

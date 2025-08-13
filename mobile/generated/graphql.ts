@@ -27,8 +27,38 @@ export type AuthResponse = {
   token: Scalars['String']['output'];
 };
 
+export type CreateLoveNoteInput = {
+  message: Scalars['String']['input'];
+  recipientId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
 export type CreatePartnerBindingDto = {
   receiverId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CreateReminderInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  isRecurring?: Scalars['Boolean']['input'];
+  recipientId?: InputMaybe<Scalars['String']['input']>;
+  recurringPattern?: InputMaybe<Scalars['String']['input']>;
+  scheduledAt: Scalars['DateTime']['input'];
+  targetType?: ReminderTargetType;
+  title: Scalars['String']['input'];
+  type: ReminderType;
+};
+
+export type GetLoveNotesInput = {
+  isRead?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+};
+
+export type GetRemindersInput = {
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+  targetType?: InputMaybe<ReminderTargetType>;
+  type?: InputMaybe<ReminderType>;
 };
 
 export type GoogleLoginInput = {
@@ -36,19 +66,48 @@ export type GoogleLoginInput = {
   pushToken?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type LoveNoteType = {
+  __typename?: 'LoveNoteType';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  message: Scalars['String']['output'];
+  recipient?: Maybe<LoveNoteUserType>;
+  recipientId: Scalars['String']['output'];
+  sender?: Maybe<LoveNoteUserType>;
+  senderId: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type LoveNoteUserType = {
+  __typename?: 'LoveNoteUserType';
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   acceptPartnerBinding: PartnerBindingResponse;
+  createLoveNote: LoveNoteType;
   createPartnerBinding: PartnerBindingResponse;
+  createReminder: ReminderGraphQlType;
   deleteAvatar: ResponseType;
+  deleteLoveNote: ResponseType;
   deleteNotification: ResponseType;
+  deleteReminder: ResponseType;
   googleLogin: AuthResponse;
   markAllNotificationsAsRead: ResponseType;
+  markLoveNoteAsRead: LoveNoteType;
   markNotificationAsRead: ResponseType;
+  markReminderAsCompleted: ReminderGraphQlType;
   rejectPartnerBinding: ResponseType;
   removePartner: ResponseType;
   renewToken: AuthResponse;
+  updateLoveNote: LoveNoteType;
   updateProfile: ResponseType;
+  updateReminder: ReminderGraphQlType;
   uploadAvatar: ResponseType;
 };
 
@@ -58,8 +117,23 @@ export type MutationAcceptPartnerBindingArgs = {
 };
 
 
+export type MutationCreateLoveNoteArgs = {
+  input: CreateLoveNoteInput;
+};
+
+
 export type MutationCreatePartnerBindingArgs = {
   createPartnerBindingDto: CreatePartnerBindingDto;
+};
+
+
+export type MutationCreateReminderArgs = {
+  input: CreateReminderInput;
+};
+
+
+export type MutationDeleteLoveNoteArgs = {
+  loveNoteId: Scalars['String']['input'];
 };
 
 
@@ -68,13 +142,28 @@ export type MutationDeleteNotificationArgs = {
 };
 
 
+export type MutationDeleteReminderArgs = {
+  reminderId: Scalars['String']['input'];
+};
+
+
 export type MutationGoogleLoginArgs = {
   googleLoginInput: GoogleLoginInput;
 };
 
 
+export type MutationMarkLoveNoteAsReadArgs = {
+  loveNoteId: Scalars['String']['input'];
+};
+
+
 export type MutationMarkNotificationAsReadArgs = {
   notificationId: Scalars['String']['input'];
+};
+
+
+export type MutationMarkReminderAsCompletedArgs = {
+  reminderId: Scalars['String']['input'];
 };
 
 
@@ -88,8 +177,20 @@ export type MutationRenewTokenArgs = {
 };
 
 
+export type MutationUpdateLoveNoteArgs = {
+  input: UpdateLoveNoteInput;
+  loveNoteId: Scalars['String']['input'];
+};
+
+
 export type MutationUpdateProfileArgs = {
   input: UpdateProfileInput;
+};
+
+
+export type MutationUpdateReminderArgs = {
+  input: UpdateReminderInput;
+  reminderId: Scalars['String']['input'];
 };
 
 
@@ -105,9 +206,18 @@ export type Notification = {
   reminderId?: Maybe<Scalars['String']['output']>;
   sentAt: Scalars['DateTime']['output'];
   title: Scalars['String']['output'];
-  type: Scalars['String']['output'];
+  type: NotificationType;
   userId: Scalars['String']['output'];
 };
+
+/** The type of notification */
+export enum NotificationType {
+  Achievement = 'ACHIEVEMENT',
+  LoveNote = 'LOVE_NOTE',
+  PartnerActivity = 'PARTNER_ACTIVITY',
+  Reminder = 'REMINDER',
+  System = 'SYSTEM'
+}
 
 export type PartnerBindingResponse = {
   __typename?: 'PartnerBindingResponse';
@@ -119,11 +229,35 @@ export type PartnerBindingResponse = {
 
 export type Query = {
   __typename?: 'Query';
+  getLoveNote: LoveNoteType;
+  getLoveNotes: Array<LoveNoteType>;
   getProfile: UserType;
+  getReminder: ReminderGraphQlType;
+  getReminders: Array<ReminderGraphQlType>;
+  getUnreadLoveNoteCount: Scalars['Int']['output'];
   getUnreadNotificationCount: Scalars['Int']['output'];
   getUserNotifications: Array<Notification>;
-  sayHello: Scalars['String']['output'];
   searchUsers: Array<UserType>;
+};
+
+
+export type QueryGetLoveNoteArgs = {
+  loveNoteId: Scalars['String']['input'];
+};
+
+
+export type QueryGetLoveNotesArgs = {
+  input: GetLoveNotesInput;
+};
+
+
+export type QueryGetReminderArgs = {
+  reminderId: Scalars['String']['input'];
+};
+
+
+export type QueryGetRemindersArgs = {
+  input: GetRemindersInput;
 };
 
 
@@ -140,6 +274,52 @@ export type QuerySearchUsersArgs = {
 export type RejectPartnerBindingDto = {
   invitationCode: Scalars['String']['input'];
 };
+
+export type ReminderGraphQlType = {
+  __typename?: 'ReminderGraphQLType';
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<UserType>;
+  createdById: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isRecurring: Scalars['Boolean']['output'];
+  recipient?: Maybe<UserType>;
+  recipientId?: Maybe<Scalars['String']['output']>;
+  recurringPattern?: Maybe<Scalars['String']['output']>;
+  scheduledAt: Scalars['DateTime']['output'];
+  status: ReminderStatus;
+  targetType: ReminderTargetType;
+  title: Scalars['String']['output'];
+  type: ReminderType;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+/** The status of a reminder */
+export enum ReminderStatus {
+  Active = 'ACTIVE',
+  Completed = 'COMPLETED'
+}
+
+/** Who the reminder is for */
+export enum ReminderTargetType {
+  ForBoth = 'FOR_BOTH',
+  ForMe = 'FOR_ME',
+  ForPartner = 'FOR_PARTNER'
+}
+
+/** The type of reminder */
+export enum ReminderType {
+  Celebration = 'CELEBRATION',
+  Chores = 'CHORES',
+  Daily = 'DAILY',
+  Date = 'DATE',
+  Family = 'FAMILY',
+  Gift = 'GIFT',
+  Health = 'HEALTH',
+  Personal = 'PERSONAL',
+  Romance = 'ROMANCE',
+  Work = 'WORK'
+}
 
 export type RenewTokenInput = {
   pushToken?: InputMaybe<Scalars['String']['input']>;
@@ -161,8 +341,25 @@ export type Subscription = {
   notificationReceived: Notification;
 };
 
+export type UpdateLoveNoteInput = {
+  isRead?: InputMaybe<Scalars['Boolean']['input']>;
+  message?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateProfileInput = {
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateReminderInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  isRecurring?: InputMaybe<Scalars['Boolean']['input']>;
+  recipientId?: InputMaybe<Scalars['String']['input']>;
+  recurringPattern?: InputMaybe<Scalars['String']['input']>;
+  scheduledAt?: InputMaybe<Scalars['DateTime']['input']>;
+  targetType?: InputMaybe<ReminderTargetType>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<ReminderType>;
 };
 
 export type UploadAvatarInput = {
@@ -197,13 +394,61 @@ export type RenewTokenMutationVariables = Exact<{
 
 export type RenewTokenMutation = { __typename?: 'Mutation', renewToken: { __typename?: 'AuthResponse', token: string } };
 
+export type CreateLoveNoteMutationVariables = Exact<{
+  input: CreateLoveNoteInput;
+}>;
+
+
+export type CreateLoveNoteMutation = { __typename?: 'Mutation', createLoveNote: { __typename?: 'LoveNoteType', id: string, title?: string | null, message: string, isRead: boolean, senderId: string, recipientId: string, createdAt: any, updatedAt: any, sender?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null, recipient?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null } };
+
+export type GetLoveNotesQueryVariables = Exact<{
+  input: GetLoveNotesInput;
+}>;
+
+
+export type GetLoveNotesQuery = { __typename?: 'Query', getLoveNotes: Array<{ __typename?: 'LoveNoteType', id: string, title?: string | null, message: string, isRead: boolean, senderId: string, recipientId: string, createdAt: any, updatedAt: any, sender?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null, recipient?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null }> };
+
+export type GetLoveNoteQueryVariables = Exact<{
+  loveNoteId: Scalars['String']['input'];
+}>;
+
+
+export type GetLoveNoteQuery = { __typename?: 'Query', getLoveNote: { __typename?: 'LoveNoteType', id: string, title?: string | null, message: string, isRead: boolean, senderId: string, recipientId: string, createdAt: any, updatedAt: any, sender?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null, recipient?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null } };
+
+export type UpdateLoveNoteMutationVariables = Exact<{
+  loveNoteId: Scalars['String']['input'];
+  input: UpdateLoveNoteInput;
+}>;
+
+
+export type UpdateLoveNoteMutation = { __typename?: 'Mutation', updateLoveNote: { __typename?: 'LoveNoteType', id: string, title?: string | null, message: string, isRead: boolean, senderId: string, recipientId: string, createdAt: any, updatedAt: any, sender?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null, recipient?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null } };
+
+export type DeleteLoveNoteMutationVariables = Exact<{
+  loveNoteId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteLoveNoteMutation = { __typename?: 'Mutation', deleteLoveNote: { __typename?: 'ResponseType', success: boolean, message: string } };
+
+export type MarkLoveNoteAsReadMutationVariables = Exact<{
+  loveNoteId: Scalars['String']['input'];
+}>;
+
+
+export type MarkLoveNoteAsReadMutation = { __typename?: 'Mutation', markLoveNoteAsRead: { __typename?: 'LoveNoteType', id: string, title?: string | null, message: string, isRead: boolean, senderId: string, recipientId: string, createdAt: any, updatedAt: any, sender?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null, recipient?: { __typename?: 'LoveNoteUserType', id: string, name?: string | null, avatarUrl?: string | null } | null } };
+
+export type GetUnreadLoveNoteCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUnreadLoveNoteCountQuery = { __typename?: 'Query', getUnreadLoveNoteCount: number };
+
 export type GetUserNotificationsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetUserNotificationsQuery = { __typename?: 'Query', getUserNotifications: Array<{ __typename?: 'Notification', id: string, type: string, title: string, message: string, isRead: boolean, sentAt: any, reminderId?: string | null, userId: string }> };
+export type GetUserNotificationsQuery = { __typename?: 'Query', getUserNotifications: Array<{ __typename?: 'Notification', id: string, type: NotificationType, title: string, message: string, isRead: boolean, sentAt: any, reminderId?: string | null, userId: string }> };
 
 export type GetUnreadNotificationCountQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -232,7 +477,7 @@ export type DeleteNotificationMutation = { __typename?: 'Mutation', deleteNotifi
 export type OnNotificationReceivedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OnNotificationReceivedSubscription = { __typename?: 'Subscription', notificationReceived: { __typename?: 'Notification', id: string, type: string, title: string, message: string, isRead: boolean, sentAt: any, reminderId?: string | null, userId: string } };
+export type OnNotificationReceivedSubscription = { __typename?: 'Subscription', notificationReceived: { __typename?: 'Notification', id: string, type: NotificationType, title: string, message: string, isRead: boolean, sentAt: any, reminderId?: string | null, userId: string } };
 
 export type CreatePartnerBindingMutationVariables = Exact<{
   createPartnerBindingDto: CreatePartnerBindingDto;
@@ -368,6 +613,342 @@ export function useRenewTokenMutation(baseOptions?: Apollo.MutationHookOptions<R
 export type RenewTokenMutationHookResult = ReturnType<typeof useRenewTokenMutation>;
 export type RenewTokenMutationResult = Apollo.MutationResult<RenewTokenMutation>;
 export type RenewTokenMutationOptions = Apollo.BaseMutationOptions<RenewTokenMutation, RenewTokenMutationVariables>;
+export const CreateLoveNoteDocument = gql`
+    mutation CreateLoveNote($input: CreateLoveNoteInput!) {
+  createLoveNote(input: $input) {
+    id
+    title
+    message
+    isRead
+    senderId
+    recipientId
+    createdAt
+    updatedAt
+    sender {
+      id
+      name
+      avatarUrl
+    }
+    recipient {
+      id
+      name
+      avatarUrl
+    }
+  }
+}
+    `;
+export type CreateLoveNoteMutationFn = Apollo.MutationFunction<CreateLoveNoteMutation, CreateLoveNoteMutationVariables>;
+
+/**
+ * __useCreateLoveNoteMutation__
+ *
+ * To run a mutation, you first call `useCreateLoveNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateLoveNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createLoveNoteMutation, { data, loading, error }] = useCreateLoveNoteMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateLoveNoteMutation(baseOptions?: Apollo.MutationHookOptions<CreateLoveNoteMutation, CreateLoveNoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateLoveNoteMutation, CreateLoveNoteMutationVariables>(CreateLoveNoteDocument, options);
+      }
+export type CreateLoveNoteMutationHookResult = ReturnType<typeof useCreateLoveNoteMutation>;
+export type CreateLoveNoteMutationResult = Apollo.MutationResult<CreateLoveNoteMutation>;
+export type CreateLoveNoteMutationOptions = Apollo.BaseMutationOptions<CreateLoveNoteMutation, CreateLoveNoteMutationVariables>;
+export const GetLoveNotesDocument = gql`
+    query GetLoveNotes($input: GetLoveNotesInput!) {
+  getLoveNotes(input: $input) {
+    id
+    title
+    message
+    isRead
+    senderId
+    recipientId
+    createdAt
+    updatedAt
+    sender {
+      id
+      name
+      avatarUrl
+    }
+    recipient {
+      id
+      name
+      avatarUrl
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLoveNotesQuery__
+ *
+ * To run a query within a React component, call `useGetLoveNotesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLoveNotesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLoveNotesQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGetLoveNotesQuery(baseOptions: Apollo.QueryHookOptions<GetLoveNotesQuery, GetLoveNotesQueryVariables> & ({ variables: GetLoveNotesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLoveNotesQuery, GetLoveNotesQueryVariables>(GetLoveNotesDocument, options);
+      }
+export function useGetLoveNotesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLoveNotesQuery, GetLoveNotesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLoveNotesQuery, GetLoveNotesQueryVariables>(GetLoveNotesDocument, options);
+        }
+export function useGetLoveNotesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLoveNotesQuery, GetLoveNotesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetLoveNotesQuery, GetLoveNotesQueryVariables>(GetLoveNotesDocument, options);
+        }
+export type GetLoveNotesQueryHookResult = ReturnType<typeof useGetLoveNotesQuery>;
+export type GetLoveNotesLazyQueryHookResult = ReturnType<typeof useGetLoveNotesLazyQuery>;
+export type GetLoveNotesSuspenseQueryHookResult = ReturnType<typeof useGetLoveNotesSuspenseQuery>;
+export type GetLoveNotesQueryResult = Apollo.QueryResult<GetLoveNotesQuery, GetLoveNotesQueryVariables>;
+export const GetLoveNoteDocument = gql`
+    query GetLoveNote($loveNoteId: String!) {
+  getLoveNote(loveNoteId: $loveNoteId) {
+    id
+    title
+    message
+    isRead
+    senderId
+    recipientId
+    createdAt
+    updatedAt
+    sender {
+      id
+      name
+      avatarUrl
+    }
+    recipient {
+      id
+      name
+      avatarUrl
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLoveNoteQuery__
+ *
+ * To run a query within a React component, call `useGetLoveNoteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLoveNoteQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLoveNoteQuery({
+ *   variables: {
+ *      loveNoteId: // value for 'loveNoteId'
+ *   },
+ * });
+ */
+export function useGetLoveNoteQuery(baseOptions: Apollo.QueryHookOptions<GetLoveNoteQuery, GetLoveNoteQueryVariables> & ({ variables: GetLoveNoteQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLoveNoteQuery, GetLoveNoteQueryVariables>(GetLoveNoteDocument, options);
+      }
+export function useGetLoveNoteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLoveNoteQuery, GetLoveNoteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLoveNoteQuery, GetLoveNoteQueryVariables>(GetLoveNoteDocument, options);
+        }
+export function useGetLoveNoteSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLoveNoteQuery, GetLoveNoteQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetLoveNoteQuery, GetLoveNoteQueryVariables>(GetLoveNoteDocument, options);
+        }
+export type GetLoveNoteQueryHookResult = ReturnType<typeof useGetLoveNoteQuery>;
+export type GetLoveNoteLazyQueryHookResult = ReturnType<typeof useGetLoveNoteLazyQuery>;
+export type GetLoveNoteSuspenseQueryHookResult = ReturnType<typeof useGetLoveNoteSuspenseQuery>;
+export type GetLoveNoteQueryResult = Apollo.QueryResult<GetLoveNoteQuery, GetLoveNoteQueryVariables>;
+export const UpdateLoveNoteDocument = gql`
+    mutation UpdateLoveNote($loveNoteId: String!, $input: UpdateLoveNoteInput!) {
+  updateLoveNote(loveNoteId: $loveNoteId, input: $input) {
+    id
+    title
+    message
+    isRead
+    senderId
+    recipientId
+    createdAt
+    updatedAt
+    sender {
+      id
+      name
+      avatarUrl
+    }
+    recipient {
+      id
+      name
+      avatarUrl
+    }
+  }
+}
+    `;
+export type UpdateLoveNoteMutationFn = Apollo.MutationFunction<UpdateLoveNoteMutation, UpdateLoveNoteMutationVariables>;
+
+/**
+ * __useUpdateLoveNoteMutation__
+ *
+ * To run a mutation, you first call `useUpdateLoveNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateLoveNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateLoveNoteMutation, { data, loading, error }] = useUpdateLoveNoteMutation({
+ *   variables: {
+ *      loveNoteId: // value for 'loveNoteId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateLoveNoteMutation(baseOptions?: Apollo.MutationHookOptions<UpdateLoveNoteMutation, UpdateLoveNoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateLoveNoteMutation, UpdateLoveNoteMutationVariables>(UpdateLoveNoteDocument, options);
+      }
+export type UpdateLoveNoteMutationHookResult = ReturnType<typeof useUpdateLoveNoteMutation>;
+export type UpdateLoveNoteMutationResult = Apollo.MutationResult<UpdateLoveNoteMutation>;
+export type UpdateLoveNoteMutationOptions = Apollo.BaseMutationOptions<UpdateLoveNoteMutation, UpdateLoveNoteMutationVariables>;
+export const DeleteLoveNoteDocument = gql`
+    mutation DeleteLoveNote($loveNoteId: String!) {
+  deleteLoveNote(loveNoteId: $loveNoteId) {
+    success
+    message
+  }
+}
+    `;
+export type DeleteLoveNoteMutationFn = Apollo.MutationFunction<DeleteLoveNoteMutation, DeleteLoveNoteMutationVariables>;
+
+/**
+ * __useDeleteLoveNoteMutation__
+ *
+ * To run a mutation, you first call `useDeleteLoveNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteLoveNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteLoveNoteMutation, { data, loading, error }] = useDeleteLoveNoteMutation({
+ *   variables: {
+ *      loveNoteId: // value for 'loveNoteId'
+ *   },
+ * });
+ */
+export function useDeleteLoveNoteMutation(baseOptions?: Apollo.MutationHookOptions<DeleteLoveNoteMutation, DeleteLoveNoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteLoveNoteMutation, DeleteLoveNoteMutationVariables>(DeleteLoveNoteDocument, options);
+      }
+export type DeleteLoveNoteMutationHookResult = ReturnType<typeof useDeleteLoveNoteMutation>;
+export type DeleteLoveNoteMutationResult = Apollo.MutationResult<DeleteLoveNoteMutation>;
+export type DeleteLoveNoteMutationOptions = Apollo.BaseMutationOptions<DeleteLoveNoteMutation, DeleteLoveNoteMutationVariables>;
+export const MarkLoveNoteAsReadDocument = gql`
+    mutation MarkLoveNoteAsRead($loveNoteId: String!) {
+  markLoveNoteAsRead(loveNoteId: $loveNoteId) {
+    id
+    title
+    message
+    isRead
+    senderId
+    recipientId
+    createdAt
+    updatedAt
+    sender {
+      id
+      name
+      avatarUrl
+    }
+    recipient {
+      id
+      name
+      avatarUrl
+    }
+  }
+}
+    `;
+export type MarkLoveNoteAsReadMutationFn = Apollo.MutationFunction<MarkLoveNoteAsReadMutation, MarkLoveNoteAsReadMutationVariables>;
+
+/**
+ * __useMarkLoveNoteAsReadMutation__
+ *
+ * To run a mutation, you first call `useMarkLoveNoteAsReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkLoveNoteAsReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markLoveNoteAsReadMutation, { data, loading, error }] = useMarkLoveNoteAsReadMutation({
+ *   variables: {
+ *      loveNoteId: // value for 'loveNoteId'
+ *   },
+ * });
+ */
+export function useMarkLoveNoteAsReadMutation(baseOptions?: Apollo.MutationHookOptions<MarkLoveNoteAsReadMutation, MarkLoveNoteAsReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MarkLoveNoteAsReadMutation, MarkLoveNoteAsReadMutationVariables>(MarkLoveNoteAsReadDocument, options);
+      }
+export type MarkLoveNoteAsReadMutationHookResult = ReturnType<typeof useMarkLoveNoteAsReadMutation>;
+export type MarkLoveNoteAsReadMutationResult = Apollo.MutationResult<MarkLoveNoteAsReadMutation>;
+export type MarkLoveNoteAsReadMutationOptions = Apollo.BaseMutationOptions<MarkLoveNoteAsReadMutation, MarkLoveNoteAsReadMutationVariables>;
+export const GetUnreadLoveNoteCountDocument = gql`
+    query GetUnreadLoveNoteCount {
+  getUnreadLoveNoteCount
+}
+    `;
+
+/**
+ * __useGetUnreadLoveNoteCountQuery__
+ *
+ * To run a query within a React component, call `useGetUnreadLoveNoteCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUnreadLoveNoteCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUnreadLoveNoteCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetUnreadLoveNoteCountQuery(baseOptions?: Apollo.QueryHookOptions<GetUnreadLoveNoteCountQuery, GetUnreadLoveNoteCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUnreadLoveNoteCountQuery, GetUnreadLoveNoteCountQueryVariables>(GetUnreadLoveNoteCountDocument, options);
+      }
+export function useGetUnreadLoveNoteCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUnreadLoveNoteCountQuery, GetUnreadLoveNoteCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUnreadLoveNoteCountQuery, GetUnreadLoveNoteCountQueryVariables>(GetUnreadLoveNoteCountDocument, options);
+        }
+export function useGetUnreadLoveNoteCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetUnreadLoveNoteCountQuery, GetUnreadLoveNoteCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetUnreadLoveNoteCountQuery, GetUnreadLoveNoteCountQueryVariables>(GetUnreadLoveNoteCountDocument, options);
+        }
+export type GetUnreadLoveNoteCountQueryHookResult = ReturnType<typeof useGetUnreadLoveNoteCountQuery>;
+export type GetUnreadLoveNoteCountLazyQueryHookResult = ReturnType<typeof useGetUnreadLoveNoteCountLazyQuery>;
+export type GetUnreadLoveNoteCountSuspenseQueryHookResult = ReturnType<typeof useGetUnreadLoveNoteCountSuspenseQuery>;
+export type GetUnreadLoveNoteCountQueryResult = Apollo.QueryResult<GetUnreadLoveNoteCountQuery, GetUnreadLoveNoteCountQueryVariables>;
 export const GetUserNotificationsDocument = gql`
     query GetUserNotifications($limit: Int, $offset: Int) {
   getUserNotifications(limit: $limit, offset: $offset) {
