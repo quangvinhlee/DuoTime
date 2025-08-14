@@ -22,9 +22,44 @@ export type AcceptPartnerBindingDto = {
   invitationCode: Scalars['String']['input'];
 };
 
+/** The status of a love activity */
+export enum ActivityStatus {
+  Confirmed = 'CONFIRMED',
+  Pending = 'PENDING',
+  Rejected = 'REJECTED'
+}
+
+/** The type of love activity */
+export enum ActivityType {
+  Anniversary = 'ANNIVERSARY',
+  Birthday = 'BIRTHDAY',
+  Casual = 'CASUAL',
+  Date = 'DATE',
+  Dinner = 'DINNER',
+  Gift = 'GIFT',
+  Movie = 'MOVIE',
+  Surprise = 'SURPRISE',
+  Travel = 'TRAVEL',
+  Walk = 'WALK'
+}
+
 export type AuthResponse = {
   __typename?: 'AuthResponse';
   token: Scalars['String']['output'];
+};
+
+export type ConfirmLoveActivityInput = {
+  activityId: Scalars['String']['input'];
+  confirm: Scalars['Boolean']['input'];
+};
+
+export type CreateLoveActivityInput = {
+  date: Scalars['DateTime']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  location?: InputMaybe<Scalars['String']['input']>;
+  receiverId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  type: ActivityType;
 };
 
 export type CreateLoveNoteInput = {
@@ -48,6 +83,14 @@ export type CreateReminderInput = {
   type: ReminderType;
 };
 
+export type GetLoveActivitiesInput = {
+  endDate?: InputMaybe<Scalars['DateTime']['input']>;
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+  startDate?: InputMaybe<Scalars['DateTime']['input']>;
+  type?: InputMaybe<ActivityType>;
+};
+
 export type GetLoveNotesInput = {
   isRead?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: Scalars['Int']['input'];
@@ -64,6 +107,42 @@ export type GetRemindersInput = {
 export type GoogleLoginInput = {
   idToken: Scalars['String']['input'];
   pushToken?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type LoveActivityStatsType = {
+  __typename?: 'LoveActivityStatsType';
+  currentStreak: Scalars['Int']['output'];
+  lastActivityDate?: Maybe<Scalars['DateTime']['output']>;
+  longestStreak: Scalars['Int']['output'];
+  mostCommonActivity?: Maybe<ActivityType>;
+  thisMonthActivities: Scalars['Int']['output'];
+  totalActivities: Scalars['Int']['output'];
+};
+
+export type LoveActivityType = {
+  __typename?: 'LoveActivityType';
+  confirmedAt?: Maybe<Scalars['DateTime']['output']>;
+  confirmedBy?: Maybe<LoveActivityUserType>;
+  confirmedById?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<LoveActivityUserType>;
+  createdById: Scalars['String']['output'];
+  date: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  location?: Maybe<Scalars['String']['output']>;
+  receiverId: Scalars['String']['output'];
+  status: ActivityStatus;
+  title: Scalars['String']['output'];
+  type: ActivityType;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type LoveActivityUserType = {
+  __typename?: 'LoveActivityUserType';
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 export type LoveNoteType = {
@@ -90,10 +169,13 @@ export type LoveNoteUserType = {
 export type Mutation = {
   __typename?: 'Mutation';
   acceptPartnerBinding: PartnerBindingResponse;
+  confirmLoveActivity: ResponseType;
+  createLoveActivity: LoveActivityType;
   createLoveNote: LoveNoteType;
   createPartnerBinding: PartnerBindingResponse;
   createReminder: ReminderGraphQlType;
   deleteAvatar: ResponseType;
+  deleteLoveActivity: ResponseType;
   deleteLoveNote: ResponseType;
   deleteNotification: ResponseType;
   deleteReminder: ResponseType;
@@ -105,6 +187,7 @@ export type Mutation = {
   rejectPartnerBinding: ResponseType;
   removePartner: ResponseType;
   renewToken: AuthResponse;
+  updateLoveActivity: ResponseType;
   updateLoveNote: LoveNoteType;
   updateProfile: ResponseType;
   updateReminder: ReminderGraphQlType;
@@ -114,6 +197,16 @@ export type Mutation = {
 
 export type MutationAcceptPartnerBindingArgs = {
   acceptPartnerBindingDto: AcceptPartnerBindingDto;
+};
+
+
+export type MutationConfirmLoveActivityArgs = {
+  input: ConfirmLoveActivityInput;
+};
+
+
+export type MutationCreateLoveActivityArgs = {
+  input: CreateLoveActivityInput;
 };
 
 
@@ -129,6 +222,11 @@ export type MutationCreatePartnerBindingArgs = {
 
 export type MutationCreateReminderArgs = {
   input: CreateReminderInput;
+};
+
+
+export type MutationDeleteLoveActivityArgs = {
+  activityId: Scalars['String']['input'];
 };
 
 
@@ -174,6 +272,12 @@ export type MutationRejectPartnerBindingArgs = {
 
 export type MutationRenewTokenArgs = {
   input?: InputMaybe<RenewTokenInput>;
+};
+
+
+export type MutationUpdateLoveActivityArgs = {
+  activityId: Scalars['String']['input'];
+  input: UpdateLoveActivityInput;
 };
 
 
@@ -229,6 +333,9 @@ export type PartnerBindingResponse = {
 
 export type Query = {
   __typename?: 'Query';
+  getLoveActivities: Array<LoveActivityType>;
+  getLoveActivity: LoveActivityType;
+  getLoveActivityStats: LoveActivityStatsType;
   getLoveNote: LoveNoteType;
   getLoveNotes: Array<LoveNoteType>;
   getProfile: UserType;
@@ -238,6 +345,16 @@ export type Query = {
   getUnreadNotificationCount: Scalars['Int']['output'];
   getUserNotifications: Array<Notification>;
   searchUsers: Array<UserType>;
+};
+
+
+export type QueryGetLoveActivitiesArgs = {
+  input: GetLoveActivitiesInput;
+};
+
+
+export type QueryGetLoveActivityArgs = {
+  activityId: Scalars['String']['input'];
 };
 
 
@@ -341,6 +458,14 @@ export type Subscription = {
   notificationReceived: Notification;
 };
 
+export type UpdateLoveActivityInput = {
+  date?: InputMaybe<Scalars['DateTime']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  location?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<ActivityType>;
+};
+
 export type UpdateLoveNoteInput = {
   isRead?: InputMaybe<Scalars['Boolean']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
@@ -393,6 +518,54 @@ export type RenewTokenMutationVariables = Exact<{
 
 
 export type RenewTokenMutation = { __typename?: 'Mutation', renewToken: { __typename?: 'AuthResponse', token: string } };
+
+export type CreateLoveActivityMutationVariables = Exact<{
+  input: CreateLoveActivityInput;
+}>;
+
+
+export type CreateLoveActivityMutation = { __typename?: 'Mutation', createLoveActivity: { __typename?: 'LoveActivityType', id: string, title: string, description?: string | null, type: ActivityType, date: any, location?: string | null, createdById: string, receiverId: string, confirmedById?: string | null, status: ActivityStatus, createdAt: any, updatedAt: any, confirmedAt?: any | null, createdBy?: { __typename?: 'LoveActivityUserType', id: string, name?: string | null, avatarUrl?: string | null } | null, confirmedBy?: { __typename?: 'LoveActivityUserType', id: string, name?: string | null, avatarUrl?: string | null } | null } };
+
+export type GetLoveActivitiesQueryVariables = Exact<{
+  input: GetLoveActivitiesInput;
+}>;
+
+
+export type GetLoveActivitiesQuery = { __typename?: 'Query', getLoveActivities: Array<{ __typename?: 'LoveActivityType', id: string, title: string, description?: string | null, type: ActivityType, date: any, location?: string | null, createdById: string, receiverId: string, confirmedById?: string | null, status: ActivityStatus, createdAt: any, updatedAt: any, confirmedAt?: any | null, createdBy?: { __typename?: 'LoveActivityUserType', id: string, name?: string | null, avatarUrl?: string | null } | null, confirmedBy?: { __typename?: 'LoveActivityUserType', id: string, name?: string | null, avatarUrl?: string | null } | null }> };
+
+export type GetLoveActivityQueryVariables = Exact<{
+  activityId: Scalars['String']['input'];
+}>;
+
+
+export type GetLoveActivityQuery = { __typename?: 'Query', getLoveActivity: { __typename?: 'LoveActivityType', id: string, title: string, description?: string | null, type: ActivityType, date: any, location?: string | null, createdById: string, receiverId: string, confirmedById?: string | null, status: ActivityStatus, createdAt: any, updatedAt: any, confirmedAt?: any | null, createdBy?: { __typename?: 'LoveActivityUserType', id: string, name?: string | null, avatarUrl?: string | null } | null, confirmedBy?: { __typename?: 'LoveActivityUserType', id: string, name?: string | null, avatarUrl?: string | null } | null } };
+
+export type UpdateLoveActivityMutationVariables = Exact<{
+  activityId: Scalars['String']['input'];
+  input: UpdateLoveActivityInput;
+}>;
+
+
+export type UpdateLoveActivityMutation = { __typename?: 'Mutation', updateLoveActivity: { __typename?: 'ResponseType', success: boolean, message: string } };
+
+export type DeleteLoveActivityMutationVariables = Exact<{
+  activityId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteLoveActivityMutation = { __typename?: 'Mutation', deleteLoveActivity: { __typename?: 'ResponseType', success: boolean, message: string } };
+
+export type ConfirmLoveActivityMutationVariables = Exact<{
+  input: ConfirmLoveActivityInput;
+}>;
+
+
+export type ConfirmLoveActivityMutation = { __typename?: 'Mutation', confirmLoveActivity: { __typename?: 'ResponseType', success: boolean, message: string } };
+
+export type GetLoveActivityStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLoveActivityStatsQuery = { __typename?: 'Query', getLoveActivityStats: { __typename?: 'LoveActivityStatsType', totalActivities: number, thisMonthActivities: number, currentStreak: number, longestStreak: number, mostCommonActivity?: ActivityType | null, lastActivityDate?: any | null } };
 
 export type CreateLoveNoteMutationVariables = Exact<{
   input: CreateLoveNoteInput;
@@ -613,6 +786,332 @@ export function useRenewTokenMutation(baseOptions?: Apollo.MutationHookOptions<R
 export type RenewTokenMutationHookResult = ReturnType<typeof useRenewTokenMutation>;
 export type RenewTokenMutationResult = Apollo.MutationResult<RenewTokenMutation>;
 export type RenewTokenMutationOptions = Apollo.BaseMutationOptions<RenewTokenMutation, RenewTokenMutationVariables>;
+export const CreateLoveActivityDocument = gql`
+    mutation CreateLoveActivity($input: CreateLoveActivityInput!) {
+  createLoveActivity(input: $input) {
+    id
+    title
+    description
+    type
+    date
+    location
+    createdById
+    receiverId
+    confirmedById
+    status
+    createdAt
+    updatedAt
+    confirmedAt
+    createdBy {
+      id
+      name
+      avatarUrl
+    }
+    confirmedBy {
+      id
+      name
+      avatarUrl
+    }
+  }
+}
+    `;
+export type CreateLoveActivityMutationFn = Apollo.MutationFunction<CreateLoveActivityMutation, CreateLoveActivityMutationVariables>;
+
+/**
+ * __useCreateLoveActivityMutation__
+ *
+ * To run a mutation, you first call `useCreateLoveActivityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateLoveActivityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createLoveActivityMutation, { data, loading, error }] = useCreateLoveActivityMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateLoveActivityMutation(baseOptions?: Apollo.MutationHookOptions<CreateLoveActivityMutation, CreateLoveActivityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateLoveActivityMutation, CreateLoveActivityMutationVariables>(CreateLoveActivityDocument, options);
+      }
+export type CreateLoveActivityMutationHookResult = ReturnType<typeof useCreateLoveActivityMutation>;
+export type CreateLoveActivityMutationResult = Apollo.MutationResult<CreateLoveActivityMutation>;
+export type CreateLoveActivityMutationOptions = Apollo.BaseMutationOptions<CreateLoveActivityMutation, CreateLoveActivityMutationVariables>;
+export const GetLoveActivitiesDocument = gql`
+    query GetLoveActivities($input: GetLoveActivitiesInput!) {
+  getLoveActivities(input: $input) {
+    id
+    title
+    description
+    type
+    date
+    location
+    createdById
+    receiverId
+    confirmedById
+    status
+    createdAt
+    updatedAt
+    confirmedAt
+    createdBy {
+      id
+      name
+      avatarUrl
+    }
+    confirmedBy {
+      id
+      name
+      avatarUrl
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLoveActivitiesQuery__
+ *
+ * To run a query within a React component, call `useGetLoveActivitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLoveActivitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLoveActivitiesQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGetLoveActivitiesQuery(baseOptions: Apollo.QueryHookOptions<GetLoveActivitiesQuery, GetLoveActivitiesQueryVariables> & ({ variables: GetLoveActivitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLoveActivitiesQuery, GetLoveActivitiesQueryVariables>(GetLoveActivitiesDocument, options);
+      }
+export function useGetLoveActivitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLoveActivitiesQuery, GetLoveActivitiesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLoveActivitiesQuery, GetLoveActivitiesQueryVariables>(GetLoveActivitiesDocument, options);
+        }
+export function useGetLoveActivitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLoveActivitiesQuery, GetLoveActivitiesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetLoveActivitiesQuery, GetLoveActivitiesQueryVariables>(GetLoveActivitiesDocument, options);
+        }
+export type GetLoveActivitiesQueryHookResult = ReturnType<typeof useGetLoveActivitiesQuery>;
+export type GetLoveActivitiesLazyQueryHookResult = ReturnType<typeof useGetLoveActivitiesLazyQuery>;
+export type GetLoveActivitiesSuspenseQueryHookResult = ReturnType<typeof useGetLoveActivitiesSuspenseQuery>;
+export type GetLoveActivitiesQueryResult = Apollo.QueryResult<GetLoveActivitiesQuery, GetLoveActivitiesQueryVariables>;
+export const GetLoveActivityDocument = gql`
+    query GetLoveActivity($activityId: String!) {
+  getLoveActivity(activityId: $activityId) {
+    id
+    title
+    description
+    type
+    date
+    location
+    createdById
+    receiverId
+    confirmedById
+    status
+    createdAt
+    updatedAt
+    confirmedAt
+    createdBy {
+      id
+      name
+      avatarUrl
+    }
+    confirmedBy {
+      id
+      name
+      avatarUrl
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLoveActivityQuery__
+ *
+ * To run a query within a React component, call `useGetLoveActivityQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLoveActivityQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLoveActivityQuery({
+ *   variables: {
+ *      activityId: // value for 'activityId'
+ *   },
+ * });
+ */
+export function useGetLoveActivityQuery(baseOptions: Apollo.QueryHookOptions<GetLoveActivityQuery, GetLoveActivityQueryVariables> & ({ variables: GetLoveActivityQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLoveActivityQuery, GetLoveActivityQueryVariables>(GetLoveActivityDocument, options);
+      }
+export function useGetLoveActivityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLoveActivityQuery, GetLoveActivityQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLoveActivityQuery, GetLoveActivityQueryVariables>(GetLoveActivityDocument, options);
+        }
+export function useGetLoveActivitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLoveActivityQuery, GetLoveActivityQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetLoveActivityQuery, GetLoveActivityQueryVariables>(GetLoveActivityDocument, options);
+        }
+export type GetLoveActivityQueryHookResult = ReturnType<typeof useGetLoveActivityQuery>;
+export type GetLoveActivityLazyQueryHookResult = ReturnType<typeof useGetLoveActivityLazyQuery>;
+export type GetLoveActivitySuspenseQueryHookResult = ReturnType<typeof useGetLoveActivitySuspenseQuery>;
+export type GetLoveActivityQueryResult = Apollo.QueryResult<GetLoveActivityQuery, GetLoveActivityQueryVariables>;
+export const UpdateLoveActivityDocument = gql`
+    mutation UpdateLoveActivity($activityId: String!, $input: UpdateLoveActivityInput!) {
+  updateLoveActivity(activityId: $activityId, input: $input) {
+    success
+    message
+  }
+}
+    `;
+export type UpdateLoveActivityMutationFn = Apollo.MutationFunction<UpdateLoveActivityMutation, UpdateLoveActivityMutationVariables>;
+
+/**
+ * __useUpdateLoveActivityMutation__
+ *
+ * To run a mutation, you first call `useUpdateLoveActivityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateLoveActivityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateLoveActivityMutation, { data, loading, error }] = useUpdateLoveActivityMutation({
+ *   variables: {
+ *      activityId: // value for 'activityId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateLoveActivityMutation(baseOptions?: Apollo.MutationHookOptions<UpdateLoveActivityMutation, UpdateLoveActivityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateLoveActivityMutation, UpdateLoveActivityMutationVariables>(UpdateLoveActivityDocument, options);
+      }
+export type UpdateLoveActivityMutationHookResult = ReturnType<typeof useUpdateLoveActivityMutation>;
+export type UpdateLoveActivityMutationResult = Apollo.MutationResult<UpdateLoveActivityMutation>;
+export type UpdateLoveActivityMutationOptions = Apollo.BaseMutationOptions<UpdateLoveActivityMutation, UpdateLoveActivityMutationVariables>;
+export const DeleteLoveActivityDocument = gql`
+    mutation DeleteLoveActivity($activityId: String!) {
+  deleteLoveActivity(activityId: $activityId) {
+    success
+    message
+  }
+}
+    `;
+export type DeleteLoveActivityMutationFn = Apollo.MutationFunction<DeleteLoveActivityMutation, DeleteLoveActivityMutationVariables>;
+
+/**
+ * __useDeleteLoveActivityMutation__
+ *
+ * To run a mutation, you first call `useDeleteLoveActivityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteLoveActivityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteLoveActivityMutation, { data, loading, error }] = useDeleteLoveActivityMutation({
+ *   variables: {
+ *      activityId: // value for 'activityId'
+ *   },
+ * });
+ */
+export function useDeleteLoveActivityMutation(baseOptions?: Apollo.MutationHookOptions<DeleteLoveActivityMutation, DeleteLoveActivityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteLoveActivityMutation, DeleteLoveActivityMutationVariables>(DeleteLoveActivityDocument, options);
+      }
+export type DeleteLoveActivityMutationHookResult = ReturnType<typeof useDeleteLoveActivityMutation>;
+export type DeleteLoveActivityMutationResult = Apollo.MutationResult<DeleteLoveActivityMutation>;
+export type DeleteLoveActivityMutationOptions = Apollo.BaseMutationOptions<DeleteLoveActivityMutation, DeleteLoveActivityMutationVariables>;
+export const ConfirmLoveActivityDocument = gql`
+    mutation ConfirmLoveActivity($input: ConfirmLoveActivityInput!) {
+  confirmLoveActivity(input: $input) {
+    success
+    message
+  }
+}
+    `;
+export type ConfirmLoveActivityMutationFn = Apollo.MutationFunction<ConfirmLoveActivityMutation, ConfirmLoveActivityMutationVariables>;
+
+/**
+ * __useConfirmLoveActivityMutation__
+ *
+ * To run a mutation, you first call `useConfirmLoveActivityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConfirmLoveActivityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [confirmLoveActivityMutation, { data, loading, error }] = useConfirmLoveActivityMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useConfirmLoveActivityMutation(baseOptions?: Apollo.MutationHookOptions<ConfirmLoveActivityMutation, ConfirmLoveActivityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConfirmLoveActivityMutation, ConfirmLoveActivityMutationVariables>(ConfirmLoveActivityDocument, options);
+      }
+export type ConfirmLoveActivityMutationHookResult = ReturnType<typeof useConfirmLoveActivityMutation>;
+export type ConfirmLoveActivityMutationResult = Apollo.MutationResult<ConfirmLoveActivityMutation>;
+export type ConfirmLoveActivityMutationOptions = Apollo.BaseMutationOptions<ConfirmLoveActivityMutation, ConfirmLoveActivityMutationVariables>;
+export const GetLoveActivityStatsDocument = gql`
+    query GetLoveActivityStats {
+  getLoveActivityStats {
+    totalActivities
+    thisMonthActivities
+    currentStreak
+    longestStreak
+    mostCommonActivity
+    lastActivityDate
+  }
+}
+    `;
+
+/**
+ * __useGetLoveActivityStatsQuery__
+ *
+ * To run a query within a React component, call `useGetLoveActivityStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLoveActivityStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLoveActivityStatsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetLoveActivityStatsQuery(baseOptions?: Apollo.QueryHookOptions<GetLoveActivityStatsQuery, GetLoveActivityStatsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLoveActivityStatsQuery, GetLoveActivityStatsQueryVariables>(GetLoveActivityStatsDocument, options);
+      }
+export function useGetLoveActivityStatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLoveActivityStatsQuery, GetLoveActivityStatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLoveActivityStatsQuery, GetLoveActivityStatsQueryVariables>(GetLoveActivityStatsDocument, options);
+        }
+export function useGetLoveActivityStatsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLoveActivityStatsQuery, GetLoveActivityStatsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetLoveActivityStatsQuery, GetLoveActivityStatsQueryVariables>(GetLoveActivityStatsDocument, options);
+        }
+export type GetLoveActivityStatsQueryHookResult = ReturnType<typeof useGetLoveActivityStatsQuery>;
+export type GetLoveActivityStatsLazyQueryHookResult = ReturnType<typeof useGetLoveActivityStatsLazyQuery>;
+export type GetLoveActivityStatsSuspenseQueryHookResult = ReturnType<typeof useGetLoveActivityStatsSuspenseQuery>;
+export type GetLoveActivityStatsQueryResult = Apollo.QueryResult<GetLoveActivityStatsQuery, GetLoveActivityStatsQueryVariables>;
 export const CreateLoveNoteDocument = gql`
     mutation CreateLoveNote($input: CreateLoveNoteInput!) {
   createLoveNote(input: $input) {

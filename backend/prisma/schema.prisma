@@ -8,27 +8,28 @@ datasource db {
 }
 
 model User {
-  id                String           @id @default(uuid())
-  email             String           @unique
-  googleId          String           @unique
-  name              String?
-  avatarUrl         String?
-  partnerId         String?          @unique
-  pushToken         String? // For push notifications
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  loveActivities    LoveActivity[]   @relation("ActivityCreator")
-  receivedNotes     LoveNote[]       @relation("NoteRecipient")
-  sentNotes         LoveNote[]       @relation("NoteSender")
-  loveStats         LoveStats?
-  notifications     Notification[]
-  receivedBindings  PartnerBinding[] @relation("BindingReceiver")
-  sentBindings      PartnerBinding[] @relation("BindingSender")
-  createdReminders  Reminder[]       @relation("ReminderCreator")
-  receivedReminders Reminder[]       @relation("ReminderRecipient")
-  partner           User?            @relation("PartnerRelation", fields: [partnerId], references: [id])
-  partnerOf         User?            @relation("PartnerRelation")
-  preferences       UserPreferences?
+  id                  String           @id @default(uuid())
+  email               String           @unique
+  googleId            String           @unique
+  name                String?
+  avatarUrl           String?
+  partnerId           String?          @unique
+  pushToken           String? // For push notifications
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  loveActivities      LoveActivity[]   @relation("ActivityCreator")
+  receivedNotes       LoveNote[]       @relation("NoteRecipient")
+  sentNotes           LoveNote[]       @relation("NoteSender")
+  loveStats           LoveStats?
+  notifications       Notification[]
+  receivedBindings    PartnerBinding[] @relation("BindingReceiver")
+  sentBindings        PartnerBinding[] @relation("BindingSender")
+  createdReminders    Reminder[]       @relation("ReminderCreator")
+  receivedReminders   Reminder[]       @relation("ReminderRecipient")
+  partner             User?            @relation("PartnerRelation", fields: [partnerId], references: [id])
+  partnerOf           User?            @relation("PartnerRelation")
+  preferences         UserPreferences?
+  confirmedActivities LoveActivity[]   @relation("ActivityConfirmer")
 }
 
 model PartnerBinding {
@@ -91,19 +92,25 @@ model Notification {
 }
 
 model LoveActivity {
-  id          String       @id @default(uuid())
-  title       String
-  description String?
-  type        ActivityType
-  date        DateTime
-  duration    Int?
-  location    String?
-  createdById String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  createdBy   User         @relation("ActivityCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  id            String         @id @default(uuid())
+  title         String
+  description   String?
+  type          ActivityType
+  date          DateTime
+  location      String?
+  createdById   String
+  receiverId    String
+  confirmedById String? // Who confirmed it
+  status        ActivityStatus @default(PENDING)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  confirmedAt   DateTime? // When partner confirmed
+  createdBy     User           @relation("ActivityCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  confirmedBy   User?          @relation("ActivityConfirmer", fields: [confirmedById], references: [id], onDelete: Cascade)
 
   @@index([createdById, date])
+  @@index([createdById, status])
+  @@index([receiverId, status])
 }
 
 model LoveNote {
@@ -207,6 +214,12 @@ enum ActivityType {
   ANNIVERSARY
   BIRTHDAY
   CASUAL
+}
+
+enum ActivityStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
 }
 
 enum BindingStatus {

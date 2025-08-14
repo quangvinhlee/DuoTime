@@ -15,6 +15,7 @@ import { UserModule } from './user/user.module';
 import { NotificationModule } from './notification/notification.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { LoveNoteModule } from './love-note/love-note.module';
+import { LoveActivityModule } from './love-activity/love-activity.module';
 import { GraphQLThrottlerGuard } from './common/guards/graphql-throttler.guard';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
 import { loggerConfig } from './common/config/logger.config';
@@ -81,6 +82,7 @@ import { GraphQLLoggingInterceptor } from './common/interceptors/graphql-logging
     NotificationModule,
     ReminderModule,
     LoveNoteModule,
+    LoveActivityModule,
   ],
   controllers: [],
   providers: [

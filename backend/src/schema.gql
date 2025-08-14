@@ -6,8 +6,43 @@ input AcceptPartnerBindingDto {
   invitationCode: String!
 }
 
+"""The status of a love activity"""
+enum ActivityStatus {
+  CONFIRMED
+  PENDING
+  REJECTED
+}
+
+"""The type of love activity"""
+enum ActivityType {
+  ANNIVERSARY
+  BIRTHDAY
+  CASUAL
+  DATE
+  DINNER
+  GIFT
+  MOVIE
+  SURPRISE
+  TRAVEL
+  WALK
+}
+
 type AuthResponse {
   token: String!
+}
+
+input ConfirmLoveActivityInput {
+  activityId: String!
+  confirm: Boolean!
+}
+
+input CreateLoveActivityInput {
+  date: DateTime!
+  description: String
+  location: String
+  receiverId: String!
+  title: String!
+  type: ActivityType!
 }
 
 input CreateLoveNoteInput {
@@ -36,6 +71,14 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input GetLoveActivitiesInput {
+  endDate: DateTime
+  limit: Int! = 20
+  offset: Int! = 0
+  startDate: DateTime
+  type: ActivityType
+}
+
 input GetLoveNotesInput {
   isRead: Boolean
   limit: Int! = 20
@@ -52,6 +95,39 @@ input GetRemindersInput {
 input GoogleLoginInput {
   idToken: String!
   pushToken: String
+}
+
+type LoveActivityStatsType {
+  currentStreak: Int!
+  lastActivityDate: DateTime
+  longestStreak: Int!
+  mostCommonActivity: ActivityType
+  thisMonthActivities: Int!
+  totalActivities: Int!
+}
+
+type LoveActivityType {
+  confirmedAt: DateTime
+  confirmedBy: LoveActivityUserType
+  confirmedById: String
+  createdAt: DateTime!
+  createdBy: LoveActivityUserType
+  createdById: String!
+  date: DateTime!
+  description: String
+  id: ID!
+  location: String
+  receiverId: String!
+  status: ActivityStatus!
+  title: String!
+  type: ActivityType!
+  updatedAt: DateTime!
+}
+
+type LoveActivityUserType {
+  avatarUrl: String
+  id: ID!
+  name: String
 }
 
 type LoveNoteType {
@@ -75,10 +151,13 @@ type LoveNoteUserType {
 
 type Mutation {
   acceptPartnerBinding(acceptPartnerBindingDto: AcceptPartnerBindingDto!): PartnerBindingResponse!
+  confirmLoveActivity(input: ConfirmLoveActivityInput!): ResponseType!
+  createLoveActivity(input: CreateLoveActivityInput!): LoveActivityType!
   createLoveNote(input: CreateLoveNoteInput!): LoveNoteType!
   createPartnerBinding(createPartnerBindingDto: CreatePartnerBindingDto!): PartnerBindingResponse!
   createReminder(input: CreateReminderInput!): ReminderGraphQLType!
   deleteAvatar: ResponseType!
+  deleteLoveActivity(activityId: String!): ResponseType!
   deleteLoveNote(loveNoteId: String!): ResponseType!
   deleteNotification(notificationId: String!): ResponseType!
   deleteReminder(reminderId: String!): ResponseType!
@@ -90,6 +169,7 @@ type Mutation {
   rejectPartnerBinding(rejectPartnerBindingDto: RejectPartnerBindingDto!): ResponseType!
   removePartner: ResponseType!
   renewToken(input: RenewTokenInput): AuthResponse!
+  updateLoveActivity(activityId: String!, input: UpdateLoveActivityInput!): ResponseType!
   updateLoveNote(input: UpdateLoveNoteInput!, loveNoteId: String!): LoveNoteType!
   updateProfile(input: UpdateProfileInput!): ResponseType!
   updateReminder(input: UpdateReminderInput!, reminderId: String!): ReminderGraphQLType!
@@ -124,6 +204,9 @@ type PartnerBindingResponse {
 }
 
 type Query {
+  getLoveActivities(input: GetLoveActivitiesInput!): [LoveActivityType!]!
+  getLoveActivity(activityId: String!): LoveActivityType!
+  getLoveActivityStats: LoveActivityStatsType!
   getLoveNote(loveNoteId: String!): LoveNoteType!
   getLoveNotes(input: GetLoveNotesInput!): [LoveNoteType!]!
   getProfile: UserType!
@@ -200,6 +283,14 @@ input SearchUsersInput {
 
 type Subscription {
   notificationReceived: Notification!
+}
+
+input UpdateLoveActivityInput {
+  date: DateTime
+  description: String
+  location: String
+  title: String
+  type: ActivityType
 }
 
 input UpdateLoveNoteInput {
