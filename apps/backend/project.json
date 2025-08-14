@@ -75,29 +75,25 @@
     "db:generate": {
       "executor": "@nx/js:node",
       "options": {
-        "command": "npx prisma generate",
-        "cwd": "apps/backend"
+        "buildTarget": "backend:build"
       }
     },
     "db:migrate": {
       "executor": "@nx/js:node",
       "options": {
-        "command": "npx prisma migrate dev",
-        "cwd": "apps/backend"
+        "buildTarget": "backend:build"
       }
     },
     "db:push": {
       "executor": "@nx/js:node",
       "options": {
-        "command": "npx prisma db push",
-        "cwd": "apps/backend"
+        "buildTarget": "backend:build"
       }
     },
     "db:studio": {
       "executor": "@nx/js:node",
       "options": {
-        "command": "npx prisma studio --port 5556",
-        "cwd": "apps/backend"
+        "buildTarget": "backend:build"
       }
     }
   },

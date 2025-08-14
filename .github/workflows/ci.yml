@@ -26,8 +26,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run Markdown linting
+        run: npx markdownlint-cli "**/*.md" --ignore "**/node_modules/**" --ignore "dist/**" --ignore "build/**" --ignore ".git/**"
+
       - name: Run Spell checking
-        run: npx cspell "**/*.{md,ts,tsx,js,jsx,json}" --ignore "node_modules/**" --ignore "dist/**" --ignore "build/**" --ignore ".git/**"
+        run: npx cspell "**/*.{md,ts,tsx,js,jsx,json}" --gitignore
 
       - name: Run ESLint on affected files
         run: npx nx affected --target=lint --parallel=3

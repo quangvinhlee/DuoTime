@@ -4,6 +4,9 @@
 # Run markdownlint on staged markdown files
 git diff --cached --name-only --diff-filter=ACM | grep '\.md$' | xargs -r npx markdownlint-cli --fix
 
+# Run spell checking on staged files
+git diff --cached --name-only --diff-filter=ACM | grep -E '\.(md|ts|tsx|js|jsx|json)$' | xargs -r npx cspell --fix
+
 # Run prettier on staged files
 git diff --cached --name-only --diff-filter=ACM | grep -E '\.(md|ts|tsx|js|jsx|json|yml|yaml)$' | xargs -r npx prettier --write
 
