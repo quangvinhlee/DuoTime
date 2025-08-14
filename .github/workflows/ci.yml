@@ -27,13 +27,13 @@ jobs:
         run: npm ci
 
       - name: Run Markdown linting
-        run: npx markdownlint-cli "**/*.md" --fix
+        run: npx markdownlint-cli "**/*.md" --fix --ignore "node_modules/**/*.md" --ignore "dist/**/*.md" --ignore "build/**/*.md" --ignore ".git/**/*.md"
 
       - name: Run Spell checking
-        run: npx cspell "**/*.{md,ts,tsx,js,jsx,json}"
+        run: npx cspell "**/*.{md,ts,tsx,js,jsx,json}" --ignore "node_modules/**" --ignore "dist/**" --ignore "build/**" --ignore ".git/**"
 
       - name: Check code formatting
-        run: npx prettier --check "**/*.{md,ts,tsx,js,jsx,json,yml,yaml}"
+        run: npx prettier --check "**/*.{md,ts,tsx,js,jsx,json,yml,yaml}" --ignore-path .gitignore
 
       - name: Run ESLint on affected files
         run: npx nx affected --target=lint --parallel=3
