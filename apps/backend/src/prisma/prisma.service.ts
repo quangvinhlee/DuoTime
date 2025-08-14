@@ -13,7 +13,26 @@ export class PrismaService
     private readonly logger: LoggerService,
     private readonly encryptionService: EncryptionService,
   ) {
-    super();
+    super({
+      log: [
+        {
+          emit: 'event',
+          level: 'query',
+        },
+        {
+          emit: 'event',
+          level: 'error',
+        },
+        {
+          emit: 'event',
+          level: 'info',
+        },
+        {
+          emit: 'event',
+          level: 'warn',
+        },
+      ],
+    });
     this.setupEncryptionMiddleware();
   }
 
@@ -35,10 +54,24 @@ export class PrismaService
     );
     const middleware = encryptionMiddleware.createMiddleware();
 
-    // Suppress deprecation warning for now
-    // TODO: Migrate to client extensions when Prisma version supports it
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this as any).$use(middleware);
+    // Use Prisma client extensions instead of deprecated $use
+    this.$extends({
+      query: {
+        $allModels: {
+          async $allOperations({ model, operation, args, query }) {
+            // Create params object for middleware compatibility
+            const params = {
+              model,
+              action: operation,
+              args: args as any,
+            };
+
+            // Apply encryption middleware
+            return middleware(params, query as any);
+          },
+        },
+      },
+    });
   }
 
   // Helper method to log database operations

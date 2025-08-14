@@ -1,6 +1,21 @@
 import { EncryptionService } from '../services/encryption.service';
 import { encryptionConfig } from '../config/encryption.config';
 
+// Type definitions for Prisma middleware
+interface PrismaMiddlewareParams {
+  model?: string;
+  action: string;
+  args: {
+    data?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+type PrismaMiddlewareNext = (
+  params: PrismaMiddlewareParams,
+) => Promise<unknown>;
+
 export class EncryptionMiddleware {
   constructor(private readonly encryptionService: EncryptionService) {}
 
@@ -10,7 +25,10 @@ export class EncryptionMiddleware {
   createMiddleware() {
     const { encryptedFields } = encryptionConfig;
 
-    return async (params: any, next: any) => {
+    return async (
+      params: PrismaMiddlewareParams,
+      next: PrismaMiddlewareNext,
+    ) => {
       const modelName = params.model;
       const config = encryptedFields[modelName as keyof typeof encryptedFields];
 
@@ -20,9 +38,10 @@ export class EncryptionMiddleware {
         ['create', 'update', 'updateMany'].includes(params.action)
       ) {
         if (params.args?.data) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           params.args.data = this.encryptionService.encryptObject(
-            params.args.data,
-            [...config],
+            params.args.data as any,
+            Array.from(config),
           );
         }
       }
@@ -36,11 +55,16 @@ export class EncryptionMiddleware {
         ['findMany', 'findFirst', 'findUnique'].includes(params.action)
       ) {
         if (Array.isArray(result)) {
-          return result.map((item) =>
-            this.encryptionService.decryptObject(item, [...config]),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return result.map((item: any) =>
+            this.encryptionService.decryptObject(item, Array.from(config)),
           );
         } else if (result) {
-          return this.encryptionService.decryptObject(result, [...config]);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return this.encryptionService.decryptObject(
+            result as any,
+            Array.from(config),
+          );
         }
       }
 

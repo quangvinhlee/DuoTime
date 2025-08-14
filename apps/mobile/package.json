@@ -79,7 +79,8 @@
     "jscodeshift": "^0.15.2",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "tailwindcss": "^3.4.17",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "ajv": "^8.12.0"
   },
   "private": true
 }

@@ -1,0 +1,88 @@
+{
+  "name": "mobile",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/mobile",
+  "projectType": "application",
+  "targets": {
+    "start": {
+      "executor": "@nx/js:node",
+      "options": {
+        "command": "npx expo start",
+        "cwd": "apps/mobile"
+      }
+    },
+    "android": {
+      "executor": "@nx/expo:run",
+      "options": {
+        "platform": "android",
+        "port": 8082
+      }
+    },
+    "ios": {
+      "executor": "@nx/expo:run",
+      "options": {
+        "platform": "ios"
+      }
+    },
+    "web": {
+      "executor": "@nx/expo:run",
+      "options": {
+        "platform": "web"
+      }
+    },
+    "build": {
+      "executor": "@nx/expo:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/mobile"
+      },
+      "configurations": {
+        "development": {
+          "development": true,
+          "distribution": "internal"
+        },
+        "production": {}
+      }
+    },
+    "export": {
+      "executor": "@nx/expo:export",
+      "options": {
+        "outputPath": "dist/apps/mobile"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/mobile/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/mobile/**/*.{ts,tsx,js,jsx}",
+          "apps/mobile/package.json"
+        ]
+      }
+    },
+    "codegen": {
+      "executor": "@nx/js:node",
+      "options": {
+        "command": "npm run codegen",
+        "cwd": "apps/mobile"
+      }
+    },
+    "codegen:watch": {
+      "executor": "@nx/js:node",
+      "options": {
+        "command": "npm run codegen:watch",
+        "cwd": "apps/mobile"
+      }
+    }
+  },
+  "tags": ["type:app", "scope:mobile"]
+}
