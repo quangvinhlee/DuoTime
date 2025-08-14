@@ -3,7 +3,7 @@
 A modern couples' reminder and activity tracking app built with NestJS backend and React Native
 mobile app, managed with Nx for optimal development experience.
 
-## 🏗️ Project Structure
+## 🏗️ Project Structuress
 
 ```text
 DuoTime/

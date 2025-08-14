@@ -90,7 +90,7 @@
   "lint-staged": {
     "*.md": [
       "cspell --fix",
-      "markdownlint-cli"
+      "npx markdownlint-cli"
     ],
     "*.{ts,tsx,js,jsx,json,yml,yaml}": [
       "cspell --fix"
