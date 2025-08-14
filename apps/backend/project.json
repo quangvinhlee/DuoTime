@@ -73,7 +73,7 @@
       }
     },
     "db:generate": {
-      "executor": "@nx/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend",
         "commands": [
@@ -82,7 +82,7 @@
       }
     },
     "db:migrate": {
-      "executor": "@nx/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend",
         "commands": [
@@ -91,7 +91,7 @@
       }
     },
     "db:push": {
-      "executor": "@nx/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend",
         "commands": [
@@ -100,7 +100,7 @@
       }
     },
     "db:studio": {
-      "executor": "@nx/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/backend",
         "commands": [
