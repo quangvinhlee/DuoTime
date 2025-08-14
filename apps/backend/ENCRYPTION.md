@@ -126,7 +126,7 @@ export const encryptionConfig = {
 };
 ```
 
-2. **Update Prisma middleware:**
+1. **Update Prisma middleware:**
 
 ```typescript
 // src/prisma/prisma.service.ts
@@ -136,7 +136,7 @@ const encryptionConfig = {
 };
 ```
 
-3. **Create a migration if needed:**
+1. **Create a migration if needed:**
 
 ```bash
 npx prisma migrate dev --name add_sensitive_field

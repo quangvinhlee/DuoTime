@@ -33,7 +33,7 @@ The pipeline runs on
 - Push to `main` or `develop` branches
 - Pull requests to `main` or `develop` branches
 
-#### Jobs:
+#### Jobs
 
 1. **Static Analysis**
    - Markdown linting
@@ -70,7 +70,7 @@ Automatically runs before each commit
 - ✅ Prettier formatting on staged files
 - ✅ Lint-staged processing
 
-### Benefits
+### Pre-commit Benefits
 
 - Prevents committing code with formatting issues
 - Ensures consistent code style

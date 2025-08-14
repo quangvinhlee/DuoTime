@@ -5,7 +5,7 @@ mobile app, managed with Nx for optimal development experience.
 
 ## 🏗️ Project Structure
 
-```
+```text
 DuoTime/
 ├── apps/
 │   ├── backend/      # NestJS GraphQL API

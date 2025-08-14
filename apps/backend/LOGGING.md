@@ -4,7 +4,7 @@
 
 Your NestJS backend now has a comprehensive Pino-based logging system that integrates seamlessly with Fastify and GraphQL.
 
-## Features Implemented:
+## Features Implemented
 
 ### 1. **Logger Configuration** (`src/common/config/logger.config.ts`)
 
@@ -37,9 +37,9 @@ Your NestJS backend now has a comprehensive Pino-based logging system that integ
 - Helper method for logging database operations
 - Error tracking for database queries
 
-## Usage Examples:
+## Usage Examples
 
-### Basic Logging in Services:
+### Basic Logging in Services
 
 ```typescript
 import { LoggerService } from '../common/services/logger.service';
@@ -64,7 +64,7 @@ export class MyService {
 }
 ```
 
-### Database Operation Logging:
+### Database Operation Logging
 
 ```typescript
 // Using the loggedQuery helper
@@ -84,7 +84,7 @@ try {
 }
 ```
 
-### Authentication Logging (already implemented in AuthService):
+### Authentication Logging (already implemented in AuthService)
 
 ```typescript
 // Success
@@ -94,7 +94,7 @@ this.logger.logAuthSuccess(user.id, 'google', { newUser: false });
 this.logger.logAuthFailure('google', 'Invalid token', { attempt: 1 });
 ```
 
-### External API Call Logging:
+### External API Call Logging
 
 ```typescript
 const startTime = Date.now();
@@ -112,7 +112,7 @@ try {
 }
 ```
 
-### Security Event Logging:
+### Security Event Logging
 
 ```typescript
 this.logger.logSecurityEvent('unauthorized_access_attempt', 'high', {
@@ -121,27 +121,27 @@ this.logger.logSecurityEvent('unauthorized_access_attempt', 'high', {
 });
 ```
 
-## Log Levels:
+## Log Levels
 
 - **debug**: Development queries, detailed operations
 - **info**: General application flow, successful operations
 - **warn**: Warning conditions, 4xx HTTP responses
 - **error**: Error conditions, 5xx HTTP responses, exceptions
 
-## Environment Variables:
+## Environment Variables
 
 Add these to your `.env` file:
 
-```
+```env
 NODE_ENV=development  # or production
 LOG_LEVEL=debug       # optional, defaults based on NODE_ENV
 ```
 
-## Log Output Examples:
+## Log Output Examples
 
-### Development (Pretty Print):
+### Development (Pretty Print)
 
-```
+```text
 [10:30:45.123] INFO (AuthService): Authentication successful for user 123 via google
     event: "auth_success"
     userId: "123"
@@ -152,7 +152,7 @@ LOG_LEVEL=debug       # optional, defaults based on NODE_ENV
 [10:30:45.456] DEBUG (PrismaService): Database findUnique on User completed in 12ms
 ```
 
-### Production (JSON):
+### Production (JSON)
 
 ```json
 {
@@ -168,7 +168,7 @@ LOG_LEVEL=debug       # optional, defaults based on NODE_ENV
 }
 ```
 
-## Best Practices:
+## Best Practices
 
 1. **Always set context** in your services:
 
@@ -194,6 +194,7 @@ LOG_LEVEL=debug       # optional, defaults based on NODE_ENV
    - Passwords, tokens, personal data should be marked as `[REDACTED]`
 
 5. **Include timing for performance monitoring**:
+
    ```typescript
    const startTime = Date.now();
    // ... operation
@@ -204,7 +205,7 @@ LOG_LEVEL=debug       # optional, defaults based on NODE_ENV
    );
    ```
 
-## Log Aggregation:
+## Log Aggregation
 
 In production, you can send logs to services like:
 

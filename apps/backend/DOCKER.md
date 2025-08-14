@@ -70,14 +70,14 @@ docker-compose down -v
 ### Redis Commander
 
 - **Port:** 8081
-- **URL:** http://localhost:8081
+- **URL:** [http://localhost:8081](http://localhost:8081)
 - **Purpose:** Redis GUI for debugging
 
 ### Backend
 
 - **Port:** 3000
-- **URL:** http://localhost:3000
-- **GraphQL Playground:** http://localhost:3000/graphql
+- **URL:** [http://localhost:3000](http://localhost:3000)
+- **GraphQL Playground:** [http://localhost:3000/graphql](http://localhost:3000/graphql)
 
 ## 🔐 Environment Variables
 
@@ -123,9 +123,9 @@ CLOUDINARY_API_SECRET=your-api-secret
    ```
 
 3. **Access services:**
-   - Backend: http://localhost:3000
-   - GraphQL: http://localhost:3000/graphql
-   - Redis GUI: http://localhost:8081
+   - Backend: [http://localhost:3000](http://localhost:3000)
+   - GraphQL: [http://localhost:3000/graphql](http://localhost:3000/graphql)
+   - Redis GUI: [http://localhost:8081](http://localhost:8081)
 
 ## 🐛 Troubleshooting
 

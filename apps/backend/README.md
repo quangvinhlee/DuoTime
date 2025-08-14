@@ -39,6 +39,7 @@ A NestJS backend for the DuoTime application - a couples' reminder and activity 
    ```
 
 5. **Start the development server:**
+
    ```bash
    npm run start:dev
    ```
@@ -92,13 +93,13 @@ npm run test:cov           # Run tests with coverage
 
 ## 🌐 API Endpoints
 
-- **GraphQL Playground:** http://localhost:3000/graphql
-- **Health Check:** http://localhost:3000/health
-- **Redis Commander:** http://localhost:8081
+- **GraphQL Playground:** [http://localhost:3000/graphql](http://localhost:3000/graphql)
+- **Health Check:** [http://localhost:3000/health](http://localhost:3000/health)
+- **Redis Commander:** [http://localhost:8081](http://localhost:8081)
 
 ## 📁 Project Structure
 
-```
+```text
 src/
 ├── auth/                 # Authentication & authorization
 ├── common/               # Shared utilities & services
