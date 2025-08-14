@@ -5,7 +5,6 @@ import { EncryptionService } from './encryption.service';
 import { LoggerService } from './logger.service';
 import { RedisService } from './redis.service';
 import { EncryptionUtils } from '../utils/encryption.utils';
-import { EncryptionMiddleware } from '../middleware/encryption.middleware';
 
 @Global()
 @Module({
@@ -15,7 +14,6 @@ import { EncryptionMiddleware } from '../middleware/encryption.middleware';
     LoggerService,
     RedisService,
     EncryptionUtils,
-    EncryptionMiddleware,
     {
       provide: 'PUB_SUB',
       useValue: new PubSub(),
@@ -26,7 +24,6 @@ import { EncryptionMiddleware } from '../middleware/encryption.middleware';
     LoggerService,
     RedisService,
     EncryptionUtils,
-    EncryptionMiddleware,
     'PUB_SUB',
   ],
 })

@@ -1,13 +1,31 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as CryptoJS from 'crypto-js';
-import { getEncryptionKey } from '../config/encryption.config';
 
 @Injectable()
 export class EncryptionService {
   private readonly secretKey: string;
 
-  constructor() {
-    this.secretKey = getEncryptionKey();
+  constructor(private readonly configService: ConfigService) {
+    this.secretKey = this.getEncryptionKey();
+  }
+
+  private getEncryptionKey(): string {
+    const key = this.configService.get<string>('ENCRYPTION_KEY');
+
+    if (!key) {
+      throw new Error(
+        '❌ ENCRYPTION_KEY environment variable is required. Please set it in your .env file.',
+      );
+    }
+
+    if (key.length < 32) {
+      throw new Error(
+        '❌ ENCRYPTION_KEY must be at least 32 characters long for security.',
+      );
+    }
+
+    return key;
   }
 
   encrypt(value: string): string {
@@ -15,7 +33,7 @@ export class EncryptionService {
 
     try {
       return CryptoJS.AES.encrypt(value, this.secretKey).toString();
-    } catch (error) {
+    } catch {
       throw new Error('Failed to encrypt data');
     }
   }
@@ -26,7 +44,7 @@ export class EncryptionService {
     try {
       const bytes = CryptoJS.AES.decrypt(encryptedValue, this.secretKey);
       return bytes.toString(CryptoJS.enc.Utf8);
-    } catch (error) {
+    } catch {
       throw new Error('Failed to decrypt data');
     }
   }
