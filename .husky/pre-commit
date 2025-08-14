@@ -1,4 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname "$0")/_/h"
 
+# Run markdownlint on staged markdown files
+git diff --cached --name-only --diff-filter=ACM | grep '\.md$' | xargs -r npx markdownlint-cli --fix
+
 npx lint-staged
