@@ -3,7 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService, ENCRYPTION_CONFIG } from '../prisma/prisma.service';
+import { EncryptionService } from '../common/services/encryption.service';
 import { NotificationService } from '../notification/notification.service';
 import {
   CreateReminderInput,
@@ -23,6 +24,7 @@ export class ReminderService {
     private readonly notificationService: NotificationService,
     private readonly logger: LoggerService,
     private readonly reminderCacheService: ReminderCacheService,
+    private readonly encryptionService: EncryptionService,
     @InjectQueue('reminders') private readonly remindersQueue: Queue,
   ) {}
 
@@ -35,15 +37,21 @@ export class ReminderService {
     // Validate target type and recipient
     await this.validateReminderTarget(targetType, recipientId, userId);
 
-    // Create the reminder
-    const reminder = await this.prisma.reminder.create({
-      data: {
+    // Encrypt sensitive fields before saving
+    const encryptedData = this.encryptionService.encryptObject(
+      {
         ...reminderData,
-        targetType, // Add the targetType to the database
+        targetType,
         createdById: userId,
         recipientId:
           targetType === ReminderTargetType.FOR_ME ? null : recipientId,
       },
+      [...ENCRYPTION_CONFIG.reminder],
+    );
+
+    // Create the reminder
+    const reminder = await this.prisma.reminder.create({
+      data: encryptedData,
     });
 
     this.logger.logBusinessEvent('reminder_created', {
@@ -59,7 +67,10 @@ export class ReminderService {
     // Schedule the reminder notification
     await this.scheduleReminderNotification(reminder);
 
-    return reminder;
+    // Decrypt sensitive fields before returning
+    return this.encryptionService.decryptObject(reminder, [
+      ...ENCRYPTION_CONFIG.reminder,
+    ]);
   }
 
   async updateReminder(
@@ -88,13 +99,19 @@ export class ReminderService {
       await this.validateReminderTarget(targetType, recipientId, userId);
     }
 
-    const reminder = await this.prisma.reminder.update({
-      where: { id: reminderId },
-      data: {
+    // Encrypt sensitive fields before updating
+    const encryptedData = this.encryptionService.encryptObject(
+      {
         ...updateData,
         recipientId:
           targetType === ReminderTargetType.FOR_PARTNER ? recipientId : null,
       },
+      [...ENCRYPTION_CONFIG.reminder],
+    );
+
+    const reminder = await this.prisma.reminder.update({
+      where: { id: reminderId },
+      data: encryptedData,
       // No need to include user objects since we have the IDs
     });
 
@@ -109,7 +126,10 @@ export class ReminderService {
       await this.scheduleReminderNotification(reminder);
     }
 
-    return reminder;
+    // Decrypt sensitive fields before returning
+    return this.encryptionService.decryptObject(reminder, [
+      ...ENCRYPTION_CONFIG.reminder,
+    ]);
   }
 
   async deleteReminder(reminderId: string, userId: string) {
@@ -172,7 +192,12 @@ export class ReminderService {
       skip: offset,
     });
 
-    return reminders;
+    // Decrypt sensitive fields for all reminders
+    return reminders.map((reminder) =>
+      this.encryptionService.decryptObject(reminder, [
+        ...ENCRYPTION_CONFIG.reminder,
+      ]),
+    );
   }
 
   async getReminder(reminderId: string, userId: string) {
@@ -195,7 +220,10 @@ export class ReminderService {
       throw new NotFoundException('Reminder not found');
     }
 
-    return reminder;
+    // Decrypt sensitive fields before returning
+    return this.encryptionService.decryptObject(reminder, [
+      ...ENCRYPTION_CONFIG.reminder,
+    ]);
   }
 
   async markReminderAsCompleted(reminderId: string, userId: string) {

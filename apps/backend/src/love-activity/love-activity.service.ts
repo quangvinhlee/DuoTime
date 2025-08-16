@@ -3,7 +3,8 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService, ENCRYPTION_CONFIG } from '../prisma/prisma.service';
+import { EncryptionService } from '../common/services/encryption.service';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '@prisma/client';
 import { ResponseType } from '../shared/graphql/types/user.types';
@@ -19,6 +20,7 @@ export class LoveActivityService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async createLoveActivity(
@@ -43,17 +45,23 @@ export class LoveActivityService {
       );
     }
 
-    // Create the love activity
-    const loveActivity = await this.prisma.loveActivity.create({
-      data: {
+    // Encrypt sensitive fields before saving
+    const encryptedData = this.encryptionService.encryptObject(
+      {
         title,
         description,
         type,
         date,
         location,
         createdById: userId,
-        receiverId: receiverId,
+        receiverId,
       },
+      [...ENCRYPTION_CONFIG.loveActivity],
+    );
+
+    // Create the love activity
+    const loveActivity = await this.prisma.loveActivity.create({
+      data: encryptedData,
       include: {
         createdBy: {
           select: {
@@ -72,10 +80,16 @@ export class LoveActivityService {
       },
     });
 
+    // Decrypt for notification
+    const decryptedActivity = this.encryptionService.decryptObject(
+      loveActivity,
+      [...ENCRYPTION_CONFIG.loveActivity],
+    );
+
     // Send notification to partner to confirm the activity
     const notificationTitle = `New Love Activity to Confirm: ${title}`;
-    const notificationMessage = description
-      ? `${description.substring(0, 50)}${description.length > 50 ? '...' : ''}`
+    const notificationMessage = decryptedActivity.description
+      ? `${decryptedActivity.description.substring(0, 50)}${decryptedActivity.description.length > 50 ? '...' : ''}`
       : `Your partner logged a ${type.toLowerCase()} activity. Please confirm if this happened!`;
 
     await this.notificationService.createNotification(
@@ -93,7 +107,7 @@ export class LoveActivityService {
 
     // Don't update love stats yet - wait for confirmation
 
-    return loveActivity;
+    return decryptedActivity;
   }
 
   async getLoveActivities(input: GetLoveActivitiesInput, userId: string) {

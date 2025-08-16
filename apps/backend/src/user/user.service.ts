@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService, ENCRYPTION_CONFIG } from 'src/prisma/prisma.service';
+import { EncryptionService } from '../common/services/encryption.service';
 import {
   uploadImage,
   deleteImage,
@@ -9,7 +10,10 @@ import {
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly encryptionService: EncryptionService,
+  ) {}
 
   async getUser(id: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
@@ -25,7 +29,10 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    // Decrypt sensitive fields
+    return this.encryptionService.decryptObject(user, [
+      ...ENCRYPTION_CONFIG.user,
+    ]);
   }
 
   async updateProfile(
@@ -33,17 +40,29 @@ export class UserService {
     profileData: {
       name?: string;
       avatarUrl?: string | null;
+      email?: string;
+      pushToken?: string;
     },
   ): Promise<User> {
-    return this.prisma.user.update({
+    // Encrypt sensitive fields before saving
+    const encryptedData = this.encryptionService.encryptObject(profileData, [
+      ...ENCRYPTION_CONFIG.user,
+    ]);
+
+    const user = await this.prisma.user.update({
       where: { id },
-      data: profileData,
+      data: encryptedData,
       include: {
         partner: true,
         loveStats: true,
         preferences: true,
       },
     });
+
+    // Decrypt sensitive fields after retrieving
+    return this.encryptionService.decryptObject(user, [
+      ...ENCRYPTION_CONFIG.user,
+    ]);
   }
 
   async searchUsers(query: string, excludeUserId?: string): Promise<User[]> {
@@ -55,11 +74,16 @@ export class UserService {
       where.NOT = { id: excludeUserId };
     }
 
-    return this.prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       where,
       include: { loveStats: true },
       take: 10,
     });
+
+    // Decrypt sensitive fields for all users
+    return users.map((user) =>
+      this.encryptionService.decryptObject(user, [...ENCRYPTION_CONFIG.user]),
+    );
   }
 
   async uploadAvatar(userId: string, avatarBase64: string): Promise<User> {

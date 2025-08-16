@@ -3,7 +3,8 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService, ENCRYPTION_CONFIG } from '../prisma/prisma.service';
+import { EncryptionService } from '../common/services/encryption.service';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '@prisma/client';
 import {
@@ -17,6 +18,7 @@ export class LoveNoteService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async createLoveNote(
@@ -51,14 +53,15 @@ export class LoveNoteService {
       );
     }
 
+    // Encrypt the message before saving
+    const encryptedData = this.encryptionService.encryptObject(
+      { title, message, senderId, recipientId },
+      [...ENCRYPTION_CONFIG.loveNote],
+    );
+
     // Create the love note
     const loveNote = await this.prisma.loveNote.create({
-      data: {
-        title,
-        message,
-        senderId,
-        recipientId,
-      },
+      data: encryptedData,
       include: {
         sender: {
           select: {
@@ -77,12 +80,17 @@ export class LoveNoteService {
       },
     });
 
+    // Decrypt the message for notification
+    const decryptedLoveNote = this.encryptionService.decryptObject(loveNote, [
+      ...ENCRYPTION_CONFIG.loveNote,
+    ]);
+
     // Send notification to recipient
     const notificationTitle = `Love Note from ${sender.name || 'Your Partner'}`;
 
     const notificationMessage = title
-      ? `${title}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`
-      : message.substring(0, 100);
+      ? `${title}: ${decryptedLoveNote.message.substring(0, 50)}${decryptedLoveNote.message.length > 50 ? '...' : ''}`
+      : decryptedLoveNote.message.substring(0, 100);
 
     await this.notificationService.createNotification(
       NotificationType.LOVE_NOTE,
@@ -100,7 +108,7 @@ export class LoveNoteService {
     // Update love stats for both users
     await this.updateLoveStats(senderId, recipientId);
 
-    return loveNote;
+    return decryptedLoveNote;
   }
 
   async getLoveNotes(userId: string, input: GetLoveNotesInput) {
@@ -114,7 +122,7 @@ export class LoveNoteService {
       where.isRead = isRead;
     }
 
-    return this.prisma.loveNote.findMany({
+    const loveNotes = await this.prisma.loveNote.findMany({
       where,
       include: {
         sender: {
@@ -136,6 +144,13 @@ export class LoveNoteService {
       take: limit,
       skip: offset,
     });
+
+    // Decrypt messages for all love notes
+    return loveNotes.map((loveNote) =>
+      this.encryptionService.decryptObject(loveNote, [
+        ...ENCRYPTION_CONFIG.loveNote,
+      ]),
+    );
   }
 
   async getLoveNote(loveNoteId: string, userId: string) {
@@ -166,7 +181,10 @@ export class LoveNoteService {
       throw new NotFoundException('Love note not found');
     }
 
-    return loveNote;
+    // Decrypt the message
+    return this.encryptionService.decryptObject(loveNote, [
+      ...ENCRYPTION_CONFIG.loveNote,
+    ]);
   }
 
   async updateLoveNote(
@@ -204,9 +222,14 @@ export class LoveNoteService {
       }
     }
 
-    return this.prisma.loveNote.update({
+    // Encrypt sensitive fields before updating
+    const encryptedData = this.encryptionService.encryptObject(updateData, [
+      ...ENCRYPTION_CONFIG.loveNote,
+    ]);
+
+    const updatedLoveNote = await this.prisma.loveNote.update({
       where: { id: loveNoteId },
-      data: updateData,
+      data: encryptedData,
       include: {
         sender: {
           select: {
@@ -224,6 +247,11 @@ export class LoveNoteService {
         },
       },
     });
+
+    // Decrypt the message after updating
+    return this.encryptionService.decryptObject(updatedLoveNote, [
+      ...ENCRYPTION_CONFIG.loveNote,
+    ]);
   }
 
   async deleteLoveNote(loveNoteId: string, userId: string) {
@@ -259,7 +287,7 @@ export class LoveNoteService {
       throw new NotFoundException('Love note not found');
     }
 
-    return this.prisma.loveNote.update({
+    const updatedLoveNote = await this.prisma.loveNote.update({
       where: { id: loveNoteId },
       data: { isRead: true },
       include: {
@@ -279,6 +307,11 @@ export class LoveNoteService {
         },
       },
     });
+
+    // Decrypt the message after updating
+    return this.encryptionService.decryptObject(updatedLoveNote, [
+      ...ENCRYPTION_CONFIG.loveNote,
+    ]);
   }
 
   async getUnreadLoveNoteCount(userId: string) {

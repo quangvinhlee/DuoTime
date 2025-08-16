@@ -1,31 +1,35 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { LoggerService } from '../common/services/logger.service';
-import { EncryptionService } from '../common/services/encryption.service';
-import { createEncryptedPrisma } from './encrypted-prisma.client';
+
+// Define which fields to encrypt for each model
+export const ENCRYPTION_CONFIG = {
+  user: ['email', 'pushToken'],
+  loveNote: ['message'],
+  reminder: ['description'],
+  loveActivity: ['description'],
+} as const;
 
 @Injectable()
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  constructor(
-    private readonly logger: LoggerService,
-    private readonly encryptionService: EncryptionService,
-  ) {
-    super();
-    // Replace the default client with the encrypted client
-    const encryptedPrisma = createEncryptedPrisma(encryptionService);
-
-    // Copy all properties from the encrypted client to this instance
-    Object.assign(this, encryptedPrisma);
+  constructor(private readonly logger: LoggerService) {
+    super({
+      log: [
+        { emit: 'event', level: 'query' },
+        { emit: 'event', level: 'error' },
+        { emit: 'event', level: 'info' },
+        { emit: 'event', level: 'warn' },
+      ],
+    });
   }
 
   async onModuleInit() {
     this.logger.logBusinessEvent('prisma_connecting', {}, 'info');
     await this.$connect();
     this.logger.logBusinessEvent('prisma_connected', {}, 'info');
-    this.logger.logBusinessEvent('encryption_extensions_setup', {}, 'info');
   }
 
   async onModuleDestroy() {
