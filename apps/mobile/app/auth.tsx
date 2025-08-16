@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,39 +7,40 @@ import {
   TouchableOpacity,
   Image,
   Animated,
-} from "react-native";
+} from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { router } from "expo-router";
+} from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import {
   GoogleSignin,
   statusCodes,
-} from "@react-native-google-signin/google-signin";
-import * as SecureStore from "expo-secure-store";
+} from '@react-native-google-signin/google-signin';
+import * as SecureStore from 'expo-secure-store';
 import {
   useGoogleLoginMutation,
   useGetProfileLazyQuery,
   UserType,
-} from "@/generated/graphql";
-import { useAuthStore } from "@/store/auth";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
-import CustomAlert from "@/components/CustomAlert";
-import { getPushToken } from "@/utils/pushToken";
+} from '@/generated/graphql';
+import { useAuthStore } from '@/store/auth';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
+import CustomAlert from '@/components/CustomAlert';
+import { getPushToken } from '@/utils/pushToken';
+import Constants from 'expo-constants';
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertConfig, setAlertConfig] = useState({
-    title: "",
-    message: "",
-    type: "info" as "success" | "error" | "info" | "warning",
+    title: '',
+    message: '',
+    type: 'info' as 'success' | 'error' | 'info' | 'warning',
   });
   const [googleLogin] = useGoogleLoginMutation();
   const [getProfile] = useGetProfileLazyQuery();
-  const setAuth = useAuthStore((state) => state.setAuth);
-  const setPushToken = useAuthStore((state) => state.setPushToken);
+  const setAuth = useAuthStore(state => state.setAuth);
+  const setPushToken = useAuthStore(state => state.setPushToken);
   const insets = useSafeAreaInsets();
 
   // Simple dot animation for loading text
@@ -50,27 +51,28 @@ export default function AuthPage() {
     if (loading) {
       setDotCount(1); // Start with 1 dot immediately
       const interval = setInterval(() => {
-        setDotCount((prev) => (prev + 1) % 4);
+        setDotCount(prev => (prev + 1) % 4);
       }, 300);
       return () => clearInterval(interval);
     } else {
       setDotCount(0);
     }
   }, [loading]);
+  const webClientId = Constants.expoConfig?.extra?.googleWebClientId;
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+      webClientId,
       offlineAccess: true,
       forceCodeForRefreshToken: true,
-      accountName: "",
+      accountName: '',
     });
   }, []);
 
   const showAlert = (
     title: string,
     message: string,
-    type: "success" | "error" | "info" | "warning" = "info"
+    type: 'success' | 'error' | 'info' | 'warning' = 'info'
   ) => {
     setAlertConfig({ title, message, type });
     setAlertVisible(true);
@@ -90,7 +92,7 @@ export default function AuthPage() {
         (userInfo as any).idToken || (userInfo as any).data?.idToken;
 
       if (!idToken) {
-        throw new Error("Failed to get ID token from Google");
+        throw new Error('Failed to get ID token from Google');
       }
 
       // Get push token
@@ -106,24 +108,24 @@ export default function AuthPage() {
       });
 
       if (errors || !data?.googleLogin.token) {
-        const errorMessage = errors?.[0]?.message || "Login failed";
-        console.error("GraphQL errors:", errors);
+        const errorMessage = errors?.[0]?.message || 'Login failed';
+        console.error('GraphQL errors:', errors);
         throw new Error(errorMessage);
       }
 
       const token = data.googleLogin.token;
-      console.log("token", token);
+      console.log('token', token);
 
       // Step 4: Store token
-      await SecureStore.setItemAsync("jwt_token", token);
+      await SecureStore.setItemAsync('jwt_token', token);
 
       // Step 5: Get user profile
       try {
         const { data: profileData, errors: profileErrors } = await getProfile();
 
         if (profileErrors) {
-          console.error("Profile fetch errors:", profileErrors);
-          throw new Error("Failed to fetch user profile");
+          console.error('Profile fetch errors:', profileErrors);
+          throw new Error('Failed to fetch user profile');
         }
 
         if (profileData?.getProfile) {
@@ -133,49 +135,49 @@ export default function AuthPage() {
             setPushToken(pushToken);
           }
         } else {
-          throw new Error("No profile data received");
+          throw new Error('No profile data received');
         }
       } catch (profileError) {
-        console.error("Profile fetch error:", profileError);
+        console.error('Profile fetch error:', profileError);
         // Even if profile fetch fails, we can still proceed with the token
         // The user can retry profile fetch later
         showAlert(
-          "Almost there! 💕",
+          'Almost there! 💕',
           "We connected successfully, but couldn't get your profile details just yet. Don't worry, you can try again later!",
-          "warning"
+          'warning'
         );
         return;
       }
 
-      router.replace("/(tabs)/home");
+      router.replace('/(tabs)/home');
     } catch (error: any) {
-      console.error("Sign in error:", error);
+      console.error('Sign in error:', error);
 
       // Handle specific Google Sign-In errors
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         showAlert(
-          "Oh no! 💔",
+          'Oh no! 💔',
           "You cancelled our love connection. Don't worry, we'll be here when you're ready to try again!",
-          "info"
+          'info'
         );
       } else if (error.code === statusCodes.IN_PROGRESS) {
         showAlert(
-          "Hold on, love! 💕",
+          'Hold on, love! 💕',
           "We're already working on connecting you. Please wait a moment for the magic to happen!",
-          "info"
+          'info'
         );
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         showAlert(
-          "Missing something special! 💝",
+          'Missing something special! 💝',
           "Google Play Services is needed to bring us together. Please make sure it's available on your device.",
-          "error"
+          'error'
         );
       } else {
         // Handle other errors
         const errorMessage =
           error.message ||
           "Oops! Something went wrong while trying to connect our hearts. Let's try again!";
-        showAlert("Connection failed 💔", errorMessage, "error");
+        showAlert('Connection failed 💔', errorMessage, 'error');
       }
     } finally {
       setLoading(false);
@@ -188,7 +190,7 @@ export default function AuthPage() {
   };
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: "#FFF5F5" }}>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: '#FFF5F5' }}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -203,19 +205,19 @@ export default function AuthPage() {
         <View className="items-center mb-12">
           <View className="w-32 h-32 mb-6 bg-white rounded-2xl items-center justify-center shadow-lg">
             <Image
-              source={require("../assets/images/logo.png")}
+              source={require('../assets/images/logo.png')}
               className="w-24 h-24"
               resizeMode="contain"
             />
           </View>
           <Text
             className="text-3xl font-bold text-center mb-2"
-            style={{ color: "#2D3748" }}
+            style={{ color: '#2D3748' }}
           >
-            Welcome to <Text style={{ color: "#2D3748" }}>Duo</Text>
-            <Text style={{ color: "#FF6B6B" }}>Time</Text>
+            Welcome to <Text style={{ color: '#2D3748' }}>Duo</Text>
+            <Text style={{ color: '#FF6B6B' }}>Time</Text>
           </Text>
-          <Text className="text-lg text-center" style={{ color: "#718096" }}>
+          <Text className="text-lg text-center" style={{ color: '#718096' }}>
             Where love meets time ✨
           </Text>
         </View>
@@ -224,11 +226,11 @@ export default function AuthPage() {
         <View className="mb-12">
           <View
             className="bg-white rounded-2xl shadow-md border-2 p-6"
-            style={{ borderColor: "#FFB3B3" }}
+            style={{ borderColor: '#FFB3B3' }}
           >
             <Text
               className="text-xl font-semibold text-center mb-8"
-              style={{ color: "#2D3748" }}
+              style={{ color: '#2D3748' }}
             >
               Create magical moments together
             </Text>
@@ -236,74 +238,74 @@ export default function AuthPage() {
             <View className="space-y-4">
               <View
                 className="flex-row items-center rounded-xl p-4"
-                style={{ backgroundColor: "#FFF5F5" }}
+                style={{ backgroundColor: '#FFF5F5' }}
               >
                 <View
                   className="w-10 h-10 rounded-lg items-center justify-center mr-4"
-                  style={{ backgroundColor: "#FF6B6B" }}
+                  style={{ backgroundColor: '#FF6B6B' }}
                 >
                   <Ionicons name="heart" size={18} color="white" />
                 </View>
                 <View className="flex-1 ">
                   <Text
                     className="font-semibold text-lg"
-                    style={{ color: "#2D3748" }}
+                    style={{ color: '#2D3748' }}
                   >
                     Love Reminders
                   </Text>
-                  <Text className="text-sm" style={{ color: "#718096" }}>
+                  <Text className="text-sm" style={{ color: '#718096' }}>
                     Never miss a moment to show you care
                   </Text>
                 </View>
               </View>
               <View
                 className="h-px mx-2"
-                style={{ backgroundColor: "#FFB3B3" }}
+                style={{ backgroundColor: '#FFB3B3' }}
               />
               <View
                 className="flex-row items-center rounded-xl p-4"
-                style={{ backgroundColor: "#FFF5F5" }}
+                style={{ backgroundColor: '#FFF5F5' }}
               >
                 <View
                   className="w-10 h-10 rounded-lg items-center justify-center mr-4"
-                  style={{ backgroundColor: "#FF8E8E" }}
+                  style={{ backgroundColor: '#FF8E8E' }}
                 >
                   <Ionicons name="gift" size={18} color="white" />
                 </View>
                 <View className="flex-1">
                   <Text
                     className="font-semibold text-lg"
-                    style={{ color: "#2D3748" }}
+                    style={{ color: '#2D3748' }}
                   >
                     Surprise Moments
                   </Text>
-                  <Text className="text-sm" style={{ color: "#718096" }}>
+                  <Text className="text-sm" style={{ color: '#718096' }}>
                     Create unexpected joy for your love
                   </Text>
                 </View>
               </View>
               <View
                 className="h-px mx-2"
-                style={{ backgroundColor: "#FFB3B3" }}
+                style={{ backgroundColor: '#FFB3B3' }}
               />
               <View
                 className="flex-row items-center rounded-xl p-4"
-                style={{ backgroundColor: "#FFF5F5" }}
+                style={{ backgroundColor: '#FFF5F5' }}
               >
                 <View
                   className="w-10 h-10 rounded-lg items-center justify-center mr-4"
-                  style={{ backgroundColor: "#FF6B6B" }}
+                  style={{ backgroundColor: '#FF6B6B' }}
                 >
                   <Ionicons name="chatbubbles" size={18} color="white" />
                 </View>
                 <View className="flex-1">
                   <Text
                     className="font-semibold text-lg"
-                    style={{ color: "#2D3748" }}
+                    style={{ color: '#2D3748' }}
                   >
                     Love Messages
                   </Text>
-                  <Text className="text-sm" style={{ color: "#718096" }}>
+                  <Text className="text-sm" style={{ color: '#718096' }}>
                     Send romantic notes anytime
                   </Text>
                 </View>
@@ -318,11 +320,11 @@ export default function AuthPage() {
             onPress={signInWithGoogle}
             disabled={loading}
             className={`w-full rounded-xl shadow-lg active:scale-98 ${
-              loading ? "opacity-70" : ""
+              loading ? 'opacity-70' : ''
             }`}
             style={{
-              backgroundColor: "#FF6B6B",
-              shadowColor: "#FF6B6B",
+              backgroundColor: '#FF6B6B',
+              shadowColor: '#FF6B6B',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
               shadowRadius: 8,
@@ -338,7 +340,7 @@ export default function AuthPage() {
                   <>
                     <ActivityIndicator color="white" size="small" />
                     <Text className="text-white font-semibold text-lg ml-2">
-                      Signing in {".".repeat(dotCount)}
+                      Signing in {'.'.repeat(dotCount)}
                     </Text>
                   </>
                 ) : (
@@ -355,36 +357,36 @@ export default function AuthPage() {
         <View className="items-center mb-8">
           <View
             className="w-full bg-white rounded-2xl shadow-md border-2 p-6"
-            style={{ borderColor: "#FFB3B3" }}
+            style={{ borderColor: '#FFB3B3' }}
           >
             <View className="items-center">
               <View
                 className="w-12 h-12 rounded-full items-center justify-center mb-2"
-                style={{ backgroundColor: "#FFF5F5" }}
+                style={{ backgroundColor: '#FFF5F5' }}
               >
                 <Ionicons name="heart" size={24} color="#FF6B6B" />
               </View>
               <Text
                 className="text-center font-medium mt-3 mb-3 italic"
-                style={{ color: "#2D3748" }}
+                style={{ color: '#2D3748' }}
               >
                 &ldquo;Love is the greatest refreshment in life.&rdquo;
               </Text>
-              <Text className="text-sm" style={{ color: "#718096" }}>
+              <Text className="text-sm" style={{ color: '#718096' }}>
                 Pablo Picasso
               </Text>
             </View>
           </View>
           <Text
             className="text-xs text-center mt-4"
-            style={{ color: "#A0AEC0" }}
+            style={{ color: '#A0AEC0' }}
           >
-            By continuing, you agree to our{" "}
-            <Text style={{ color: "#FF6B6B", fontWeight: "600" }}>
+            By continuing, you agree to our{' '}
+            <Text style={{ color: '#FF6B6B', fontWeight: '600' }}>
               Terms of Service
-            </Text>{" "}
-            and{" "}
-            <Text style={{ color: "#FF6B6B", fontWeight: "600" }}>
+            </Text>{' '}
+            and{' '}
+            <Text style={{ color: '#FF6B6B', fontWeight: '600' }}>
               Privacy Policy
             </Text>
           </Text>
